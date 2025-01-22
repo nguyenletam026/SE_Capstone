@@ -4,7 +4,6 @@ import com.capstone.dto.request.UserCreationRequest;
 import com.capstone.dto.request.UserUpdateRequest;
 import com.capstone.dto.response.ApiResponse;
 import com.capstone.dto.response.UserResponse;
-import com.capstone.entity.User;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.repository.UserRepository;
@@ -27,42 +26,44 @@ public class UserController {
     ApiResponse<String> createUser (@RequestBody @Valid UserCreationRequest request){
         if(userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
+
         userService.createUser(request);
-        ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setMessage("User created successfully!");
-        return apiResponse;
+        return ApiResponse.<String>builder()
+                .result("User create successful")
+                .build();
+
     }
     @GetMapping
     ApiResponse<List<UserResponse>> getAllUsers(){
-        ApiResponse<List<UserResponse>> apiResponse = new ApiResponse<>();
-        List<UserResponse> userResponses = userService.getAllUser();
-        apiResponse.setResult(userResponses);
-        return apiResponse;
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getAllUser())
+                .build();
     }
 
 
 
     @GetMapping("/{userId}")
-    ApiResponse<User> getUserById(@PathVariable("userId") String userId){
-        ApiResponse<User> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(userService.getUserById(userId));
-        return apiResponse;
+    ApiResponse<UserResponse> getUserById(@PathVariable("userId") String userId){
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUserById(userId))
+                .build();
     }
 
     @PutMapping("/{userId}")
-    ApiResponse<User> updateUser (@PathVariable("userId") String userId,
+    ApiResponse<String> updateUser (@PathVariable("userId") String userId,
                      @RequestBody UserUpdateRequest request){
-        ApiResponse<User> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(userService.updateUser(userId, request));
-        return apiResponse;
+        userService.updateUser(userId, request);
+        return ApiResponse.<String>builder()
+                .result("User update successful")
+                .build();
     }
 
     @DeleteMapping("/{userId}")
     ApiResponse<String> deleteUser(@PathVariable("userId") String userId){
-        ApiResponse<String> apiResponse = new ApiResponse<>();
         userService.deleteUser(userId);
-        apiResponse.setResult("User deleted successfully");
-        return apiResponse;
+        return ApiResponse.<String>builder()
+                .result("User delete successful")
+                .build();
     }
     }
 
