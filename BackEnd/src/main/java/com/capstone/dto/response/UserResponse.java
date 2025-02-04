@@ -1,21 +1,20 @@
 package com.capstone.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponse {
-    private String username;
-    private String password;
-    private String firsName;
-    private String lastName;
-    private Date birthdayDate;
-    private String role;
+    String username;
+    String password;
+    String firsName;
+    String lastName;
+    Date birthdayDate;
+    String role;
 
 }

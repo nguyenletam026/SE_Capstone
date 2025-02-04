@@ -1,9 +1,7 @@
 package com.capstone.controller;
 
-
 import com.capstone.dto.request.AuthenticationRequest;
 import com.capstone.dto.request.IntrospectRequest;
-import com.capstone.dto.response.ApiResponse;
 import com.capstone.dto.response.AuthenticationResponse;
 import com.capstone.dto.response.IntrospectResponse;
 import com.capstone.service.AuthenticationService;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.text.ParseException;
 
 @RestController
@@ -24,20 +21,21 @@ import java.text.ParseException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationController {
     AuthenticationService authenticationService;
-
     @PostMapping("/token")
-    ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
+    com.capstone.dto.response.ApiResponse<AuthenticationResponse> authenticate(
+            @RequestBody AuthenticationRequest request
+    ) {
         var result = authenticationService.authenticate(request);
-        return ApiResponse.<AuthenticationResponse>builder()
+        return com.capstone.dto.response.ApiResponse.<AuthenticationResponse>builder()
                 .result(result)
                 .build();
     }
-
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request)
-            throws ParseException, JOSEException {
+    com.capstone.dto.response.ApiResponse<IntrospectResponse> authenticate(
+            @RequestBody IntrospectRequest request
+    ) throws ParseException, JOSEException {
         var result = authenticationService.introspect(request);
-        return ApiResponse.<IntrospectResponse>builder()
+        return com.capstone.dto.response.ApiResponse.<IntrospectResponse>builder()
                 .result(result)
                 .build();
     }
