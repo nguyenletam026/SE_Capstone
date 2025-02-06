@@ -2,18 +2,29 @@ server:
   port: 8080
 
 spring:
-    datasource:
-      url: "jdbc:postgresql://localhost:5432/test"
-      username: postgres
-      password: admin
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/test"
+    username: postgres
+    password: admin
 
-    jpa:
-      hibernate:
-        ddl-auto: update
-      show-sql: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 136913781813-nk8630l3fvt3bm32vrdsq4dbovres2bn.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
-
 
 springdoc:
   api-docs:

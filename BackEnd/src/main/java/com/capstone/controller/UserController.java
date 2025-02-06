@@ -5,6 +5,7 @@ import com.capstone.dto.request.UserCreationRequest;
 import com.capstone.dto.request.UserUpdateRequest;
 import com.capstone.dto.response.ApiResponse;
 import com.capstone.dto.response.UserResponse;
+import com.capstone.entity.User;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.repository.UserRepository;
@@ -14,10 +15,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+
 @Slf4j
 @RestController
 @RequestMapping("/users")
@@ -90,5 +95,45 @@ public class UserController {
                 .result("Password change successful")
                 .build();
     }
+
+    @GetMapping("/oauth2-info")
+    ApiResponse<UserResponse> getOAuth2UserInfo(@AuthenticationPrincipal OAuth2User user) {
+        if (user == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String email = user.getAttribute("email");
+        if (email == null) {
+            email = user.getAttribute("name");
+        }
+
+        Optional<User> userData = userRepository.findByEmail(email);
+
+        String finalEmail = email;
+        User currentUser = userData.orElseGet(() -> {
+            User newUser = new User();
+            newUser.setEmail(finalEmail);
+            newUser.setFirstName(user.getAttribute("given_name")); // Google OAuth
+            newUser.setLastName(user.getAttribute("family_name"));
+            return userRepository.save(newUser);
+        });
+
+        log.info("OAuth2 User Logged In: {}", currentUser.getEmail());
+
+        // Convert roles từ SecurityContext
+        List<String> role = user.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .toList();
+
+        return ApiResponse.<UserResponse>builder()
+                .result(UserResponse.builder()
+                        .username(currentUser.getEmail())
+                        .firstName(currentUser.getFirstName())
+                        .lastName(currentUser.getLastName())
+                        .role(String.valueOf(role))
+                        .build())
+                .build();
+    }
+
 }
 
