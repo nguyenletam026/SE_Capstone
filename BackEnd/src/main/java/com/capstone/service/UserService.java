@@ -5,7 +5,6 @@ import com.capstone.dto.request.UserCreationRequest;
 import com.capstone.dto.request.UserUpdateRequest;
 import com.capstone.dto.response.UserResponse;
 import com.capstone.entity.User;
-import com.capstone.enums.Role;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.mapper.UserMapper;
@@ -29,7 +28,7 @@ public class UserService {
         User user = userMapper.toUser(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER.name());
+        //user.setRole(Role.USER.name());
         userRepository.save(user);
     }
     public UserResponse getMyInfo(){

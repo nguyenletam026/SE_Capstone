@@ -15,6 +15,6 @@ public class UserResponse {
     String firsName;
     String lastName;
     Date birthdayDate;
-    String role;
+    RoleResponse role;
 
 }

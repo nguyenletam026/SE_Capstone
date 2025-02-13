@@ -22,5 +22,7 @@ public class User {
     String firstName;
     String lastName;
     Date birthdayDate;
-    String role;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    Role role;
 }

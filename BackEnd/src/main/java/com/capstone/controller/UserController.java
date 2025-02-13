@@ -44,7 +44,7 @@ public class UserController {
                 .result(userService.getMyInfo())
                 .build();
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping
     ApiResponse<List<UserResponse>> getAllUsers() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
