@@ -1,4 +1,4 @@
-package com.capstone.repository;
+package com.capstone.repository.httpclient;
 
 import com.capstone.dto.request.ExchangeTokenRequest;
 import com.capstone.dto.response.ExchangeTokenResponse;

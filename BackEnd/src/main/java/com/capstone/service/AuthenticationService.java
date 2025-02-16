@@ -5,11 +5,14 @@ import com.capstone.dto.request.ExchangeTokenRequest;
 import com.capstone.dto.request.IntrospectRequest;
 import com.capstone.dto.response.AuthenticationResponse;
 import com.capstone.dto.response.IntrospectResponse;
+import com.capstone.dto.response.OutboundUserResponse;
 import com.capstone.entity.User;
+import com.capstone.enums.Role;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
-import com.capstone.repository.OutboundIdentityClient;
+import com.capstone.repository.httpclient.OutboundIdentityClient;
 import com.capstone.repository.UserRepository;
+import com.capstone.repository.httpclient.OutboundUserClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -39,6 +42,8 @@ import java.util.StringJoiner;
 public class AuthenticationService {
     UserRepository userRepository;
     OutboundIdentityClient outboundIdentityClient;
+    OutboundUserClient outboundUserClient;
+
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -115,7 +120,7 @@ public class AuthenticationService {
         return stringJoiner.toString();
     }
 
-    public AuthenticationResponse authenticateOutbound(String code){
+    public AuthenticationResponse authenticateOutbound(String code) {
         var response = outboundIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
                 .code(code)
                 .clientId(CLIENT_ID)
@@ -123,11 +128,25 @@ public class AuthenticationService {
                 .grantType(GRANT_TYPE)
                 .redirectUri(REDIRECT_URI)
                 .build());
-        log.info("response: {}", response);
-        return AuthenticationResponse.builder()
-                .token(response.getAccessToken())
-                .build();
+        var userInfo = outboundUserClient.getUserInfo("json", response.getAccessToken());
 
-}
+        log.info("User info before setting: {}", userInfo);
+        log.info(userInfo.getGivenName());
+        var user = userRepository.findByUsername(userInfo.getEmail())
+                .orElseGet(() -> userRepository.save(User.builder()
+                        .username(userInfo.getEmail())
+                        .firstName(userInfo.getGivenName())
+                        .lastName(userInfo.getFamilyName())
+                        .role(com.capstone.entity.Role.builder()
+                                .name(Role.USER.name())
+                                .build())
+                        .build()));
+        log.info("User info after setting: {}", userInfo);
+        log.info("User entity after save/retrieve: {}", user);
+        var token = generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(token)
+                .build();
+    }
 
 }

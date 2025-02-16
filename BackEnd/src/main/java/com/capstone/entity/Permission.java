@@ -16,6 +16,4 @@ import lombok.NoArgsConstructor;
 public class Permission {
     @Id
     private String name;
-
-
 }
