@@ -23,6 +23,14 @@ spring:
               - email
               - profile
 
+#  data:
+#    mongodb:
+#      uri: "mongodb://localhost:27017/testdb"
+#      username: nhattienn
+#      password: ikH3qEIy9T0viObp
+#     authentication-database: admin
+
+
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
 
