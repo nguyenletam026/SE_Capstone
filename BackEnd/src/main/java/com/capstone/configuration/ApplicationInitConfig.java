@@ -17,7 +17,7 @@ import java.util.Set;
 public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
-        return _ -> {
+        return args -> {
             if (!roleRepository.existsById("ADMIN")) {
                 roleRepository.save(Role.builder()
                         .name("ADMIN")
