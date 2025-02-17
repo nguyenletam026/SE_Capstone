@@ -1,13 +1,18 @@
 package com.capstone.service;
 
 import com.capstone.dto.request.AuthenticationRequest;
+import com.capstone.dto.request.ExchangeTokenRequest;
 import com.capstone.dto.request.IntrospectRequest;
 import com.capstone.dto.response.AuthenticationResponse;
 import com.capstone.dto.response.IntrospectResponse;
+import com.capstone.dto.response.OutboundUserResponse;
 import com.capstone.entity.User;
+import com.capstone.enums.Role;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
+import com.capstone.repository.httpclient.OutboundIdentityClient;
 import com.capstone.repository.UserRepository;
+import com.capstone.repository.httpclient.OutboundUserClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -27,7 +32,6 @@ import org.springframework.util.CollectionUtils;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Date;
 import java.util.StringJoiner;
 
@@ -37,10 +41,25 @@ import java.util.StringJoiner;
 @Slf4j
 public class AuthenticationService {
     UserRepository userRepository;
+    OutboundIdentityClient outboundIdentityClient;
+    OutboundUserClient outboundUserClient;
 
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
+
+    @NonFinal
+        protected String CLIENT_ID = "964382509869-hik85ja05qv6ddk6puctvvp9ackik4jn.apps.googleusercontent.com";
+
+    @NonFinal
+    protected String CLIENT_SECRET = "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";
+
+    @NonFinal
+    protected String REDIRECT_URI = "http://localhost:3000/authenticate";
+
+    @NonFinal
+    protected String GRANT_TYPE = "authorization_code";
+
 
     public IntrospectResponse introspect(IntrospectRequest request)
             throws JOSEException, ParseException {
@@ -74,7 +93,7 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
-                .claim("scope", user.getRole())
+                .claim("scope", buildScope(user))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -88,11 +107,46 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
-    private String buildScope(User user){
+    private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
-        if (user.getRole().equals("ADMIN")){
-            stringJoiner.add("ADMIN");
+
+        if (user.getRole() != null) {
+            stringJoiner.add("ROLE_" + user.getRole().getName());
+            if (!CollectionUtils.isEmpty(user.getRole().getPermissions())) {
+                user.getRole().getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
+            }
         }
+
         return stringJoiner.toString();
     }
+
+    public AuthenticationResponse authenticateOutbound(String code) {
+        var response = outboundIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
+                .code(code)
+                .clientId(CLIENT_ID)
+                .clientSecret(CLIENT_SECRET)
+                .grantType(GRANT_TYPE)
+                .redirectUri(REDIRECT_URI)
+                .build());
+        var userInfo = outboundUserClient.getUserInfo("json", response.getAccessToken());
+
+        log.info("User info before setting: {}", userInfo);
+        log.info(userInfo.getGivenName());
+        var user = userRepository.findByUsername(userInfo.getEmail())
+                .orElseGet(() -> userRepository.save(User.builder()
+                        .username(userInfo.getEmail())
+                        .firstName(userInfo.getGivenName())
+                        .lastName(userInfo.getFamilyName())
+                        .role(com.capstone.entity.Role.builder()
+                                .name(Role.USER.name())
+                                .build())
+                        .build()));
+        log.info("User info after setting: {}", userInfo);
+        log.info("User entity after save/retrieve: {}", user);
+        var token = generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(token)
+                .build();
+    }
+
 }

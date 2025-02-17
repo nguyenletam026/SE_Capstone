@@ -9,6 +9,7 @@ import com.capstone.enums.Role;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.mapper.UserMapper;
+import com.capstone.repository.RoleRepository;
 import com.capstone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContext;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -24,12 +26,22 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+
+
     public void createUser(UserCreationRequest request) {
 
         User user = userMapper.toUser(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER.name());
+        if (!roleRepository.existsById("USER")) {
+            roleRepository.save(com.capstone.entity.Role.builder()
+                    .name("USER")
+                    .build());
+        }
+        com.capstone.entity.Role role = roleRepository.findByName(Role.USER.name())
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+        user.setRole(role);
         userRepository.save(user);
     }
     public UserResponse getMyInfo(){

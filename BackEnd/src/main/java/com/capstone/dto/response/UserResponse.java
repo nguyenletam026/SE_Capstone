@@ -12,9 +12,9 @@ import java.util.Date;
 public class UserResponse {
     String username;
     String password;
-    String firsName;
+    String firstName;
     String lastName;
     Date birthdayDate;
-    String role;
+    RoleResponse role;
 
 }
