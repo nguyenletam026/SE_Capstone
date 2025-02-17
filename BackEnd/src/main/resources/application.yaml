@@ -2,15 +2,17 @@ server:
   port: 8080
 
 spring:
-    datasource:
-      url: "jdbc:postgresql://localhost:5432/postgres"
-      username: postgres
-      password: admin
+  datasource:
+    url: "jdbc:postgresql://metro.proxy.rlwy.net:44416/railway"
+    username: "postgres"
+    password: "edrDRqwWXGRQktsLQyoirbfDcpxhXcfI"
+    driver-class-name: org.postgresql.Driver
 
-    jpa:
-      hibernate:
-        ddl-auto: update
-      show-sql: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
 
