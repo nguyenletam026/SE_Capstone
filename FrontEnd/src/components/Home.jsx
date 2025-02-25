@@ -1,92 +1,39 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "../services/localStorageService";
-import Header from "./header/Header";
-import { Box, Card, CircularProgress, Typography } from "@mui/material";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState({});
-
-  const getUserDetails = async (accessToken) => {
-    const response = await fetch(
-      "http://localhost:8080/users/myInfo",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    const data = await response.json();
-
-    console.log(data.result);
-    console.log(userDetails)
-    setUserDetails(data.result);
-  };
+  const [userDetails, setUserDetails] = useState(null);
 
   useEffect(() => {
     const accessToken = getToken();
+    if (!accessToken) navigate("/login");
 
-    if (!accessToken) {
-      navigate("/login");
-    }
-
-    getUserDetails(accessToken);
+    fetch("http://localhost:8080/users/myInfo", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then((response) => response.json())
+      .then((data) => setUserDetails(data.result));
   }, [navigate]);
 
+  if (!userDetails) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        <p className="text-lg font-semibold text-gray-700">Loading...</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <Header></Header>
-      {userDetails ? (
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          height="100vh"
-          bgcolor={"#f0f2f5"}
-        >
-          <Card
-            sx={{
-              minWidth: 400,
-              maxWidth: 500,
-              boxShadow: 4,
-              borderRadius: 4,
-              padding: 4,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                width: "100%", // Ensure content takes full width
-              }}
-            >
-              <p>Welcome back to Devteria, {userDetails.username}</p>
-              <h1 className="name">{`${userDetails.firstName} ${userDetails.lastName}`}</h1>
-              <p className="email">{userDetails.dob}</p>
-             
-            </Box>
-          </Card>
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "30px",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <CircularProgress></CircularProgress>
-          <Typography>Loading ...</Typography>
-        </Box>
-      )}
-    </>
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+      <div className="bg-white p-8 shadow-lg rounded-xl max-w-sm w-full text-center">
+        <h2 className="text-xl font-bold">Welcome back, {userDetails.username}!</h2>
+        <p className="text-gray-600">{`${userDetails.firstName} ${userDetails.lastName}`}</p>
+        <p className="text-gray-500">{userDetails.dob}</p>
+      </div>
+    </div>
   );
 }
