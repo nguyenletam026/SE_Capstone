@@ -17,7 +17,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -27,10 +29,12 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final CloudinaryService cloudinaryService;
 
-
-    public void createUser(UserCreationRequest request) {
-
+    public void createUser(UserCreationRequest request,MultipartFile avtFile) throws IOException {
+        if (avtFile == null || avtFile.isEmpty()) {
+            throw new AppException(ErrorCode.FILE_NULL);
+        }
         User user = userMapper.toUser(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -42,6 +46,10 @@ public class UserService {
         com.capstone.entity.Role role = roleRepository.findByName(Role.USER.name())
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         user.setRole(role);
+        userRepository.save(user);
+        String avtUrl = cloudinaryService.uploadFile(avtFile, user.getId());
+        user.setAvtUrl(avtUrl);
+
         userRepository.save(user);
     }
     public UserResponse getMyInfo(){

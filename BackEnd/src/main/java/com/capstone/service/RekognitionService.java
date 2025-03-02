@@ -81,8 +81,6 @@ public class RekognitionService {
 
     private double calculateStressScore(FaceDetail face) {
         double score = 0.0;
-
-        // Tính điểm từ cảm xúc
         StringBuilder emotionLog = new StringBuilder("Emotion contributions: ");
         for (Emotion emotion : face.emotions()) {
             if (emotion.confidence() < confidenceThreshold) {
