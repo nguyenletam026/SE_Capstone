@@ -34,7 +34,8 @@ public class SecurityConfig {
             "/auth/token", "/auth/introspect",
             "/swagger-ui/**", "/v3/api-docs/**",
             "/auth/outbound/**",
-            "users","https://deploy-se.onrender.com/**"
+            "users","https://deploy-se.onrender.com/**",
+            "/api/stress/**"
     };
     @Value("${jwt.signerKey}")
     private String signerKey;

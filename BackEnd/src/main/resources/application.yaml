@@ -7,6 +7,10 @@ spring:
     username: "postgres"
     password: "edrDRqwWXGRQktsLQyoirbfDcpxhXcfI"
     driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB   # Giới hạn file tối đa 10MB
+      max-request-size: 10MB  # Giới hạn tổng request tối đa 10MB
 
   jpa:
     hibernate:
@@ -23,3 +27,22 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
+
+aws:
+  region: us-east-1
+  access-key: "AKIAZAI4GVIKCJPKKLVU"
+  secret-key: "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"
+
+stress:
+  extreme:
+    threshold: 85
+  high:
+    threshold: 70
+  moderate:
+    threshold: 50
+  mild:
+    threshold: 30
+  normal:
+    threshold: 10
+  confidence:
+    threshold: 50
