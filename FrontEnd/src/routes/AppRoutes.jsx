@@ -1,7 +1,10 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Login from "../components/Login";
-import Home from "../components/Home";
-import Authenticate from "../components/Authenticate";
+// Auth Page
+import Login from "../page/authPage/Login";
+import Authenticate from "../page/authPage/Authenticate";
+// User Page
+import Home from "../page/userPage/Home";
+
 
 const AppRoutes = () => {
   return (

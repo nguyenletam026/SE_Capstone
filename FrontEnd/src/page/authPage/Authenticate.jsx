@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { setToken } from "../services/localStorageService";
+import { setToken } from "../../services/localStorageService";
 
 export default function Authenticate() {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ export default function Authenticate() {
     if (isMatch) {
       const authCode = isMatch[1];
 
-      fetch(`http://localhost:8080/auth/outbound/authentication?code=${authCode}`, {
+      fetch(`${process.env.REACT_APP_API_URL}/auth/outbound/authentication?code=${authCode}`, {
         method: "POST",
       })
         .then((response) => response.json())
