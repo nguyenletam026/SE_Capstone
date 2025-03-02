@@ -2,7 +2,7 @@ package com.capstone.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @AllArgsConstructor
@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "chat_messages")
 public class ChatMessage {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,6 +29,5 @@ public class ChatMessage {
     private String content;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private Instant timestamp;
 }
-
