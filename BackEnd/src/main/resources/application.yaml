@@ -3,10 +3,14 @@ server:
 
 spring:
   datasource:
-    url: "jdbc:postgresql://metro.proxy.rlwy.net:44416/railway"
+    url: "jdbc:postgresql://localhost:5432/postgres"
     username: "postgres"
-    password: "edrDRqwWXGRQktsLQyoirbfDcpxhXcfI"
+    password: "postgres"
     driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   jpa:
     hibernate:
@@ -23,3 +27,27 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
+
+aws:
+  region: us-east-1
+  access-key: "AKIAZAI4GVIKCJPKKLVU"
+  secret-key: "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"
+
+cloudinary:
+    cloud-name: "dfrlcr9ml"
+    api-key: "659595431959666"
+    api-secret: "23muN8vxgbbh8AHzXOvzj4HlSrg"
+
+stress:
+  extreme:
+    threshold: 85
+  high:
+    threshold: 70
+  moderate:
+    threshold: 50
+  mild:
+    threshold: 30
+  normal:
+    threshold: 10
+  confidence:
+    threshold: 50
