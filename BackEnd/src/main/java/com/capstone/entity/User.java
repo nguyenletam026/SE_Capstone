@@ -25,5 +25,4 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "role_id")
     Role role;
-    String avtUrl;
 }
