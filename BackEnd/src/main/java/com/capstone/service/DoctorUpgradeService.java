@@ -1,0 +1,96 @@
+package com.capstone.service;
+
+import com.capstone.dto.request.DoctorUpgradeRequest;
+import com.capstone.dto.response.DoctorUpgradeResponse;
+import com.capstone.entity.DoctorUpgrade;
+import com.capstone.entity.User;
+import com.capstone.enums.RequestStatus;
+import com.capstone.enums.Role;
+import com.capstone.exception.AppException;
+import com.capstone.exception.ErrorCode;
+import com.capstone.repository.DoctorUpgradeRepository;
+import com.capstone.repository.RoleRepository;
+import com.capstone.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
+@Service
+public class DoctorUpgradeService {
+    private final UserRepository userRepository;
+    private final DoctorUpgradeRepository doctorUpgradeRepository;
+    private final RoleRepository roleRepository;
+
+    public void requestDoctorUpgrade(DoctorUpgradeRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (user.getRole().getName().equals(Role.DOCTOR.name())) {
+            throw new AppException(ErrorCode.ALREADY_DOCTOR);
+        }
+
+        try {
+            byte[] imageData = request.getCertificateImage().getBytes(); // Lưu ảnh dưới dạng byte[]
+
+            DoctorUpgrade upgradeRequest = DoctorUpgrade.builder()
+                    .user(user)
+                    .certificateImage(imageData)
+                    .status(RequestStatus.PENDING)
+                    .build();
+
+            doctorUpgradeRepository.save(upgradeRequest);
+        } catch (IOException e) {
+            throw new RuntimeException("Error saving certificate image", e);
+        }
+    }
+
+
+    public void approveDoctorUpgrade(String requestId) {
+        DoctorUpgrade upgradeRequest = doctorUpgradeRepository.findById(requestId)
+                .orElseThrow(() -> new AppException(ErrorCode.REQUEST_NOT_FOUND));
+
+        upgradeRequest.setStatus(RequestStatus.APPROVED);
+        User user = upgradeRequest.getUser();
+
+        com.capstone.entity.Role roleDoctor = roleRepository.findByName(Role.DOCTOR.name())
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+
+        user.setRole(roleDoctor);
+
+        userRepository.save(user);
+        doctorUpgradeRepository.save(upgradeRequest);
+    }
+
+
+    public void rejectDoctorUpgrade(String requestId) {
+        DoctorUpgrade upgradeRequest = doctorUpgradeRepository.findById(requestId)
+                .orElseThrow(() -> new AppException(ErrorCode.REQUEST_NOT_FOUND));
+
+        upgradeRequest.setStatus(RequestStatus.REJECTED);
+        doctorUpgradeRepository.save(upgradeRequest);
+    }
+
+    public List<DoctorUpgradeResponse> getAllUpgradeRequests() {
+        return doctorUpgradeRepository.findAll().stream()
+                .map(req -> DoctorUpgradeResponse.builder()
+                        .requestId(req.getId())
+                        .username(req.getUser().getUsername())
+                        .status(req.getStatus())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
+    public byte[] getDoctorCertificateImage(String requestId) {
+        DoctorUpgrade request = doctorUpgradeRepository.findById(requestId)
+                .orElseThrow(() -> new AppException(ErrorCode.REQUEST_NOT_FOUND));
+        return request.getCertificateImage();
+    }
+}
