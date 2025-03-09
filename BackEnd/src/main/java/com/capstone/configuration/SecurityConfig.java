@@ -34,9 +34,7 @@ public class SecurityConfig {
             "/auth/token", "/auth/introspect",
             "/swagger-ui/**", "/v3/api-docs/**",
             "/auth/outbound/**",
-            "users","https://deploy-se.onrender.com/**",
-            "/api/stress/**",
-            "/auth-face"
+            "users","https://deploy-se.onrender.com/**"
     };
     @Value("${jwt.signerKey}")
     private String signerKey;
@@ -47,15 +45,21 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request ->
-                request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated());
+        httpSecurity
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/chat/**").authenticated()
+                        .anyRequest().authenticated()
+                );
 
         httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
         return httpSecurity.build();
