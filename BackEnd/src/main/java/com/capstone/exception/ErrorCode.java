@@ -21,7 +21,12 @@ public enum ErrorCode {
     REQUEST_NOT_FOUND(1011, "Doctor upgrade request not found", HttpStatus.NOT_FOUND),
     REQUEST_ALREADY_PROCESSED(1012, "Doctor upgrade request has already been processed", HttpStatus.BAD_REQUEST),
     INVALID_CERTIFICATE(1013, "Invalid doctor certificate", HttpStatus.BAD_REQUEST),
-    FILE_UPLOAD_ERROR(1014, "Error occurred while uploading the certificate", HttpStatus.INTERNAL_SERVER_ERROR)
+    FILE_UPLOAD_ERROR(1014, "Error occurred while uploading the certificate", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_NULL(1015, "File is null", HttpStatus.BAD_REQUEST),
+    INVALID_IMAGE_URL(1016, "Invalid image url", HttpStatus.BAD_REQUEST),
+    FAILED_TO_PROCESS_IMAGE(1017, "Failed to process image", HttpStatus.INTERNAL_SERVER_ERROR),
+    FACE_COMPARISON_FAILED(1018, "Face comparison failed", HttpStatus.INTERNAL_SERVER_ERROR),
+
 
     ;
 

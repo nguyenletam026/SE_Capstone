@@ -5,7 +5,7 @@ spring:
   datasource:
     url: "jdbc:postgresql://localhost:5432/postgres"
     username: "postgres"
-    password: "postgres"
+    password: "admin"
     driver-class-name: org.postgresql.Driver
   servlet:
     multipart:
@@ -26,7 +26,7 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
-    path: /swagger-ui.html
+    path: /swagger-ui.htmlfs fdsfsdf
 
 aws:
   region: us-east-1
