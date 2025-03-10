@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: "jdbc:postgresql://localhost:5432/postgres"
+    url: "jdbc:postgresql://metro.proxy.rlwy.net:44416/railway"
     username: "postgres"
-    password: "admin"
+    password: "edrDRqwWXGRQktsLQyoirbfDcpxhXcfI"
     driver-class-name: org.postgresql.Driver
   servlet:
     multipart:
