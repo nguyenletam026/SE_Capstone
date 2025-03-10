@@ -7,6 +7,7 @@ import com.capstone.dto.response.DoctorUpgradeResponse;
 import com.capstone.service.DoctorUpgradeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ import java.util.List;
 public class DoctorUpgradeController {
     private final DoctorUpgradeService doctorUpgradeService;
 
-    @PostMapping("/request-doctor")
+    @PostMapping(value = "/request-doctor", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<String> requestDoctorUpgrade(@RequestParam("certificateImage") MultipartFile certificateImage) {
         DoctorUpgradeRequest request = new DoctorUpgradeRequest(certificateImage);
         doctorUpgradeService.requestDoctorUpgrade(request);
@@ -28,6 +29,7 @@ public class DoctorUpgradeController {
                 .result("Doctor upgrade request submitted")
                 .build();
     }
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/doctor-requests")
