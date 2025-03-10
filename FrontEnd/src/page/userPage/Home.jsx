@@ -12,7 +12,10 @@ export default function Home() {
 
   useEffect(() => {
     const accessToken = getToken();
-    if (!accessToken) navigate("/login");
+    if (!accessToken) {
+      navigate("/login", { replace: true });
+      return; // 🛑 Ngăn chặn các request API nếu không có token
+    }
 
     fetch(`${process.env.REACT_APP_API_URL}/users/myInfo`, {
       method: "GET",
@@ -22,8 +25,12 @@ export default function Home() {
       .then((data) => {
         setUserDetails(data.result);
         setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+        navigate("/login", { replace: true });
       });
-  }, [navigate]);
+  }, []); // ✅ Chạy 1 lần khi component mount
 
   const Button = ({ children, onClick }) => (
     <button 

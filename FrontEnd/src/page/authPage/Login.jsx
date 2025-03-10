@@ -5,22 +5,41 @@ import { FaEnvelope, FaLock, FaGoogle } from "react-icons/fa";
 import loginImage from "../../assets/1.png";
 import { Link } from "react-router-dom";
 import { handleLogin, handleContinueWithGoogle } from "../../lib/auth/authServices"; // Import hàm từ authService.js
+import { useAuth } from "../../context/AuthContext";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    if (getToken()) {
-      navigate("/");
+    const token = getToken();
+    if (token) {
+      navigate("/login");
     }
-  }, [navigate]);
+  }, []);
+  
+  
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    handleLogin(username, password, setToken, navigate);
+    const token = await handleLogin(username, password);
+    if (token) {
+      login(token); // Gọi hàm login từ AuthContext
+      const decoded = jwtDecode(token);
+      if (decoded.scope === "ROLE_ADMIN") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/home");
+      }
+    }
   };
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   await handleLogin(username, password, login, navigate);
+  // };
 
   return (
     <div className="flex h-screen bg-gray-50">
