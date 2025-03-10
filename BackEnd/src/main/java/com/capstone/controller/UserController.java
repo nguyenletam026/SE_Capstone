@@ -14,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 @Slf4j
 @RestController
@@ -26,15 +28,14 @@ public class UserController {
     private final UserRepository userRepository;
 
     @PostMapping
-    ApiResponse<String> createUser(@RequestBody @Valid UserCreationRequest request) {
+    ApiResponse<String> createUser(@RequestPart("request") UserCreationRequest request,
+                                   @RequestPart(value = "avtFile", required = true) MultipartFile avtFile) throws IOException {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
-
-        userService.createUser(request);
+        userService.createUser(request, avtFile);
         return ApiResponse.<String>builder()
                 .result("User create successful")
                 .build();
-
     }
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo(){
@@ -82,4 +83,3 @@ public class UserController {
                 .build();
     }
 }
-
