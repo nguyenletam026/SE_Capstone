@@ -9,7 +9,6 @@ import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.repository.UserRepository;
 import com.capstone.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;

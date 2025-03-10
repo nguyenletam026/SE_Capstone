@@ -1,11 +1,8 @@
 package com.capstone.controller;
 
-import com.capstone.dto.request.PermissionRequest;
 import com.capstone.dto.request.RoleRequest;
 import com.capstone.dto.response.ApiResponse;
-import com.capstone.dto.response.PermissionResponse;
 import com.capstone.dto.response.RoleResponse;
-import com.capstone.service.PermissionService;
 import com.capstone.service.RoleService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
