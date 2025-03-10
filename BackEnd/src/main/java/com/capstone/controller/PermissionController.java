@@ -26,7 +26,7 @@ public class PermissionController {
                 .build();
     }
     @GetMapping
-    ApiResponse<List<PermissionResponse>>  getAllPermission() {
+    ApiResponse<List<PermissionResponse>> getAllPermission() {
         return ApiResponse.<List<PermissionResponse>>builder()
                 .result(permissionService.getAllPermission())
                 .build();

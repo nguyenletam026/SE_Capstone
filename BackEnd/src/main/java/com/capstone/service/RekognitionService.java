@@ -1,8 +1,16 @@
 package com.capstone.service;
 
+import com.capstone.entity.StressAnalysis;
+import com.capstone.entity.User;
 import com.capstone.enums.StressLevel;
+import com.capstone.exception.AppException;
+import com.capstone.exception.ErrorCode;
+import com.capstone.repository.StressAnalysisRepository;
+import com.capstone.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -11,12 +19,15 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
 @Service
 public class RekognitionService {
     private final RekognitionClient rekognitionClient;
+    private final UserRepository userRepository;
+    private final StressAnalysisRepository stressAnalysisRepository;
 
     @Value("${stress.extreme.threshold:85}")
     private double extremeStressThreshold;
@@ -39,7 +50,9 @@ public class RekognitionService {
     public RekognitionService(
             @Value("${aws.access-key}") String accessKey,
             @Value("${aws.secret-key}") String secretKey,
-            @Value("${aws.region}") String region) {
+            @Value("${aws.region}") String region, UserRepository userRepository, StressAnalysisRepository stressAnalysisRepository) {
+        this.userRepository = userRepository;
+        this.stressAnalysisRepository = stressAnalysisRepository;
         rekognitionClient = RekognitionClient.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
@@ -48,6 +61,11 @@ public class RekognitionService {
 
     public String detectStress(byte[] imageBytes) {
         try {
+            // Lấy userId từ SecurityContextHolder
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
             Image image = Image.builder().bytes(SdkBytes.fromByteArray(imageBytes)).build();
             DetectFacesRequest request = DetectFacesRequest.builder()
                     .image(image)
@@ -72,7 +90,18 @@ public class RekognitionService {
             double avgScore = totalScore / faces.size();
             log.info("Average stress score: {}", avgScore);
 
-            return mapStressScoreToLevel(avgScore);
+            String stressLevel = mapStressScoreToLevel(avgScore);
+
+            // Lưu kết quả vào database
+            StressAnalysis analysis = StressAnalysis.builder()
+                    .user(user)
+                    .stressScore(avgScore)
+                    .stressLevel(stressLevel)
+                    .createdAt(new Date())
+                    .build();
+            stressAnalysisRepository.save(analysis);
+
+            return stressLevel;
         } catch (Exception e) {
             log.error("Error detecting stress: {}", e.getMessage());
             return "Error analyzing stress.";
@@ -224,5 +253,13 @@ public class RekognitionService {
         } else {
             return StressLevel.RELAXED.toString();
         }
+    }
+
+    public List<StressAnalysis> getStressHistory() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return stressAnalysisRepository.findByUserId(user.getId());
     }
 }

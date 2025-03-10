@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: "jdbc:postgresql://localhost:5432/postgres"
+    url: "jdbc:postgresql://metro.proxy.rlwy.net:44416/railway"
     username: "postgres"
-    password: "postgres"
+    password: "edrDRqwWXGRQktsLQyoirbfDcpxhXcfI"
     driver-class-name: org.postgresql.Driver
   servlet:
     multipart:
@@ -26,7 +26,7 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
-    path: /swagger-ui.html
+    path: /swagger-ui.htmlfs fdsfsdf
 
 aws:
   region: us-east-1
