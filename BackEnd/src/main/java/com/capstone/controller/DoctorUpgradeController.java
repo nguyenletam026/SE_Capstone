@@ -21,7 +21,7 @@ public class DoctorUpgradeController {
     private final DoctorUpgradeService doctorUpgradeService;
 
     @PostMapping("/request-doctor")
-    ApiResponse<String> requestDoctorUpgrade(@RequestParam("certificateImage") MultipartFile certificateImage) {
+    public ApiResponse<String> requestDoctorUpgrade(@RequestParam("certificateImage") MultipartFile certificateImage) {
         DoctorUpgradeRequest request = new DoctorUpgradeRequest(certificateImage);
         doctorUpgradeService.requestDoctorUpgrade(request);
         return ApiResponse.<String>builder()
@@ -31,15 +31,16 @@ public class DoctorUpgradeController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/doctor-requests")
-    ApiResponse<List<DoctorUpgradeResponse>> getAllDoctorRequests() {
+    public ApiResponse<List<DoctorUpgradeResponse>> getAllDoctorRequests() {
         return ApiResponse.<List<DoctorUpgradeResponse>>builder()
                 .result(doctorUpgradeService.getAllUpgradeRequests())
                 .build();
     }
 
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/approve-doctor/{requestId}")
-    ApiResponse<String> approveDoctor(@PathVariable String requestId) {
+    public ApiResponse<String> approveDoctor(@PathVariable String requestId) {
         doctorUpgradeService.approveDoctorUpgrade(requestId);
         return ApiResponse.<String>builder()
                 .result("Doctor upgrade approved")
@@ -48,7 +49,7 @@ public class DoctorUpgradeController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/reject-doctor/{requestId}")
-    ApiResponse<String> rejectDoctor(@PathVariable String requestId) {
+    public ApiResponse<String> rejectDoctor(@PathVariable String requestId) {
         doctorUpgradeService.rejectDoctorUpgrade(requestId);
         return ApiResponse.<String>builder()
                 .result("Doctor upgrade rejected")

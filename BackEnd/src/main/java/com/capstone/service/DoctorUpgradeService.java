@@ -14,7 +14,7 @@ import com.capstone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -26,6 +26,7 @@ public class DoctorUpgradeService {
     private final UserRepository userRepository;
     private final DoctorUpgradeRepository doctorUpgradeRepository;
     private final RoleRepository roleRepository;
+    private final CloudinaryService cloudinaryService;
 
     public void requestDoctorUpgrade(DoctorUpgradeRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -37,17 +38,18 @@ public class DoctorUpgradeService {
         }
 
         try {
-            byte[] imageData = request.getCertificateImage().getBytes(); // Lưu ảnh dưới dạng byte[]
+
+            String imageUrl = cloudinaryService.uploadFile(request.getCertificateImage(), user.getId());
 
             DoctorUpgrade upgradeRequest = DoctorUpgrade.builder()
                     .user(user)
-                    .certificateImage(imageData)
+                    .certificateUrl(imageUrl)
                     .status(RequestStatus.PENDING)
                     .build();
 
             doctorUpgradeRepository.save(upgradeRequest);
         } catch (IOException e) {
-            throw new RuntimeException("Error saving certificate image", e);
+            throw new RuntimeException("Error uploading certificate image: " + e.getMessage());
         }
     }
 
@@ -59,7 +61,7 @@ public class DoctorUpgradeService {
         upgradeRequest.setStatus(RequestStatus.APPROVED);
         User user = upgradeRequest.getUser();
 
-        com.capstone.entity.Role roleDoctor = roleRepository.findByName(Role.DOCTOR.name())
+        com.capstone.entity.Role roleDoctor = roleRepository.findByName("DOCTOR")
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
 
         user.setRole(roleDoctor);
@@ -67,6 +69,7 @@ public class DoctorUpgradeService {
         userRepository.save(user);
         doctorUpgradeRepository.save(upgradeRequest);
     }
+
 
 
     public void rejectDoctorUpgrade(String requestId) {
@@ -77,11 +80,13 @@ public class DoctorUpgradeService {
         doctorUpgradeRepository.save(upgradeRequest);
     }
 
+
     public List<DoctorUpgradeResponse> getAllUpgradeRequests() {
         return doctorUpgradeRepository.findAll().stream()
                 .map(req -> DoctorUpgradeResponse.builder()
                         .requestId(req.getId())
                         .username(req.getUser().getUsername())
+                        .certificateUrl(req.getCertificateUrl())
                         .status(req.getStatus())
                         .build())
                 .collect(Collectors.toList());
@@ -91,6 +96,11 @@ public class DoctorUpgradeService {
     public byte[] getDoctorCertificateImage(String requestId) {
         DoctorUpgrade request = doctorUpgradeRepository.findById(requestId)
                 .orElseThrow(() -> new AppException(ErrorCode.REQUEST_NOT_FOUND));
-        return request.getCertificateImage();
+
+        try {
+            return cloudinaryService.downloadFile(request.getCertificateUrl());
+        } catch (IOException e) {
+            throw new RuntimeException("Error downloading certificate image: " + e.getMessage());
+        }
     }
 }
