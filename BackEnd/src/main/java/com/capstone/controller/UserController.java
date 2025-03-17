@@ -42,7 +42,6 @@ public class UserController {
                 .result(userService.getMyInfo())
                 .build();
     }
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     ApiResponse<List<UserResponse>> getAllUsers() {
         return ApiResponse.<List<UserResponse>>builder()
