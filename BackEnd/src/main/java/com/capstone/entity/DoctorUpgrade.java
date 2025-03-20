@@ -23,7 +23,7 @@ public class DoctorUpgrade {
     User user;
 
     @Column(nullable = false)
-    String certificateUrl; // ✅ Lưu URL thay vì BLOB
+    String certificateUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

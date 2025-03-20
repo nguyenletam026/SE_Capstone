@@ -26,6 +26,7 @@ public enum ErrorCode {
     INVALID_IMAGE_URL(1016, "Invalid image url", HttpStatus.BAD_REQUEST),
     FAILED_TO_PROCESS_IMAGE(1017, "Failed to process image", HttpStatus.INTERNAL_SERVER_ERROR),
     FACE_COMPARISON_FAILED(1018, "Face comparison failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    UNKNOWN_ERROR(1019, "Unknown error", HttpStatus.INTERNAL_SERVER_ERROR),
 
 
     ;
