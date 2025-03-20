@@ -1,4 +1,5 @@
-import { FaChartBar, FaShoppingCart, FaProjectDiagram, FaBars } from "react-icons/fa";
+import { FaChartBar, FaUser, FaProjectDiagram, FaBars } from "react-icons/fa";
+import { FaUserDoctor } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
@@ -14,9 +15,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
 
       {/* Sidebar Menu */}
       <nav className="flex flex-col space-y-6 mt-6">
-        <SidebarItem to="/admin-dashboard" icon={<FaChartBar />} label="Analytics" isOpen={isOpen} />
-        <SidebarItem to="/ecommerce" icon={<FaShoppingCart />} label="Ecommerce" isOpen={isOpen} />
-        <SidebarItem to="/projects" icon={<FaProjectDiagram />} label="Project" isOpen={isOpen} />
+        <SidebarItem to="/admin-dashboard" icon={<FaChartBar />} label="DashBoard" isOpen={isOpen} />
+        <SidebarItem to="/admin-role" icon={<FaProjectDiagram />} label="Role" isOpen={isOpen} />
+        <SidebarItem to="/admin-user" icon={<FaUser />} label="User" isOpen={isOpen} />
+        <SidebarItem to="/admin-doctor" icon={<FaUserDoctor />} label="Doctor" isOpen={isOpen} />
       </nav>
     </div>
   );

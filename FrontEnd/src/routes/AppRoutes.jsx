@@ -12,7 +12,10 @@ import Authenticate from "../page/authPage/Authenticate";
 import Home from "../page/userPage/Home";
 
 // Admin Pages
+import AdminLayout from "../components/layouts/adminLayout";
 import AdminHome from "../page/adminPage/adminHome";
+import AdminManageRole from "../page/adminPage/adminManageRole";
+import AdminManageUser from "../page/adminPage/adminManageUser";
 
 const AppRoutes = () => {
   return (
@@ -35,6 +38,8 @@ const AppRoutes = () => {
           {/* Route Admin */}
           <Route element={<ProtectedRoute allowedRoles={["ROLE_ADMIN"]} />}>
             <Route path="/admin-dashboard" element={<AdminHome />} />
+            <Route path="/admin-role" element={<AdminLayout><AdminManageRole /></AdminLayout>} />
+            <Route path="/admin-user" element={<AdminLayout><AdminManageUser /></AdminLayout>} />
           </Route>
         </Routes>
       </Router>
