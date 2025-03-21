@@ -5,8 +5,10 @@ import com.capstone.dto.response.WeeklyStressReportResponse;
 import com.capstone.dto.response.MonthlyStressReportResponse;
 import com.capstone.dto.response.DailyStressReportResponse;
 import com.capstone.dto.response.StressAnalysisResponse;
+import com.capstone.dto.response.StressTrendResponse;
 import com.capstone.entity.StressAnalysis;
 import com.capstone.service.RekognitionService;
+import com.capstone.service.StressTrendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StressController {
     private final RekognitionService rekognitionService;
+    private final StressTrendService stressTrendService;
 
     @Operation(
             summary = "Analyze stress from facial image",
@@ -196,6 +199,22 @@ public class StressController {
         return ApiResponse.<List<DailyStressReportResponse>>builder()
                 .message("Daily stress analysis results retrieved")
                 .result(dailyResults)
+                .build();
+    }
+
+    @Operation(
+            summary = "Analyze stress trends",
+            description = "Analyzes stress trends over time and provides insights about stress patterns."
+    )
+    @GetMapping("/trends")
+    public ApiResponse<StressTrendResponse> analyzeStressTrends(
+            @RequestParam(defaultValue = "day") String period,
+            @RequestParam(defaultValue = "7") int duration
+    ) {
+        StressTrendResponse trendAnalysis = stressTrendService.analyzeTrend(period, duration);
+        return ApiResponse.<StressTrendResponse>builder()
+                .message("Stress trend analysis completed")
+                .result(trendAnalysis)
                 .build();
     }
 }
