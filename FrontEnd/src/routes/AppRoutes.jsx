@@ -17,6 +17,9 @@ import AdminHome from "../page/adminPage/adminHome";
 import AdminManageRole from "../page/adminPage/adminManageRole";
 import AdminManageUser from "../page/adminPage/adminManageUser";
 
+// Doctor Pages
+import DoctorLandingPage from "../page/doctorPage/doctorHome";
+
 const AppRoutes = () => {
   return (
     <AuthProvider>
@@ -41,6 +44,10 @@ const AppRoutes = () => {
             <Route path="/admin-role" element={<AdminLayout><AdminManageRole /></AdminLayout>} />
             <Route path="/admin-user" element={<AdminLayout><AdminManageUser /></AdminLayout>} />
           </Route>
+
+          {/* Route Doctor */}
+          <Route path="/doctorHomePage" element={<DoctorLandingPage/> } /> 
+          {/* Dang phat trien */}
         </Routes>
       </Router>
     </AuthProvider>
