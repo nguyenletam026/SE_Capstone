@@ -2,6 +2,8 @@ package com.capstone.service;
 
 import com.capstone.entity.StressAnalysis;
 import com.capstone.entity.User;
+import com.capstone.entity.WeeklyStressReport;
+import com.capstone.entity.MonthlyStressReport;
 import com.capstone.enums.StressLevel;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
@@ -19,8 +21,12 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.*;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,6 +34,7 @@ public class RekognitionService {
     private final RekognitionClient rekognitionClient;
     private final UserRepository userRepository;
     private final StressAnalysisRepository stressAnalysisRepository;
+    private final StressReportService stressReportService;
 
     @Value("${stress.extreme.threshold:85}")
     private double extremeStressThreshold;
@@ -50,9 +57,13 @@ public class RekognitionService {
     public RekognitionService(
             @Value("${aws.access-key}") String accessKey,
             @Value("${aws.secret-key}") String secretKey,
-            @Value("${aws.region}") String region, UserRepository userRepository, StressAnalysisRepository stressAnalysisRepository) {
+            @Value("${aws.region}") String region,
+            UserRepository userRepository,
+            StressAnalysisRepository stressAnalysisRepository,
+            StressReportService stressReportService) {
         this.userRepository = userRepository;
         this.stressAnalysisRepository = stressAnalysisRepository;
+        this.stressReportService = stressReportService;
         rekognitionClient = RekognitionClient.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
@@ -100,6 +111,9 @@ public class RekognitionService {
                     .createdAt(new Date())
                     .build();
             stressAnalysisRepository.save(analysis);
+
+            // Cập nhật báo cáo tuần và tháng
+            stressReportService.updateReports(analysis);
 
             return stressLevel;
         } catch (Exception e) {
@@ -239,7 +253,7 @@ public class RekognitionService {
         return frownScore;
     }
 
-    private String mapStressScoreToLevel(double score) {
+    public String mapStressScoreToLevel(double score) {
         if (score >= extremeStressThreshold) {
             return StressLevel.EXTREME_STRESS.toString();
         } else if (score >= highStressThreshold) {
@@ -259,7 +273,76 @@ public class RekognitionService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return stressAnalysisRepository.findByUserOrderByCreatedAtDesc(user);
+    }
 
-        return stressAnalysisRepository.findByUserId(user.getId());
+    public List<WeeklyStressReport> getWeeklyReports() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return stressReportService.getWeeklyReports(user);
+    }
+
+    public List<MonthlyStressReport> getMonthlyReports() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return stressReportService.getMonthlyReports(user);
+    }
+
+    public Map<String, List<StressAnalysis>> getStressByWeek() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        List<StressAnalysis> allResults = stressAnalysisRepository.findByUserOrderByCreatedAtDesc(user);
+        
+        return allResults.stream()
+                .collect(Collectors.groupingBy(
+                    analysis -> {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(analysis.getCreatedAt());
+                        cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+                        return String.format("Week %d, %d", 
+                            cal.get(Calendar.WEEK_OF_YEAR),
+                            cal.get(Calendar.YEAR));
+                    }
+                ));
+    }
+
+    public Map<String, List<StressAnalysis>> getStressByMonth() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        List<StressAnalysis> allResults = stressAnalysisRepository.findByUserOrderByCreatedAtDesc(user);
+        
+        return allResults.stream()
+                .collect(Collectors.groupingBy(
+                    analysis -> {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(analysis.getCreatedAt());
+                        return String.format("%s %d", 
+                            cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()),
+                            cal.get(Calendar.YEAR));
+                    }
+                ));
+    }
+
+    public Map<String, List<StressAnalysis>> getStressByDay() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        List<StressAnalysis> allResults = stressAnalysisRepository.findByUserOrderByCreatedAtDesc(user);
+        
+        return allResults.stream()
+                .collect(Collectors.groupingBy(
+                    analysis -> {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(analysis.getCreatedAt());
+                        return String.format("%d/%d/%d", 
+                            cal.get(Calendar.DAY_OF_MONTH),
+                            cal.get(Calendar.MONTH) + 1,
+                            cal.get(Calendar.YEAR));
+                    }
+                ));
     }
 }
