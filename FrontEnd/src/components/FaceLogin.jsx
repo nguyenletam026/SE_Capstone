@@ -58,7 +58,7 @@ export default function FaceLogin({ username }) {
       // Create form data
       const formData = new FormData();
       formData.append('username', username);
-      formData.append('image', blob);
+      formData.append('file_target', blob);
 
       // Send to backend
       const response = await fetch(`${process.env.REACT_APP_API_URL}/auth-face`, {
