@@ -7,6 +7,8 @@ import ProtectedRoute from "../components/route/ProtectedRoute";
 import LandingPage from "../page/authPage/landingPage";
 import Login from "../page/authPage/Login";
 import Authenticate from "../page/authPage/Authenticate";
+import ForgotPassword from "../page/authPage/forgotPasswordPage";
+
 
 // User Pages
 import Home from "../page/userPage/Home";
@@ -28,6 +30,7 @@ const AppRoutes = () => {
           {/* Route Đăng nhập */}
           <Route path="/login" element={<Login />} />
           <Route path="/authenticate" element={<Authenticate />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
           {/* Redirect nếu truy cập "/" mà chưa đăng nhập */}
