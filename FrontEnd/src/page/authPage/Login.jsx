@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getToken, setToken } from "../../services/localStorageService";
-import { FaEnvelope, FaLock, FaGoogle } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaGoogle, FaCamera } from "react-icons/fa";
 import loginImage from "../../assets/1.png";
 import { Link } from "react-router-dom";
 import { handleLogin, handleContinueWithGoogle } from "../../lib/auth/authServices"; // Import hàm từ authService.js
 import { useAuth } from "../../context/AuthContext";
 import { jwtDecode } from "jwt-decode";
+import FaceLogin from "../../components/FaceLogin";
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [loginMethod, setLoginMethod] = useState("password"); // "password" or "face"
 
   useEffect(() => {
     const token = getToken();
@@ -54,39 +56,83 @@ export default function Login() {
             journey to a healthier mind starts here!
           </p>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Email */}
-            <div className="relative">
-              <input
-                type="username"
-                placeholder="Enter your email"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                value={username}
-                onChange={(e) => setUserName(e.target.value)}
-              />
-              <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            </div>
-
-            {/* Password */}
-            <div className="relative">
-              <input
-                type="password"
-                placeholder="Enter your password"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            </div>
-
-            {/* Login button */}
+          {/* Login Method Toggle */}
+          <div className="flex justify-center space-x-4 mb-6">
             <button
-              type="submit"
-              className="w-full bg-black text-white p-3 rounded-lg hover:bg-gray-900 transition"
+              onClick={() => setLoginMethod("password")}
+              className={`flex items-center px-4 py-2 rounded-lg transition ${
+                loginMethod === "password"
+                  ? "bg-black text-white"
+                  : "bg-gray-100 text-gray-600"
+              }`}
             >
-              Log in
+              <FaLock className="mr-2" />
+              Password
             </button>
-          </form>
+            <button
+              onClick={() => setLoginMethod("face")}
+              className={`flex items-center px-4 py-2 rounded-lg transition ${
+                loginMethod === "face"
+                  ? "bg-black text-white"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              <FaCamera className="mr-2" />
+              Face ID
+            </button>
+          </div>
+
+          {loginMethod === "password" ? (
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {/* Email */}
+              <div className="relative">
+                <input
+                  type="username"
+                  placeholder="Enter your email"
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={username}
+                  onChange={(e) => setUserName(e.target.value)}
+                />
+                <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+
+              {/* Password */}
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+
+              {/* Login button */}
+              <button
+                type="submit"
+                className="w-full bg-black text-white p-3 rounded-lg hover:bg-gray-900 transition"
+              >
+                Log in
+              </button>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              {/* Email for Face Login */}
+              <div className="relative">
+                <input
+                  type="username"
+                  placeholder="Enter your email"
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={username}
+                  onChange={(e) => setUserName(e.target.value)}
+                />
+                <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+
+              <FaceLogin username={username} />
+            </div>
+          )}
 
           {/* OR Separator */}
           <div className="my-4 flex items-center">
