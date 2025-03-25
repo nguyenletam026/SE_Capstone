@@ -20,6 +20,11 @@ spring:
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
 
+fptai:
+  api:
+    key: QKIh1IJzqbTmOmt4xaw120eP8c6M0TfN
+    url: https://api.fpt.ai/vision/idr/vnm
+
 
 springdoc:
   api-docs:

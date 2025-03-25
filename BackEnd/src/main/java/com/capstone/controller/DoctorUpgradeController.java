@@ -21,14 +21,23 @@ import java.util.List;
 public class DoctorUpgradeController {
     private final DoctorUpgradeService doctorUpgradeService;
 
-    @PostMapping(value = "/request-doctor", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<String> requestDoctorUpgrade(@RequestParam("certificateImage") MultipartFile certificateImage) {
-        DoctorUpgradeRequest request = new DoctorUpgradeRequest(certificateImage);
+    @PostMapping("/request-doctor")
+    public ApiResponse<String> requestDoctorUpgrade(
+            @RequestParam("certificateImage") MultipartFile certificateImage,
+            @RequestParam("cccdImage") MultipartFile cccdImage) {
+
+        DoctorUpgradeRequest request = DoctorUpgradeRequest.builder()
+                .certificateImage(certificateImage)
+                .cccdImage(cccdImage)
+                .build();
+
         doctorUpgradeService.requestDoctorUpgrade(request);
+
         return ApiResponse.<String>builder()
                 .result("Doctor upgrade request submitted")
                 .build();
     }
+
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

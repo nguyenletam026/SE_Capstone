@@ -27,18 +27,22 @@ public class DoctorUpgradeService {
     private final DoctorUpgradeRepository doctorUpgradeRepository;
     private final RoleRepository roleRepository;
     private final CloudinaryService cloudinaryService;
+    private final CccdVerificationService cccdVerificationService;
 
     public void requestDoctorUpgrade(DoctorUpgradeRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        if (user.getRole().getName().equals(Role.DOCTOR.name())) {
+        if (user.getRole().getName().equals("DOCTOR")) {
             throw new AppException(ErrorCode.ALREADY_DOCTOR);
         }
 
-        try {
+        // 1. Xác thực CCCD
+        cccdVerificationService.verifyCccd(request.getCccdImage(), user);
 
+        // 2. Upload chứng chỉ
+        try {
             String imageUrl = cloudinaryService.uploadFile(request.getCertificateImage(), user.getId());
 
             DoctorUpgrade upgradeRequest = DoctorUpgrade.builder()
@@ -52,7 +56,6 @@ public class DoctorUpgradeService {
             throw new RuntimeException("Error uploading certificate image: " + e.getMessage());
         }
     }
-
 
     public void approveDoctorUpgrade(String requestId) {
         DoctorUpgrade upgradeRequest = doctorUpgradeRepository.findById(requestId)
