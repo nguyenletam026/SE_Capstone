@@ -24,11 +24,21 @@ public class DoctorUpgradeController {
     @PostMapping("/request-doctor")
     public ApiResponse<String> requestDoctorUpgrade(
             @RequestParam("certificateImage") MultipartFile certificateImage,
-            @RequestParam("cccdImage") MultipartFile cccdImage) {
+            @RequestParam("cccdImage") MultipartFile cccdImage,
+            @RequestParam("specialization") String specialization,
+            @RequestParam("experienceYears") int experienceYears,
+            @RequestParam("description") String description,
+            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("hospital") String hospital) {
 
         DoctorUpgradeRequest request = DoctorUpgradeRequest.builder()
                 .certificateImage(certificateImage)
                 .cccdImage(cccdImage)
+                .specialization(specialization)
+                .experienceYears(experienceYears)
+                .description(description)
+                .phoneNumber(phoneNumber)
+                .hospital(hospital)
                 .build();
 
         doctorUpgradeService.requestDoctorUpgrade(request);

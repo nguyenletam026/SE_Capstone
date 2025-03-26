@@ -49,6 +49,11 @@ public class DoctorUpgradeService {
                     .user(user)
                     .certificateUrl(imageUrl)
                     .status(RequestStatus.PENDING)
+                    .specialization(request.getSpecialization())
+                    .experienceYears(request.getExperienceYears())
+                    .description(request.getDescription())
+                    .phoneNumber(request.getPhoneNumber())
+                    .hospital(request.getHospital())
                     .build();
 
             doctorUpgradeRepository.save(upgradeRequest);
