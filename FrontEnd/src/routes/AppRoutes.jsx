@@ -11,6 +11,7 @@ import ForgotPassword from "../page/authPage/forgotPasswordPage";
 
 
 // User Pages
+import UserLayout from "../components/layouts/userLayout";
 import Home from "../page/userPage/Home";
 
 // Admin Pages
@@ -38,7 +39,7 @@ const AppRoutes = () => {
 
           {/* Route User */}
           <Route element={<ProtectedRoute allowedRoles={["ROLE_USER"]} />}>
-            <Route path="/home" element={<Home />} />
+            <Route path="/home" element={<UserLayout><Home /></UserLayout>} />
           </Route>
 
           {/* Route Admin */}

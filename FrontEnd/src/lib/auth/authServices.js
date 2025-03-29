@@ -33,3 +33,14 @@ export const handleLogin = async (username, password) => {
   
     window.location.href = targetUrl;
   };
+
+  export async function sendResetPasswordEmail(email) {
+    // Giả lập gửi mail với delay 1.5s
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log(`📩 Reset link sent to ${email}`);
+        resolve({ success: true });
+      }, 1500);
+    });
+  }
+  
