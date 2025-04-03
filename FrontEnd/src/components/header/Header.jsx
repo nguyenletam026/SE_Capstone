@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { logOut } from "../../services/authenticationService";
 import mainAvatar from "../../assets/2.png";
 import defaultImage from "../../assets/3.png";
@@ -28,9 +28,9 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 w-full h-16 z-50 bg-white shadow-md px-6 flex justify-between items-center">
+    <header className="fixed top-0 left-0 w-full h-16 z-50 bg-white shadow-md px-6 flex items-center justify-between">
       {/* Logo */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-shrink-0">
         <img
           src={mainAvatar}
           alt="Logo"
@@ -38,6 +38,17 @@ export default function Header() {
         />
         <span className="text-gray-800 font-bold text-lg">Student Stress Helper</span>
       </div>
+
+      {/* Navigation Links - Centered */}
+      <nav className="flex-1">
+        <ul className="flex justify-center space-x-6 text-sm font-semibold text-gray-700">
+          <li><Link to="/about" className="hover:text-green-600">Về Chúng Tôi</Link></li>
+          <li><Link to="/store" className="hover:text-green-600">Store</Link></li>
+          <li><Link to="/transactions" className="hover:text-green-600">Xem Giao Dịch</Link></li>
+          <li><Link to="/chatroom" className="hover:text-green-600">ChatRoom</Link></li>
+          <li><Link to="/plans" className="hover:text-green-600">Gói</Link></li>
+        </ul>
+      </nav>
 
       {/* Icons & Profile */}
       <div className="flex items-center space-x-4 relative" ref={dropdownRef}>

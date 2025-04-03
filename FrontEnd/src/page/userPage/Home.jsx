@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { getToken } from "../../services/localStorageService";
 import StressChart from "../../components/stress/stressChart";
 import Bot from "../../assets/4.png";
-// import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -44,17 +43,39 @@ export default function Home() {
 
   return (
     <div className="text-gray-800">
-      {/* Section 1 - Greeting */}
-      <div className="bg-green-300 text-white text-center py-10 rounded-b-[4rem] relative z-0">
-        <div className="text-sm font-medium uppercase mb-2">
-          Xin Chào {userDetails.firstName?.toUpperCase()} {userDetails.lastName?.toUpperCase()}
+      {/* Section 1 - Greeting with green wave background */}
+      <div className="relative bg-[#9BB168] text-white text-center pb-16 rounded-b-[80px] overflow-hidden">
+        <div className="pt-6">
+          <div className="text-sm font-semibold uppercase mb-1">
+            Xin Chào {userDetails.firstName?.toUpperCase()}{" "}
+            {userDetails.lastName?.toUpperCase()}
+          </div>
+          <div className="text-xs underline mb-4 cursor-pointer">
+            Thiết Lập Profile
+          </div>
+          <div className="text-6xl font-bold">{stressScore}</div>
+          <div className="text-6xl mt-2">😊</div>
+          <div className="mt-2 font-bold text-lg">
+            Bạn Đang Có Tâm Trạng Tốt
+          </div>
         </div>
-        <div className="text-xs underline mb-2 cursor-pointer">Thiết Lập Profile</div>
-        <div className="text-6xl font-bold">{stressScore}</div>
-        <div className="text-6xl mt-2">😊</div>
-        <div className="mt-2 font-bold text-xl">Bạn Đang Có Tâm Trạng Tốt</div>
-        <div className="mt-6 flex justify-center">
+
+        <div className="mt-6 flex justify-center z-10 relative">
           <img src={Bot} alt="Bot" className="w-40 h-40" />
+        </div>
+
+        {/* Sóng cong giả phía dưới */}
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] rotate-0">
+          <svg
+            viewBox="0 0 1440 320"
+            className="w-full h-[100px]"
+            preserveAspectRatio="none"
+          >
+            <path
+              fill="#ffffff"
+              d="M0,192L80,181.3C160,171,320,149,480,160C640,171,800,213,960,229.3C1120,245,1280,235,1360,229.3L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+            />
+          </svg>
         </div>
       </div>
 
@@ -73,8 +94,15 @@ export default function Home() {
             { title: "Bla Bla Bla", img: "/tip3.jpg" },
             { title: "Bla Bla Bla", img: "/tip4.jpg" },
           ].map((item, index) => (
-            <div key={index} className="border rounded-lg overflow-hidden shadow-sm">
-              <img src={item.img} alt={item.title} className="h-32 w-full object-cover" />
+            <div
+              key={index}
+              className="border rounded-lg overflow-hidden shadow-sm"
+            >
+              <img
+                src={item.img}
+                alt={item.title}
+                className="h-32 w-full object-cover"
+              />
               <div className="p-2 text-sm font-medium">{item.title}</div>
             </div>
           ))}

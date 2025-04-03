@@ -11,7 +11,7 @@ const UserLayout = ({ children }) => {
       <Header />
 
       {/* Main Content - phải chừa padding-top cho header */}
-      <main className="flex-grow w-full pt-20 bg-white">
+      <main className="flex-grow w-full pt-16 bg-white">
         {children}
       </main>
 
