@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { fetchMonthlyStress } from "../../lib/user/stressServices";
+import { getMonthlyStress } from "../../lib/user/stressServices";
 
 export default function StressChart() {
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
-      const rawData = await fetchMonthlyStress();
+      const rawData = await getMonthlyStress();
       const formatted = rawData.map((item, index) => ({
         id: index + 1,
         stressScore: item.stressScore,

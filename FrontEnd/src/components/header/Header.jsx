@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { logOut } from "../../services/authenticationService";
-import mainAvatar from "../../assets/2.png";
+// import mainAvatar from "../../assets/2.png";
 import defaultImage from "../../assets/3.png";
+import Bot from "../../assets/4.png";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export default function Header() {
       {/* Logo */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <img
-          src={mainAvatar}
+          src={Bot}
           alt="Logo"
           className="w-10 h-10 rounded-full object-cover"
         />

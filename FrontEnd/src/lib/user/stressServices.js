@@ -1,13 +1,42 @@
 // services/stressServices.js
 
-export async function fetchMonthlyStress() {
-    try {
-      const response = await fetch("http://localhost:8080/api/stress/monthly");
-      const data = await response.json();
-      return data.result[0]?.stress_analyses || [];
-    } catch (error) {
-      console.error("Error fetching stress data:", error);
-      return [];
-    }
-  }
-  
+// 📁 services/stressService.jsx
+import { getToken } from "../../services/localStorageService";
+
+export const getDailyStress = async () => {
+  const token = getToken();
+
+  const res = await fetch("http://localhost:8080/api/stress/daily", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Unauthorized");
+  return res.json();
+};
+
+export const getMonthlyStress = async () => {
+  const token = getToken();
+
+  const res = await fetch("http://localhost:8080/api/stress/monthly", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) throw new Error("Unauthorized");
+  return res.json();
+};
+
+
+// 📁 services/stressService.jsx
+export const analyzeImage = async (formData) => {
+  const res = await fetch("http://localhost:8080/api/stress/analyze", {
+    method: "POST",
+    body: formData,
+  });
+  return res.json();
+};
+
+
