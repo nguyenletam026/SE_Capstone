@@ -23,6 +23,11 @@ public class CloudinaryService {
     private static final Set<String> ALLOWED_MUSIC_FORMATS = Set.of(
             "audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg"
     );
+
+    private static final Set<String> ALLOWED_VIDEO_FORMATS = Set.of(
+            "video/mp4", "video/mpeg", "video/quicktime", "video/x-msvideo"
+    );
+
     public String uploadFile(MultipartFile file, String userId) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new AppException(ErrorCode.FILE_NULL);
@@ -79,6 +84,32 @@ public class CloudinaryService {
             throw new AppException(ErrorCode.UPLOAD_FILE_FAILED);
         }
     }
+
+    public String uploadVideo(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new AppException(ErrorCode.FILE_NULL);
+        }
+
+        String contentType = file.getContentType();
+
+        if (contentType == null || !ALLOWED_VIDEO_FORMATS.contains(contentType.toLowerCase())) {
+            log.error("Invalid video format: {}", contentType);
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+        }
+
+        try {
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap(
+                            "resource_type", "video",
+                            "folder", "videos"
+                    ));
+            return (String) uploadResult.get("url");
+        } catch (IOException e) {
+            log.error("Failed to upload video file to Cloudinary: {}", e.getMessage());
+            throw new AppException(ErrorCode.UPLOAD_FILE_FAILED);
+        }
+    }
+
     public byte[] downloadFile(String url) throws IOException {
         try {
             URL imageUrl = new URL(url);
