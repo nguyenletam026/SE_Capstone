@@ -13,13 +13,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class CloudinaryService {
     private final Cloudinary cloudinary;
-
+    private static final Set<String> ALLOWED_MUSIC_FORMATS = Set.of(
+            "audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg"
+    );
     public String uploadFile(MultipartFile file, String userId) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new AppException(ErrorCode.FILE_NULL);
@@ -51,6 +54,31 @@ public class CloudinaryService {
         }
     }
 
+
+    public String uploadMusic(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new AppException(ErrorCode.FILE_NULL);
+        }
+
+        String contentType = file.getContentType();
+
+        if (contentType == null || !ALLOWED_MUSIC_FORMATS.contains(contentType.toLowerCase())) {
+            log.error("Invalid music format: {}", contentType);
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+        }
+
+        try {
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap(
+                            "resource_type", "video", // Cloudinary uses "video" type for audio files
+                            "folder", "music"
+                    ));
+            return (String) uploadResult.get("url");
+        } catch (IOException e) {
+            log.error("Failed to upload music file to Cloudinary: {}", e.getMessage());
+            throw new AppException(ErrorCode.UPLOAD_FILE_FAILED);
+        }
+    }
     public byte[] downloadFile(String url) throws IOException {
         try {
             URL imageUrl = new URL(url);

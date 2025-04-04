@@ -112,6 +112,13 @@
 			<version>4.2.0</version>
 		</dependency>
 
+		<!-- Spotify Web API -->
+		<dependency>
+			<groupId>se.michaelthelin.spotify</groupId>
+			<artifactId>spotify-web-api-java</artifactId>
+			<version>8.3.6</version>
+		</dependency>
+
     </dependencies>
 
 	<build>
