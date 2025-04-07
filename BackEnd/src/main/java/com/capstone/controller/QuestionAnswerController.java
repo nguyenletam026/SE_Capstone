@@ -33,7 +33,13 @@ public class QuestionAnswerController {
                 .result(questionAnswerService.createQuestion(request))
                 .build();
     }
-
+    @GetMapping
+    public ApiResponse<List<QuestionResponse>> getAllQuestions() {
+        return ApiResponse.<List<QuestionResponse>>builder()
+                .message("All questions retrieved successfully")
+                .result(questionAnswerService.getAllQuestions())
+                .build();
+    }
 
     @PostMapping("/answer")
     public ApiResponse<AnswerResponse> submitAnswer(@Valid @RequestBody AnswerRequest request) {

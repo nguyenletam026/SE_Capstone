@@ -1,7 +1,7 @@
 package com.capstone.controller;
 
 import com.capstone.dto.response.ApiResponse;
-import com.capstone.dto.response.MusicResponse;
+import com.capstone.dto.response.RecommendationResponse;
 import com.capstone.entity.MusicRecommend;
 import com.capstone.service.MusicRecommendService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,9 +36,9 @@ public class MusicRecommendController {
 
     @GetMapping("/get-my-recommend")
     @Operation(summary = "Get music recommendations based on user's stress level")
-    public ApiResponse<List<MusicResponse>> getMyRecommendations() {
-        List<MusicResponse> recommendations = musicRecommendService.getMusicRecommendationsForUser();
-        return ApiResponse.<List<MusicResponse>>builder()
+    public ApiResponse<List<RecommendationResponse>> getMyRecommendations() {
+        List<RecommendationResponse> recommendations = musicRecommendService.getMusicRecommendationsForUser();
+        return ApiResponse.<List<RecommendationResponse>>builder()
                 .message("Music recommendations retrieved successfully")
                 .result(recommendations)
                 .build();

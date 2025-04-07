@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MusicResponse {
+public class RecommendationResponse {
     private String musicName;
     private String musicUrl;
 }

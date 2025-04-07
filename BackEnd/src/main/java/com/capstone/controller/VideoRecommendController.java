@@ -33,14 +33,4 @@ public class VideoRecommendController {
                 videoFile, videoName, "MODERATE_STRESS");
         return ResponseEntity.ok(recommendation);
     }
-
-    @GetMapping("/get-my-video-recommend")
-    @Operation(summary = "Get video recommendations based on user's stress level")
-    public ApiResponse<List<VideoResponse>> getMyRecommendations() {
-        List<VideoResponse> recommendations = videoRecommendService.getVideoRecommendationsForUser();
-        return ApiResponse.<List<VideoResponse>>builder()
-                .message("Video recommendations retrieved successfully")
-                .result(recommendations)
-                .build();
-    }
 } 

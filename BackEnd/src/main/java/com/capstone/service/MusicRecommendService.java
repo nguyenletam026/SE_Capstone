@@ -1,9 +1,10 @@
 package com.capstone.service;
 
-import com.capstone.dto.response.MusicResponse;
+import com.capstone.dto.response.RecommendationResponse;
 import com.capstone.entity.Answer;
 import com.capstone.entity.MusicRecommend;
 import com.capstone.entity.User;
+import com.capstone.entity.VideoRecommend;
 import com.capstone.enums.StressLevel;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
@@ -11,23 +12,18 @@ import com.capstone.repository.AnswerRepository;
 import com.capstone.repository.MusicRecommendRepository;
 import com.capstone.repository.UserRepository;
 import com.capstone.repository.QuestionRepository;
-import com.capstone.dto.response.DailyAnswerSummaryResponse;
+import com.capstone.repository.VideoRecommendRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
-import org.hibernate.Hibernate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -39,6 +35,7 @@ public class MusicRecommendService {
     private final AnswerRepository answerRepository;
     private final QuestionAnswerService questionAnswerService;
     private final QuestionRepository questionRepository;
+    private final VideoRecommendRepository videoRecommendRepository;
     // Định dạng file nhạc được phép upload
     private static final Set<String> ALLOWED_MUSIC_FORMATS = Set.of(
         "audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg"
@@ -88,7 +85,7 @@ public class MusicRecommendService {
                 
         return musicRecommendRepository.save(musicRecommend);
     }
-    public List<MusicResponse> getMusicRecommendationsForUser() {
+    public List<RecommendationResponse> getMusicRecommendationsForUser() {
         User currentUser = getCurrentUser();
         LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
         
@@ -125,8 +122,8 @@ public class MusicRecommendService {
         if(stressLevel.equals(StressLevel.MILD_STRESS.name())){
             log.info("User {} has high stress level: {}, returning all music recommendations", currentUser.getUsername(), stressLevel);
             List<MusicRecommend> allMusic = musicRecommendRepository.findAll();
-            List<MusicResponse> allMusicResponse = allMusic.stream()
-                    .map(music -> MusicResponse.builder()
+            List<RecommendationResponse> allMusicResponse = allMusic.stream()
+                    .map(music -> RecommendationResponse.builder()
                             .musicName(music.getMusicName())
                             .musicUrl(music.getMusicUrl())
                             .build())
@@ -134,12 +131,17 @@ public class MusicRecommendService {
 
             return allMusicResponse;
         }
-        else
-            return null;
+        else {
+            List<VideoRecommend> videoRecommends = videoRecommendRepository.findAll();
+            List<RecommendationResponse> videoResponseList = videoRecommends.stream()
+                    .map(video -> RecommendationResponse.builder()
+                            .musicName(video.getVideoName())
+                            .musicUrl(video.getVideoUrl())
+                            .build())
+                    .toList();
+            return videoResponseList;
+        }
     }
-
-    
-    
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
