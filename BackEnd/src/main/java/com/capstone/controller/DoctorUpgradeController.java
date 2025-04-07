@@ -50,6 +50,7 @@ public class DoctorUpgradeController {
 
 
 
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/doctor-requests")
     public ApiResponse<List<DoctorUpgradeResponse>> getAllDoctorRequests() {

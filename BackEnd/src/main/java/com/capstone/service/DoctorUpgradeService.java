@@ -38,10 +38,8 @@ public class DoctorUpgradeService {
             throw new AppException(ErrorCode.ALREADY_DOCTOR);
         }
 
-        // 1. Xác thực CCCD
         cccdVerificationService.verifyCccd(request.getCccdImage(), user);
 
-        // 2. Upload chứng chỉ
         try {
             String imageUrl = cloudinaryService.uploadFile(request.getCertificateImage(), user.getId());
 
@@ -61,6 +59,7 @@ public class DoctorUpgradeService {
             throw new RuntimeException("Error uploading certificate image: " + e.getMessage());
         }
     }
+
 
     public void approveDoctorUpgrade(String requestId) {
         DoctorUpgrade upgradeRequest = doctorUpgradeRepository.findById(requestId)
