@@ -32,11 +32,17 @@ export const getMonthlyStress = async () => {
 
 // 📁 services/stressService.jsx
 export const analyzeImage = async (formData) => {
+  const token = getToken();
+
   const res = await fetch("http://localhost:8080/api/stress/analyze", {
     method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
     body: formData,
   });
+
+  if (!res.ok) throw new Error("Unauthorized or failed");
   return res.json();
 };
-
 

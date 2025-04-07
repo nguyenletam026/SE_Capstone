@@ -11,7 +11,7 @@ export default function WebcamCapture({ onResult }) {
     const blob = await (await fetch(imageSrc)).blob();
 
     const formData = new FormData();
-    formData.append("file", blob, "webcam.jpg");
+    formData.append("image", blob, "webcam.jpg");
 
     setLoading(true);
     const result = await analyzeImage(formData);

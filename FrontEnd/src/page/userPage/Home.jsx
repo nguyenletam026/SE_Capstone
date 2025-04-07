@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "../../services/localStorageService";
 import StressChart from "../../components/stress/stressChart";
-import StressHomeSection from "../../components/stress/StressHomeSection"; // 👈 MỚI
+import StressHomeSection from "../../components/stress/StressHomeSection";
+import Daily from "../../assets/5.png";
+import Rain from "../../assets/6.png";
+import Music from "../../assets/7.png";
+import Yoga from "../../assets/8.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -41,7 +45,7 @@ export default function Home() {
 
   return (
     <div className="text-gray-800">
-      {/* Section 1 - Greeting moved to separate component */}
+      {/* Section 1 - Greeting */}
       <StressHomeSection />
 
       {/* Section 2 - Chart */}
@@ -54,10 +58,22 @@ export default function Home() {
         <h2 className="text-2xl font-bold mb-6">Các Biện Pháp Giảm Stress</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { title: "Lịch Sinh Hoạt Cho Một Ngày Vui Vẻ", img: "/tip1.jpg" },
-            { title: "Tiếng Mưa Nghe Khi Làm Việc", img: "/tip2.jpg" },
-            { title: "Bla Bla Bla", img: "/tip3.jpg" },
-            { title: "Bla Bla Bla", img: "/tip4.jpg" },
+            {
+              title: "Lịch Sinh Hoạt Cho Một Ngày Vui Vẻ",
+              img: Daily,
+            },
+            {
+              title: "Nghe Âm Thanh Mưa Thư Giãn",
+              img: Rain,
+            },
+            {
+              title: "Âm Nhạc Giúp Cân Bằng Cảm Xúc",
+              img: Music,
+            },
+            {
+              title: "Tập Yoga Giảm Căng Thẳng",
+              img: Yoga,
+            },
           ].map((item, index) => (
             <div
               key={index}

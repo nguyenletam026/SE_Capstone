@@ -1,4 +1,3 @@
-// 📁 components/stress/StressHomeSection.jsx
 import React, { useEffect, useState } from "react";
 import { getDailyStress } from "../../lib/user/stressServices";
 import WebcamCapture from "../utils/WebcamCapture";
@@ -13,11 +12,27 @@ export default function StressHomeSection() {
   const refreshDailyStress = async () => {
     const data = await getDailyStress();
     if (data.code === 1000) {
-      const today = data.result?.[0];
-      const score = today?.average_stress_score ?? 100;
-      setStressScore(Math.round(score));
-      setStressLevel(today?.dominant_stress_level ?? "Unknown");
-      setBgColor((100 - score) < 50 ? "#ef4444" : "#9BB168");
+      const todayDate = new Date().toISOString().split("T")[0];
+      const todayData = data.result.find(item => item.start_date.startsWith(todayDate));
+
+      if (todayData && todayData.stress_analyses?.length) {
+        const now = new Date();
+        let closestEntry = todayData.stress_analyses[0];
+        let smallestDiff = Math.abs(new Date(closestEntry.createdAt) - now);
+
+        todayData.stress_analyses.forEach(entry => {
+          const diff = Math.abs(new Date(entry.createdAt) - now);
+          if (diff < smallestDiff) {
+            closestEntry = entry;
+            smallestDiff = diff;
+          }
+        });
+
+        const score = closestEntry.stressScore ?? 100;
+        setStressScore(Math.round(score));
+        setStressLevel(closestEntry.stressLevel ?? "Unknown");
+        setBgColor((100 - score) < 50 ? "#ef4444" : "#9BB168");
+      }
     }
   };
 
@@ -42,22 +57,28 @@ export default function StressHomeSection() {
       </div>
 
       <div className="mt-6">
-        {!showWebcam && (
+        {!showWebcam ? (
           <button
             onClick={() => setShowWebcam(true)}
             className="bg-white text-brown-700 px-4 py-2 rounded font-semibold"
           >
-            Mở Camera Phân Tích
+            Bắt Đầu Phân Tích Bằng Camera 📸
           </button>
-        )}
-
-        {showWebcam && (
-          <WebcamCapture
-            onResult={() => {
-              refreshDailyStress();
-              setShowWebcam(false);
-            }}
-          />
+        ) : (
+          <div className="flex flex-col items-center space-y-4">
+            <WebcamCapture
+              onResult={() => {
+                refreshDailyStress();
+                setShowWebcam(false);
+              }}
+            />
+            <button
+              onClick={() => setShowWebcam(false)}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+            >
+              Thoát Chế Độ Camera ❌
+            </button>
+          </div>
         )}
       </div>
 
