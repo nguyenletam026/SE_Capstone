@@ -9,6 +9,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RecommendationResponse {
-    private String musicName;
-    private String musicUrl;
+    private String recommendName;
+    private String recommendUrl;
 }
