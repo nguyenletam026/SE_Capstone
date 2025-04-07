@@ -9,7 +9,6 @@ import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.repository.StressAnalysisRepository;
 import com.capstone.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
