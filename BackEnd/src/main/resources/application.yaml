@@ -34,9 +34,9 @@ aws:
   secret-key: "Wi0iTyCmiSpltTCK6W+/jPTU5CE21dlcOixv6Z6M"
 
 cloudinary:
-    cloud-name: "dfrlcr9ml"
-    api-key: "659595431959666"
-    api-secret: "23muN8vxgbbh8AHzXOvzj4HlSrg"
+    cloud-name: "dpuekoyqz"
+    api-key: "984166367576298"
+    api-secret: "AF5MoSOUXN1uqUhMlTlBcobPJg0"
 
 stress:
   extreme:

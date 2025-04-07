@@ -90,4 +90,9 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
+    public List<UserResponse> getAllDoctor() {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole().getName().equals(Role.DOCTOR.name()))
+                .map(userMapper::toUserResponse).toList();
+    }
 }

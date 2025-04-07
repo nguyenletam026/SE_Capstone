@@ -27,7 +27,13 @@ public enum ErrorCode {
     FAILED_TO_PROCESS_IMAGE(1017, "Failed to process image", HttpStatus.INTERNAL_SERVER_ERROR),
     FACE_COMPARISON_FAILED(1018, "Face comparison failed", HttpStatus.INTERNAL_SERVER_ERROR),
     UNKNOWN_ERROR(1019, "Unknown error", HttpStatus.INTERNAL_SERVER_ERROR),
-
+    RESOURCE_NOT_FOUND(1020, "Resource not found", HttpStatus.NOT_FOUND),
+    DUPLICATE_RESOURCE(1021, "Resource already exists", HttpStatus.CONFLICT),
+    INVALID_REQUEST(1022, "Invalid request parameters", HttpStatus.BAD_REQUEST),
+    DAILY_LIMIT_EXCEEDED(429, "Daily limit exceeded", HttpStatus.TOO_MANY_REQUESTS),
+    INTERNAL_SERVER_ERROR(500, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_FILE_FORMAT(1023, "Invalid file format", HttpStatus.BAD_REQUEST),
+    UPLOAD_FILE_FAILED(1024, "Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
 
     ;
 
