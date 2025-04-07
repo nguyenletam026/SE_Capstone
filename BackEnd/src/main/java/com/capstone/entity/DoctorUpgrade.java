@@ -28,4 +28,10 @@ public class DoctorUpgrade {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     RequestStatus status;
+
+    String specialization;
+    int experienceYears;
+    String description;
+    String phoneNumber;
+    String hospital;
 }

@@ -27,6 +27,7 @@ public enum ErrorCode {
     FAILED_TO_PROCESS_IMAGE(1017, "Failed to process image", HttpStatus.INTERNAL_SERVER_ERROR),
     FACE_COMPARISON_FAILED(1018, "Face comparison failed", HttpStatus.INTERNAL_SERVER_ERROR),
     UNKNOWN_ERROR(1019, "Unknown error", HttpStatus.INTERNAL_SERVER_ERROR),
+
     RESOURCE_NOT_FOUND(1020, "Resource not found", HttpStatus.NOT_FOUND),
     DUPLICATE_RESOURCE(1021, "Resource already exists", HttpStatus.CONFLICT),
     INVALID_REQUEST(1022, "Invalid request parameters", HttpStatus.BAD_REQUEST),
