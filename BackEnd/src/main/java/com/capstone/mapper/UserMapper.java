@@ -16,6 +16,7 @@ public interface UserMapper {
     @Mapping(source = "password", target = "password")
     @Mapping(source = "birthdayDate", target = "birthdayDate")
     @Mapping(source = "role", target = "role")
+    @Mapping(source = "avtUrl", target = "avtUrl")
 
     UserResponse toUserResponse(User user);
 }
