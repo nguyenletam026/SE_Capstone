@@ -1,5 +1,6 @@
 package com.capstone.service;
 
+import com.capstone.dto.response.RecommendationListResponse;
 import com.capstone.dto.response.RecommendationResponse;
 import com.capstone.dto.response.UserResponse;
 import com.capstone.entity.Answer;
@@ -87,7 +88,7 @@ public class MusicRecommendService {
                 
         return musicRecommendRepository.save(musicRecommend);
     }
-    public List<RecommendationResponse> getMusicRecommendationsForUser() {
+    public RecommendationListResponse getMusicRecommendationsForUser() {
         User currentUser = getCurrentUser();
         LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
         
@@ -96,7 +97,11 @@ public class MusicRecommendService {
         
         if (todayAnswers.isEmpty()) {
             log.info("No answers found for user {} today", currentUser.getUsername());
-            return List.of(); // Return empty list instead of null
+            return RecommendationListResponse.builder()
+                    .stressLevel("NO_DATA")
+                    .recommendationType("NO_DATA")
+                    .recommendations(List.of())
+                    .build();
         }
 
         // Calculate average stress score
@@ -107,51 +112,64 @@ public class MusicRecommendService {
 
         // Convert average stress score to stress level based on configured thresholds
         String stressLevel;
+        String recommendationType;
+        
         if (averageStressScore >= extremeStressThreshold) {
             stressLevel = StressLevel.EXTREME_STRESS.name();
+            recommendationType = "DOCTOR_ADVISE";
         } else if (averageStressScore >= highStressThreshold) {
             stressLevel = StressLevel.HIGH_STRESS.name();
+            recommendationType = "DOCTOR_ADVISE";
         } else if (averageStressScore >= moderateStressThreshold) {
             stressLevel = StressLevel.MODERATE_STRESS.name();
+            recommendationType = "YOGA_EXCERSITE";
         } else if (averageStressScore >= mildStressThreshold) {
             stressLevel = StressLevel.MILD_STRESS.name();
+            recommendationType = "MUSIC_LISTENING";
         } else if (averageStressScore >= normalStressThreshold) {
             stressLevel = StressLevel.NORMAL.name();
+            recommendationType = "MUSIC_LISTENING";
         } else {
             stressLevel = StressLevel.RELAXED.name();
+            recommendationType = "MUSIC_LISTENING";
         }
 
+        List<RecommendationResponse> recommendations;
+        
         if(stressLevel.equals(StressLevel.MILD_STRESS.name())){
-            log.info("User {} has high stress level: {}, returning all music recommendations", currentUser.getUsername(), stressLevel);
+            log.info("User {} has mild stress level: {}, returning all music recommendations", currentUser.getUsername(), stressLevel);
             List<MusicRecommend> allMusic = musicRecommendRepository.findAll();
-            List<RecommendationResponse> allMusicResponse = allMusic.stream()
+            recommendations = allMusic.stream()
                     .map(music -> RecommendationResponse.builder()
                             .recommendName(music.getMusicName())
                             .recommendUrl(music.getMusicUrl())
                             .build())
                     .toList();
-
-            return allMusicResponse;
         }
         else if(stressLevel.equals(StressLevel.MODERATE_STRESS.name())){
             List<VideoRecommend> videoRecommends = videoRecommendRepository.findAll();
-            List<RecommendationResponse> videoResponseList = videoRecommends.stream()
+            recommendations = videoRecommends.stream()
                     .map(video -> RecommendationResponse.builder()
                             .recommendName(video.getVideoName())
                             .recommendUrl(video.getVideoUrl())
                             .build())
                     .toList();
-            return videoResponseList;
         }
         else {
             List<UserResponse> userResponse = userService.getAllDoctor();
-            return userResponse.stream()
+            recommendations = userResponse.stream()
                     .map(user -> RecommendationResponse.builder()
                             .recommendName(user.getId())
                             .recommendUrl(user.getAvtUrl())
                             .build())
                     .toList();
         }
+        
+        return RecommendationListResponse.builder()
+                .stressLevel(stressLevel)
+                .recommendationType(recommendationType)
+                .recommendations(recommendations)
+                .build();
     }
     private User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
