@@ -1,6 +1,7 @@
 package com.capstone.controller;
 
 import com.capstone.dto.response.ApiResponse;
+import com.capstone.dto.response.RecommendationListResponse;
 import com.capstone.dto.response.RecommendationResponse;
 import com.capstone.entity.MusicRecommend;
 import com.capstone.service.MusicRecommendService;
@@ -36,11 +37,10 @@ public class MusicRecommendController {
 
     @GetMapping("/get-my-recommend")
     @Operation(summary = "Get music recommendations based on user's stress level")
-    public ApiResponse<List<RecommendationResponse>> getMyRecommendations() {
-        List<RecommendationResponse> recommendations = musicRecommendService.getMusicRecommendationsForUser();
-        return ApiResponse.<List<RecommendationResponse>>builder()
-                .message("Music recommendations retrieved successfully")
-                .result(recommendations)
+    public ApiResponse<RecommendationListResponse> getMyRecommendations() {
+        RecommendationListResponse response = musicRecommendService.getMusicRecommendationsForUser();
+        return ApiResponse.<RecommendationListResponse>builder()
+                .result(response)
                 .build();
     }
 } 
