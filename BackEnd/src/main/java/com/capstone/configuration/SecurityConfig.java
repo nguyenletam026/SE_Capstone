@@ -37,6 +37,7 @@ public class SecurityConfig {
             "users","https://deploy-se.onrender.com/**",
             "/auth-face",
             "/ws/**",
+            "/api/download/**",
     };
     @Value("${jwt.signerKey}")
     private String signerKey;
