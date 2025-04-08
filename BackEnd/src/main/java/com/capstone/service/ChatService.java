@@ -2,11 +2,14 @@ package com.capstone.service;
 
 import com.capstone.dto.response.ChatMessageDTO;
 import com.capstone.entity.ChatMessage;
+import com.capstone.entity.ChatRequest;
 import com.capstone.entity.User;
+import com.capstone.enums.RequestStatus;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.mapper.ChatMessageMapper;
 import com.capstone.repository.ChatMessageRepository;
+import com.capstone.repository.ChatRequestRepository;
 import com.capstone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatRequestRepository chatRequestRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageMapper chatMessageMapper;
@@ -35,9 +39,13 @@ public class ChatService {
     public ChatMessageDTO saveMessage(String content, String senderId, String receiverId) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // Check if there's an approved chat request
+        ChatRequest chatRequest = chatRequestRepository.findByPatientAndDoctorAndStatus(sender, receiver, RequestStatus.APPROVED)
+                .orElseGet(() -> chatRequestRepository.findByPatientAndDoctorAndStatus(receiver, sender, RequestStatus.APPROVED)
+                        .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED)));
 
         ChatMessage message = ChatMessage.builder()
                 .content(content)
@@ -66,9 +74,13 @@ public class ChatService {
         try {
             User sender = userRepository.findById(senderId)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
             User receiver = userRepository.findById(receiverId)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+            // Check if there's an approved chat request
+            ChatRequest chatRequest = chatRequestRepository.findByPatientAndDoctorAndStatus(sender, receiver, RequestStatus.APPROVED)
+                    .orElseGet(() -> chatRequestRepository.findByPatientAndDoctorAndStatus(receiver, sender, RequestStatus.APPROVED)
+                            .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED)));
 
             // Upload hình ảnh lên Cloudinary
             String imageUrl = cloudinaryService.uploadFile(image, senderId);
@@ -112,13 +124,16 @@ public class ChatService {
     public List<ChatMessageDTO> getConversation(String user1Id, String user2Id) {
         User user1 = userRepository.findById(user1Id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
         User user2 = userRepository.findById(user2Id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        List<ChatMessage> conversation = chatMessageRepository.findConversation(user1, user2);
+        // Check if there's an approved chat request
+        ChatRequest chatRequest = chatRequestRepository.findByPatientAndDoctorAndStatus(user1, user2, RequestStatus.APPROVED)
+                .orElseGet(() -> chatRequestRepository.findByPatientAndDoctorAndStatus(user2, user1, RequestStatus.APPROVED)
+                        .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED)));
 
-        return conversation.stream()
+        return chatMessageRepository.findConversation(user1, user2)
+                .stream()
                 .map(chatMessageMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -126,37 +141,24 @@ public class ChatService {
     public List<ChatMessageDTO> markMessagesAsRead(String userId, String senderId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        List<ChatMessage> unreadMessages = chatMessageRepository
-                .findBySenderAndReceiverOrderByTimestampDesc(sender, user);
+        List<ChatMessage> messages = chatMessageRepository.findByReceiverAndReadFalseOrderByTimestampDesc(user);
+        messages.forEach(message -> message.setRead(true));
+        chatMessageRepository.saveAll(messages);
 
-        List<ChatMessage> readMessages = new ArrayList<>();
-
-        for (ChatMessage message : unreadMessages) {
-            if (!message.isRead()) {
-                message.setRead(true);
-                readMessages.add(chatMessageRepository.save(message));
-            }
-        }
-
-        List<ChatMessageDTO> readMessageDTOs = readMessages.stream()
+        return messages.stream()
                 .map(chatMessageMapper::toDTO)
                 .collect(Collectors.toList());
-
-        return readMessageDTOs;
     }
 
     public List<ChatMessageDTO> getUnreadMessages(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        List<ChatMessage> unreadMessages = chatMessageRepository
-                .findByReceiverAndReadFalseOrderByTimestampDesc(user);
-
-        return unreadMessages.stream()
+        return chatMessageRepository.findByReceiverAndReadFalseOrderByTimestampDesc(user)
+                .stream()
                 .map(chatMessageMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -172,21 +174,14 @@ public class ChatService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // Lấy danh sách người đã gửi tin nhắn cho user
-        List<User> senders = chatMessageRepository.findDistinctSenders(user);
-
-        List<ChatMessageDTO> recentMessages = new ArrayList<>();
-
-        // Với mỗi người gửi, lấy tin nhắn gần nhất
-        for (User sender : senders) {
-            List<ChatMessage> messages = chatMessageRepository
-                    .findBySenderAndReceiverOrderByTimestampDesc(sender, user);
-
-            if (!messages.isEmpty()) {
-                recentMessages.add(chatMessageMapper.toDTO(messages.get(0)));
-            }
-        }
-
-        return recentMessages;
+        return chatMessageRepository.findDistinctSenders(user)
+                .stream()
+                .map(sender -> chatMessageRepository.findBySenderAndReceiverOrderByTimestampDesc(sender, user)
+                        .stream()
+                        .findFirst()
+                        .orElse(null))
+                .filter(message -> message != null)
+                .map(chatMessageMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }
