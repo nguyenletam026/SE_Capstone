@@ -110,4 +110,15 @@ public class ChatRequestService {
                 .map(ChatRequestResponse::fromChatRequest)
                 .collect(Collectors.toList());
     }
+
+    public List<ChatRequestResponse> getUserAcceptedRequests() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User patient = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return chatRequestRepository.findByPatientAndStatus(patient, RequestStatus.APPROVED)
+                .stream()
+                .map(ChatRequestResponse::fromChatRequest)
+                .collect(Collectors.toList());
+    }
 } 
