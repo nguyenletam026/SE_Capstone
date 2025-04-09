@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { getMonthlyStress } from "../../lib/user/stressServices";
 
-export default function StressChart() {
+export default function StressChart({ refreshSignal }) {
   const [chartData, setChartData] = useState([]);
   const [allMonths, setAllMonths] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -19,29 +19,31 @@ export default function StressChart() {
 
   useEffect(() => {
     const loadData = async () => {
-      const raw = await getMonthlyStress();
+      try {
+        const raw = await getMonthlyStress();
+        const monthGroups = raw.result.reduce((acc, item) => {
+          const date = new Date(item.start_date);
+          const monthKey = `${date.getFullYear()}-${String(
+            date.getMonth() + 1
+          ).padStart(2, "0")}`;
+          if (!acc.includes(monthKey)) acc.push(monthKey);
+          return acc;
+        }, []);
 
-      // Lấy danh sách các tháng có trong dữ liệu
-      const monthGroups = raw.result.reduce((acc, item) => {
-        const date = new Date(item.start_date);
-        const monthKey = `${date.getFullYear()}-${String(
-          date.getMonth() + 1
-        ).padStart(2, "0")}`;
-        if (!acc.includes(monthKey)) acc.push(monthKey);
-        return acc;
-      }, []);
+        setAllMonths(monthGroups);
 
-      setAllMonths(monthGroups);
+        if (!selectedMonth && monthGroups.length > 0) {
+          setSelectedMonth(monthGroups[monthGroups.length - 1]);
+        }
 
-      if (!selectedMonth) {
-        setSelectedMonth(monthGroups[monthGroups.length - 1]); // Mặc định chọn tháng mới nhất nếu chưa có
+        setRawResult(raw.result);
+      } catch (err) {
+        console.error("Failed to load monthly stress:", err);
       }
-
-      setRawResult(raw.result);
     };
 
     loadData();
-  }, []);
+  }, [refreshSignal]);
 
   useEffect(() => {
     if (!selectedMonth || rawResult.length === 0) return;
@@ -75,9 +77,18 @@ export default function StressChart() {
   }, [selectedMonth, rawResult]);
 
   const getMonthDisplayName = (key) => {
+    if (!key) return "Không xác định";
     const [year, month] = key.split("-");
     return `Tháng ${parseInt(month)}`;
   };
+
+  if (!selectedMonth) {
+    return (
+      <div className="text-center py-10 text-gray-500 text-sm">
+        Không có dữ liệu stress theo tháng để hiển thị.
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-4 rounded-lg shadow w-full max-w-6xl mx-auto">
@@ -97,11 +108,12 @@ export default function StressChart() {
           ))}
         </select>
       </div>
+
       <ResponsiveContainer width="100%" height={400}>
         <BarChart
           data={chartData}
           barCategoryGap={4}
-          margin={{ top: 40, right: 30, left: 50, bottom: 60 }}
+          margin={{ top: 40, right: 30, left: 60, bottom: 60 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date">
@@ -114,10 +126,15 @@ export default function StressChart() {
           </XAxis>
           <YAxis domain={[0, 100]}>
             <Label
-              value="Điểm Trung Bình Stress"
+              value="Điểm trung bình stress"
+              angle={0}
               position="top"
-              offset={10}
-              style={{ fill: "#4b5563", fontSize: 12 }}
+              offset={-40}
+              style={{
+                fill: "#4b5563",
+                fontSize: 12,
+                textAnchor: "start",
+              }}
             />
           </YAxis>
           <Tooltip

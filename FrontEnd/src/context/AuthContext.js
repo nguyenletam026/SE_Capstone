@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { getToken, setToken, removeToken } from "../services/localStorageService";
+// 📁 context/AuthContext.jsx
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { getToken, removeToken, setToken } from "../services/localStorageService";
+import { fetchUserInfo } from "../lib/user/info"; // 👈 Thêm dòng này
 
 const AuthContext = createContext();
 
@@ -9,29 +11,43 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = getToken();
-    if (token) {
+    const initializeAuth = async () => {
+      const token = getToken();
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const decoded = jwtDecode(token);
+        const scope = decoded.scope;
+        const email = decoded.sub;
+
+        // 🔁 Gọi API /myInfo để lấy id + avatar + tên
+        const infoRes = await fetchUserInfo(); // 👈 Lấy từ API
+        const { id, username, firstName, lastName, avtUrl } = infoRes.result;
+
         setUser({
-          username: decoded.sub,
-          role: decoded.scope || decoded.roles || decoded.role || [],
+          id,
+          email: username,
+          name: `${firstName} ${lastName}`,
+          avatar: avtUrl,
+          role: scope,
         });
-      } catch (error) {
-        console.error("Invalid token", error);
+      } catch (err) {
+        console.error("Auth init failed:", err);
         removeToken();
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
-  }, []); // ✅ Chỉ chạy một lần khi app khởi động
+    };
+
+    initializeAuth();
+  }, []);
 
   const login = (token) => {
     setToken(token);
-    const decoded = jwtDecode(token);
-    setUser({
-      username: decoded.sub,
-      role: decoded.scope || decoded.roles || decoded.role || [],
-    });
+    window.location.reload(); // Reload để chạy lại `useEffect` và fetch myInfo
   };
 
   const logout = () => {
@@ -40,7 +56,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

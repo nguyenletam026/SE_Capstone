@@ -13,6 +13,13 @@ import ForgotPassword from "../page/authPage/forgotPasswordPage";
 // User Pages
 import UserLayout from "../components/layouts/userLayout";
 import Home from "../page/userPage/Home";
+import StartAssessment from "../page/userPage/userStartAssessment";
+import UserHealthAssessment from "../page/userPage/userHealthAssessment";
+import AssessmentResult from "../page/userPage/userAssessmentResult";
+import ChatWithDoctor from "../page/userPage/userChatWithDoctor";
+import Recommendation from "../page/userPage/userRecommendation";
+import UserContactDoctor from "../page/userPage/userContactDoctor";
+import UserChatDoctor from "../page/userPage/userChatDoctor";
 
 // Admin Pages
 import AdminLayout from "../components/layouts/adminLayout";
@@ -21,7 +28,9 @@ import AdminManageRole from "../page/adminPage/adminManageRole";
 import AdminManageUser from "../page/adminPage/adminManageUser";
 
 // Doctor Pages
-import DoctorLandingPage from "../page/doctorPage/doctorHome";
+import DoctorLayout from "../components/layouts/doctorLayout";
+import DoctorHome from "../page/doctorPage/doctorHome";
+import DoctorChatPage from "../page/doctorPage/doctorChatPage";
 
 const AppRoutes = () => {
   return (
@@ -40,6 +49,14 @@ const AppRoutes = () => {
           {/* Route User */}
           <Route element={<ProtectedRoute allowedRoles={["ROLE_USER"]} />}>
             <Route path="/home" element={<UserLayout><Home /></UserLayout>} />
+            <Route path="/daily" element={<UserLayout><StartAssessment /></UserLayout>} />
+            <Route path="/assessment/step" element={<UserLayout><UserHealthAssessment /></UserLayout>} />
+            <Route path="/assessment/result" element={<UserLayout><AssessmentResult /></UserLayout>} />
+            <Route path="/assessment/recommend" element={<UserLayout><Recommendation /></UserLayout>} />
+            <Route path="/assessment/recommend" element={<UserLayout><Recommendation /></UserLayout>} />
+            <Route path="/contact-doctor/:id" element={<UserLayout><UserContactDoctor /></UserLayout>} />
+            <Route path="/chatroom" element={<UserLayout><UserChatDoctor /></UserLayout>} />
+
           </Route>
 
           {/* Route Admin */}
@@ -50,7 +67,11 @@ const AppRoutes = () => {
           </Route>
 
           {/* Route Doctor */}
-          <Route path="/doctorHomePage" element={<DoctorLandingPage/> } /> 
+          <Route element={<ProtectedRoute allowedRoles={["ROLE_DOCTOR"]} />}>
+            <Route path="/doctor-home" element={<DoctorLayout><DoctorHome /></DoctorLayout>} />
+            <Route path="/doctor-chat" element={<DoctorLayout><DoctorChatPage /></DoctorLayout>} />
+          </Route>
+            
           {/* Dang phat trien */}
         </Routes>
       </Router>

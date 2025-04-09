@@ -3,7 +3,7 @@ import { getDailyStress } from "../../lib/user/stressServices";
 import WebcamCapture from "../utils/WebcamCapture";
 import Bot from "../../assets/4.png";
 
-export default function StressHomeSection() {
+export default function StressHomeSection({ onRefreshCharts }) {
   const [bgColor, setBgColor] = useState("#9BB168");
   const [showWebcam, setShowWebcam] = useState(false);
   const [stressLevel, setStressLevel] = useState(null);
@@ -12,19 +12,30 @@ export default function StressHomeSection() {
   const refreshDailyStress = async () => {
     const data = await getDailyStress();
     if (data.code === 1000) {
-      const todayDate = new Date().toISOString().split("T")[0];
-      const todayData = data.result.find(item => item.start_date.startsWith(todayDate));
+      const now = new Date();
 
-      if (todayData && todayData.stress_analyses?.length) {
-        const now = new Date();
-        let closestEntry = todayData.stress_analyses[0];
-        let smallestDiff = Math.abs(new Date(closestEntry.createdAt) - now);
+      // Tìm dữ liệu có end_date gần nhất với thời điểm hiện tại
+      let closestItem = null;
+      let smallestDiff = Infinity;
 
-        todayData.stress_analyses.forEach(entry => {
+      for (const item of data.result) {
+        const endDate = new Date(item.end_date);
+        const diff = Math.abs(endDate - now);
+        if (diff < smallestDiff) {
+          smallestDiff = diff;
+          closestItem = item;
+        }
+      }
+
+      if (closestItem && closestItem.stress_analyses?.length) {
+        let closestEntry = closestItem.stress_analyses[0];
+        let smallestCreatedDiff = Math.abs(new Date(closestEntry.createdAt) - now);
+
+        closestItem.stress_analyses.forEach(entry => {
           const diff = Math.abs(new Date(entry.createdAt) - now);
-          if (diff < smallestDiff) {
+          if (diff < smallestCreatedDiff) {
             closestEntry = entry;
-            smallestDiff = diff;
+            smallestCreatedDiff = diff;
           }
         });
 
@@ -70,6 +81,7 @@ export default function StressHomeSection() {
               onResult={() => {
                 refreshDailyStress();
                 setShowWebcam(false);
+                onRefreshCharts();
               }}
             />
             <button

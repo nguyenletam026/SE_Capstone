@@ -1,10 +1,11 @@
+// 📁 page/authPage/Login.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getToken, setToken } from "../../services/localStorageService";
+import { getToken } from "../../services/localStorageService";
 import { FaEnvelope, FaLock, FaGoogle, FaCamera } from "react-icons/fa";
 import loginImage from "../../assets/1.png";
 import { Link } from "react-router-dom";
-import { handleLogin, handleContinueWithGoogle } from "../../lib/auth/authServices"; // Import hàm từ authService.js
+import { handleLogin, handleContinueWithGoogle } from "../../lib/auth/authServices";
 import { useAuth } from "../../context/AuthContext";
 import { jwtDecode } from "jwt-decode";
 import FaceLogin from "../../components/FaceLogin";
@@ -14,56 +15,49 @@ export default function Login() {
   const { login } = useAuth();
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [loginMethod, setLoginMethod] = useState("password"); // "password" or "face"
+  const [loginMethod, setLoginMethod] = useState("password");
 
   useEffect(() => {
     const token = getToken();
     if (token) {
-      navigate("/login");
+      const decoded = jwtDecode(token);
+      if (decoded.scope === "ROLE_ADMIN") navigate("/admin-dashboard");
+      else if (decoded.scope === "ROLE_DOCTOR") navigate("/doctor-home");
+      else navigate("/home");
     }
   }, []);
-  
-  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const token = await handleLogin(username, password);
     if (token) {
-      login(token); // Gọi hàm login từ AuthContext
+      login(token); // cập nhật context
       const decoded = jwtDecode(token);
       if (decoded.scope === "ROLE_ADMIN") {
         navigate("/admin-dashboard");
+      } else if (decoded.scope === "ROLE_DOCTOR") {
+        navigate("/doctor-home");
       } else {
         navigate("/home");
       }
     }
   };
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   await handleLogin(username, password, login, navigate);
-  // };
 
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Left Side - Form */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10">
         <div className="max-w-md w-full">
-          <h1 className="text-3xl font-bold text-center mb-2">
-            Student Stress Helper ✨
-          </h1>
+          <h1 className="text-3xl font-bold text-center mb-2">Student Stress Helper ✨</h1>
           <p className="text-center text-gray-500 mb-6">
-            Empowering students, reducing stress, and unlocking potential – Your
-            journey to a healthier mind starts here!
+            Empowering students, reducing stress, and unlocking potential – Your journey to a healthier mind starts here!
           </p>
 
-          {/* Login Method Toggle */}
           <div className="flex justify-center space-x-4 mb-6">
             <button
               onClick={() => setLoginMethod("password")}
               className={`flex items-center px-4 py-2 rounded-lg transition ${
-                loginMethod === "password"
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-600"
+                loginMethod === "password" ? "bg-black text-white" : "bg-gray-100 text-gray-600"
               }`}
             >
               <FaLock className="mr-2" />
@@ -72,9 +66,7 @@ export default function Login() {
             <button
               onClick={() => setLoginMethod("face")}
               className={`flex items-center px-4 py-2 rounded-lg transition ${
-                loginMethod === "face"
-                  ? "bg-black text-white"
-                  : "bg-gray-100 text-gray-600"
+                loginMethod === "face" ? "bg-black text-white" : "bg-gray-100 text-gray-600"
               }`}
             >
               <FaCamera className="mr-2" />
@@ -84,7 +76,6 @@ export default function Login() {
 
           {loginMethod === "password" ? (
             <form className="space-y-4" onSubmit={handleSubmit}>
-              {/* Email */}
               <div className="relative">
                 <input
                   type="username"
@@ -96,7 +87,6 @@ export default function Login() {
                 <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
 
-              {/* Password */}
               <div className="relative">
                 <input
                   type="password"
@@ -108,17 +98,12 @@ export default function Login() {
                 <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
 
-              {/* Login button */}
-              <button
-                type="submit"
-                className="w-full bg-black text-white p-3 rounded-lg hover:bg-gray-900 transition"
-              >
+              <button type="submit" className="w-full bg-black text-white p-3 rounded-lg hover:bg-gray-900 transition">
                 Log in
               </button>
             </form>
           ) : (
             <div className="space-y-4">
-              {/* Email for Face Login */}
               <div className="relative">
                 <input
                   type="username"
@@ -129,19 +114,16 @@ export default function Login() {
                 />
                 <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
-
               <FaceLogin username={username} />
             </div>
           )}
 
-          {/* OR Separator */}
           <div className="my-4 flex items-center">
             <hr className="flex-grow border-gray-300" />
             <span className="px-2 text-gray-500">OR</span>
             <hr className="flex-grow border-gray-300" />
           </div>
 
-          {/* Google Login */}
           <button
             onClick={handleContinueWithGoogle}
             className="w-full flex items-center justify-center gap-2 border border-gray-300 text-black p-3 rounded-lg hover:bg-gray-100 transition"
@@ -150,7 +132,6 @@ export default function Login() {
             Log in with Google
           </button>
 
-          {/* Đổi vị trí link */}
           <p className="text-center text-gray-500 mt-4">
             Don't have an account?{" "}
             <Link to="/signup" className="text-blue-600 hover:underline">
@@ -170,9 +151,7 @@ export default function Login() {
           />
           <div className="absolute bottom-6 left-6 text-white">
             <p className="text-lg font-semibold">
-              "The Student Stress Helper Platform transformed the way I manage
-              stress. Thanks to its guidance, I now navigate my studies with
-              confidence and a healthier mindset."
+              "The Student Stress Helper Platform transformed the way I manage stress. Thanks to its guidance, I now navigate my studies with confidence and a healthier mindset."
             </p>
             <p className="mt-2 text-sm">Nguyễn Minh An</p>
             <p className="text-sm opacity-75">Student - High School Senior</p>

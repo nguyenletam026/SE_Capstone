@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "../../services/localStorageService";
 import StressChart from "../../components/stress/stressChart";
+import StressChartsCombined from "../../components/stress/stressChartsCombined";
 import StressHomeSection from "../../components/stress/StressHomeSection";
 import Daily from "../../assets/5.png";
 import Rain from "../../assets/6.png";
@@ -12,6 +13,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshCharts, setRefreshCharts] = useState(0);
 
   useEffect(() => {
     const accessToken = getToken();
@@ -46,14 +48,18 @@ export default function Home() {
   return (
     <div className="text-gray-800">
       {/* Section 1 - Greeting */}
-      <StressHomeSection />
+      <StressHomeSection onRefreshCharts={() => setRefreshCharts(prev => prev + 1)} />
 
-      {/* Section 2 - Chart */}
+      {/* Section 2 - Today + Weekly Chart */}
+      <StressChartsCombined refreshSignal={refreshCharts} />
+
+
+      {/* Section 3 - Monthly Chart */}
       <div className="mt-10 px-6">
-        <StressChart />
+        <StressChart key={refreshCharts} />
       </div>
 
-      {/* Section 3 - Tips */}
+      {/* Section 4 - Tips */}
       <div className="mt-10 px-6">
         <h2 className="text-2xl font-bold mb-6">Các Biện Pháp Giảm Stress</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

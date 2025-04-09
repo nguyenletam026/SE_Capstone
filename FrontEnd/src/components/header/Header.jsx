@@ -44,7 +44,7 @@ export default function Header() {
       <nav className="flex-1">
         <ul className="flex justify-center space-x-6 text-sm font-semibold text-gray-700">
           <li><Link to="/about" className="hover:text-green-600">Về Chúng Tôi</Link></li>
-          <li><Link to="/store" className="hover:text-green-600">Store</Link></li>
+          <li><Link to="/daily" className="hover:text-green-600">Daily Assessment</Link></li>
           <li><Link to="/transactions" className="hover:text-green-600">Xem Giao Dịch</Link></li>
           <li><Link to="/chatroom" className="hover:text-green-600">ChatRoom</Link></li>
           <li><Link to="/plans" className="hover:text-green-600">Gói</Link></li>

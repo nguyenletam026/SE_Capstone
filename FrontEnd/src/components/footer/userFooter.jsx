@@ -14,7 +14,7 @@ const Footer = () => {
     <footer>
       {/* Subscription Section */}
       <div
-        className="grid grid-cols-3 items-center bg-[#9BB168] py-8 px-2"
+        className="grid grid-cols-3 items-center bg-white py-8 px-2 border-black border-t-2"
         style={{ fontFamily: "Jomolhari" }}
       >
         {/* Left Section */}
@@ -56,7 +56,7 @@ const Footer = () => {
       </div>
 
       {/* Main Footer Content */}
-      <div className="grid grid-cols-12 gap-4 bg-[#9BB168] py-8 px-4" style={{ fontFamily: "Jomolhari" }}>
+      <div className="grid grid-cols-12 gap-4 bg-white py-8 px-4" style={{ fontFamily: "Jomolhari" }}>
         {/* About Us Section */}
         <div className="col-span-6 text-left">
           <h2 className="text-[#9e645b] text-lg font-semibold">
@@ -141,7 +141,7 @@ const Footer = () => {
       </div>
 
       {/* Copyright Section */}
-      <div className="bg-[#9BB168] py-4 border-t-2 border-[#9e645b]">
+      <div className="bg-white py-4 border-t-2 border-[#9e645b]">
         <div className="text-center text-[#9e645b] text-sm" style={{ fontFamily: "Jomolhari" }}>
           © {new Date().getFullYear()} Recipe Haven. All rights reserved.
         </div>
