@@ -59,6 +59,15 @@ public class MusicRecommendService {
     @Value("${stress.normal.threshold:10}")
     private double normalStressThreshold;
 
+    public List<RecommendationResponse> getAllMusicRecommendations() {
+        List<MusicRecommend> musicRecommends = musicRecommendRepository.findAll();
+        return musicRecommends.stream()
+                .map(music -> RecommendationResponse.builder()
+                        .recommendName(music.getMusicName())
+                        .recommendUrl(music.getMusicUrl())
+                        .build())
+                .toList();
+    }
 
     public MusicRecommend uploadMusicForStressLevel(MultipartFile musicFile, String musicName, String stressLevel) throws IOException {
         User currentUser = getCurrentUser();

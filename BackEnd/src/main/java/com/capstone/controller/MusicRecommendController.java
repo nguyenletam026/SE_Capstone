@@ -43,4 +43,12 @@ public class MusicRecommendController {
                 .result(response)
                 .build();
     }
+    @GetMapping("/get-all-music-recommend")
+    @Operation(summary = "Get all music recommendations")
+    public ApiResponse<List<RecommendationResponse>> getAllRecommendations() {
+        List<RecommendationResponse> response = musicRecommendService.getAllMusicRecommendations();
+        return ApiResponse.<List<RecommendationResponse>>builder()
+                .result(response)
+                .build();
+    }
 } 
