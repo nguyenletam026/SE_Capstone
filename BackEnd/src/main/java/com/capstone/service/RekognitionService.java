@@ -1,5 +1,7 @@
 package com.capstone.service;
 
+import com.capstone.dto.response.DailyStressReportResponse;
+import com.capstone.dto.response.StressAnalysisResponse;
 import com.capstone.entity.StressAnalysis;
 import com.capstone.entity.User;
 import com.capstone.entity.WeeklyStressReport;
@@ -9,7 +11,6 @@ import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.repository.StressAnalysisRepository;
 import com.capstone.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +28,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
 
 @Slf4j
 @Service
@@ -344,5 +348,144 @@ public class RekognitionService {
                             cal.get(Calendar.YEAR));
                     }
                 ));
+    }
+    
+    public DailyStressReportResponse getStressBySpecificDate(String dateStr) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = dateFormat.parse(dateStr);
+            
+            // Set start time to beginning of day (00:00:00)
+            Calendar calStart = Calendar.getInstance();
+            calStart.setTime(date);
+            calStart.set(Calendar.HOUR_OF_DAY, 0);
+            calStart.set(Calendar.MINUTE, 0);
+            calStart.set(Calendar.SECOND, 0);
+            calStart.set(Calendar.MILLISECOND, 0);
+            Date startDate = calStart.getTime();
+            
+            // Set end time to end of day (23:59:59)
+            Calendar calEnd = Calendar.getInstance();
+            calEnd.setTime(date);
+            calEnd.set(Calendar.HOUR_OF_DAY, 23);
+            calEnd.set(Calendar.MINUTE, 59);
+            calEnd.set(Calendar.SECOND, 59);
+            calEnd.set(Calendar.MILLISECOND, 999);
+            Date endDate = calEnd.getTime();
+            
+            // Get stress analyses for the specified date
+            List<StressAnalysis> analyses = stressAnalysisRepository.findByUserAndCreatedAtBetween(user, startDate, endDate);
+            
+            if (analyses.isEmpty()) {
+                return DailyStressReportResponse.builder()
+                        .average_stress_score(0.0)
+                        .dominant_stress_level("No Data")
+                        .start_date(startDate)
+                        .end_date(endDate)
+                        .total_analyses(0)
+                        .stress_analyses(Collections.emptyList())
+                        .build();
+            }
+            
+            // Calculate average stress score
+            double avgScore = analyses.stream()
+                    .mapToDouble(StressAnalysis::getStressScore)
+                    .average()
+                    .orElse(0.0);
+            
+            // Determine dominant stress level
+            String dominantLevel = mapStressScoreToLevel(avgScore);
+            
+            // Map to response objects
+            List<StressAnalysisResponse> analysisResponses = analyses.stream()
+                    .map(analysis -> StressAnalysisResponse.builder()
+                            .id(analysis.getId())
+                            .stressScore(analysis.getStressScore())
+                            .stressLevel(analysis.getStressLevel())
+                            .createdAt(analysis.getCreatedAt())
+                            .build())
+                    .collect(Collectors.toList());
+            
+            // Build and return the response
+            return DailyStressReportResponse.builder()
+                    .average_stress_score(avgScore)
+                    .dominant_stress_level(dominantLevel)
+                    .start_date(startDate)
+                    .end_date(endDate)
+                    .total_analyses(analyses.size())
+                    .stress_analyses(analysisResponses)
+                    .build();
+            
+        } catch (ParseException e) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+    }
+
+    public DailyStressReportResponse getStressForToday() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        
+        // Get today's date
+        Calendar today = Calendar.getInstance();
+        
+        // Set start time to beginning of today (00:00:00)
+        Calendar calStart = Calendar.getInstance();
+        calStart.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        calStart.set(Calendar.MILLISECOND, 0);
+        Date startDate = calStart.getTime();
+        
+        // Set end time to end of today (23:59:59)
+        Calendar calEnd = Calendar.getInstance();
+        calEnd.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        calEnd.set(Calendar.MILLISECOND, 999);
+        Date endDate = calEnd.getTime();
+        
+        // Get stress analyses for today
+        List<StressAnalysis> analyses = stressAnalysisRepository.findByUserAndCreatedAtBetween(user, startDate, endDate);
+        
+        if (analyses.isEmpty()) {
+            return DailyStressReportResponse.builder()
+                    .average_stress_score(0.0)
+                    .dominant_stress_level("No Data")
+                    .start_date(startDate)
+                    .end_date(endDate)
+                    .total_analyses(0)
+                    .stress_analyses(Collections.emptyList())
+                    .build();
+        }
+        
+        // Calculate average stress score
+        double avgScore = analyses.stream()
+                .mapToDouble(StressAnalysis::getStressScore)
+                .average()
+                .orElse(0.0);
+        
+        // Determine dominant stress level
+        String dominantLevel = mapStressScoreToLevel(avgScore);
+        
+        // Map to response objects
+        List<StressAnalysisResponse> analysisResponses = analyses.stream()
+                .map(analysis -> StressAnalysisResponse.builder()
+                        .id(analysis.getId())
+                        .stressScore(analysis.getStressScore())
+                        .stressLevel(analysis.getStressLevel())
+                        .createdAt(analysis.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+        
+        // Build and return the response
+        return DailyStressReportResponse.builder()
+                .average_stress_score(avgScore)
+                .dominant_stress_level(dominantLevel)
+                .start_date(startDate)
+                .end_date(endDate)
+                .total_analyses(analyses.size())
+                .stress_analyses(analysisResponses)
+                .build();
     }
 }

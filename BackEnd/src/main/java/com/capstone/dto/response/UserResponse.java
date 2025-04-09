@@ -17,5 +17,6 @@ public class UserResponse {
     String lastName;
     Date birthdayDate;
     RoleResponse role;
+    String avtUrl;
 
 }

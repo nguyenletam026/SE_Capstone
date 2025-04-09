@@ -31,6 +31,7 @@ public class StressController {
     private final RekognitionService rekognitionService;
     private final StressTrendService stressTrendService;
 
+
     @Operation(
             summary = "Analyze stress from facial image",
             description = "Uploads an image file and analyzes the user's stress level."
@@ -161,12 +162,8 @@ public class StressController {
                 .build();
     }
 
-    @Operation(
-            summary = "Get stress analysis results by day",
-            description = "Fetches the user's stress analysis results grouped by day."
-    )
     @GetMapping("/daily")
-    public ApiResponse<List<DailyStressReportResponse>> getStressByDay() {
+    public ApiResponse<List<DailyStressReportResponse>> getStressDaily() {
         Map<String, List<StressAnalysis>> dailyGroups = rekognitionService.getStressByDay();
         List<DailyStressReportResponse> dailyResults = dailyGroups.values().stream()
                 .map(analyses -> {
@@ -215,6 +212,19 @@ public class StressController {
         return ApiResponse.<StressTrendResponse>builder()
                 .message("Stress trend analysis completed")
                 .result(trendAnalysis)
+                .build();
+    }
+
+    @Operation(
+            summary = "Get stress analysis for today",
+            description = "Fetches the user's stress analysis results for today."
+    )
+    @GetMapping("/today")
+    public ApiResponse<DailyStressReportResponse> getStressForToday() {
+        DailyStressReportResponse report = rekognitionService.getStressForToday();
+        return ApiResponse.<DailyStressReportResponse>builder()
+                .message("Today's stress analysis retrieved")
+                .result(report)
                 .build();
     }
 }

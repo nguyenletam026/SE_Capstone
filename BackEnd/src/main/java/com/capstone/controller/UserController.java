@@ -11,6 +11,7 @@ import com.capstone.repository.UserRepository;
 import com.capstone.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,9 +27,9 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<String> createUser(@RequestPart("request") UserCreationRequest request,
-                                   @RequestPart(value = "avtFile", required = true) MultipartFile avtFile) throws IOException {
+                                   @RequestPart(value = "avtFile", required = false) MultipartFile avtFile) throws IOException {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
         userService.createUser(request, avtFile);
