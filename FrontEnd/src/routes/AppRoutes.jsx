@@ -8,6 +8,7 @@ import LandingPage from "../page/authPage/landingPage";
 import Login from "../page/authPage/Login";
 import Authenticate from "../page/authPage/Authenticate";
 import ForgotPassword from "../page/authPage/forgotPasswordPage";
+import SignUp from "../page/authPage/SignUp";
 
 
 // User Pages
@@ -41,6 +42,7 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/authenticate" element={<Authenticate />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/signup" element={<SignUp />} />
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
           {/* Redirect nếu truy cập "/" mà chưa đăng nhập */}
