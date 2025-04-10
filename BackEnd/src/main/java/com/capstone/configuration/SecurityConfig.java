@@ -34,6 +34,7 @@ public class SecurityConfig {
             "/swagger-ui/**", "/v3/api-docs/**",
             "/auth/outbound/**",
             "users","https://deploy-se.onrender.com/**",
+            "/api/users",
             "/auth-face",
             "/ws/**",
     };
