@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StressAnalyzerClient", "StressAnalyzerClient\StressAnalyzerClient.csproj", "{B97A3FB5-9A9B-4F4D-90D1-6BE470C02EAE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B97A3FB5-9A9B-4F4D-90D1-6BE470C02EAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B97A3FB5-9A9B-4F4D-90D1-6BE470C02EAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B97A3FB5-9A9B-4F4D-90D1-6BE470C02EAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B97A3FB5-9A9B-4F4D-90D1-6BE470C02EAE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {361D9175-ABF9-4F77-95E6-343F24448E31}
+	EndGlobalSection
+EndGlobal
