@@ -146,7 +146,7 @@ public class ClassRoomController {
         
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
-    
+
     @GetMapping("/all-students-stress")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<ApiResponse> getAllStudentsStressData(Principal principal) {

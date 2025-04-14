@@ -152,4 +152,28 @@ public class DoctorScheduleController {
                 .result(doctorResponses)
                 .build());
     }
-} 
+
+    @GetMapping("/current/doctors/available-slots")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getDoctorsWithAvailableSlots() {
+        System.out.println("Controller: Getting doctors with available appointment slots");
+        
+        // Use server's current date and time
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = LocalTime.now();
+        
+        System.out.println("Server current date: " + currentDate + ", current time: " + currentTime);
+        
+        // Get doctors with available slots at the current server time
+        List<User> doctors = doctorScheduleService.getDoctorsWithAvailableSlots(currentDate, currentTime);
+        
+        System.out.println("Controller: Found " + doctors.size() + " doctors with available slots now");
+        
+        List<UserResponse> doctorResponses = doctors.stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(ApiResponse.<List<UserResponse>>builder()
+                .result(doctorResponses)
+                .build());
+    }
+}
