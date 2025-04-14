@@ -1,29 +1,20 @@
-// import React from "react";
-import { CiMail } from "react-icons/ci";
-import { CiFacebook } from "react-icons/ci";
+import { CiMail, CiFacebook } from "react-icons/ci";
 import { AiFillTwitterCircle } from "react-icons/ai";
-import { FaInstagram } from "react-icons/fa";
-import { FaYoutube } from "react-icons/fa";
-import { FaGoogle } from "react-icons/fa";
-import { FaMapMarkerAlt } from "react-icons/fa";
-import { FaPhoneAlt } from "react-icons/fa";
+import { FaInstagram, FaYoutube, FaGoogle, FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa";
 import { GoMail } from "react-icons/go";
 
 const Footer = () => {
   return (
     <footer>
       {/* Subscription Section */}
-      <div
-        className="grid grid-cols-3 items-center bg-white py-8 px-2 border-black border-t-2"
-        style={{ fontFamily: "Jomolhari" }}
-      >
+      <div className="grid grid-cols-3 items-center bg-white py-8 px-2 border-black border-t-2" style={{ fontFamily: "Jomolhari" }}>
         {/* Left Section */}
         <div className="text-left">
           <h2 className="text-[#9e645b] text-lg font-semibold">
-            Get the Latest Recipes and Tips
+            Nhận thông tin hỗ trợ mới nhất
           </h2>
           <p className="text-[#9e645b] text-sm">
-            Sign up for our newsletter to receive delicious recipes, cooking tips, and updates directly to your inbox!
+            Đăng ký nhận bản tin để nhận các lời khuyên sức khỏe tinh thần và cập nhật từ đội ngũ tư vấn của chúng tôi.
           </p>
         </div>
 
@@ -32,18 +23,18 @@ const Footer = () => {
           <CiMail className="text-xl text-[#9e645b]" />
           <input
             type="email"
-            placeholder="Enter your Email"
+            placeholder="Nhập Email của bạn"
             className="border border-[#9e645b] px-2 py-1 rounded-lg text-[#9e645b] focus:outline-none"
           />
           <button className="bg-[#9e645b] text-white px-4 py-1 rounded-lg">
-            SIGN UP
+            ĐĂNG KÝ
           </button>
         </div>
 
         {/* Right Section */}
         <div className="flex flex-col items-end justify-center">
           <h2 className="text-[#9e645b] text-lg font-semibold mb-2">
-            Connect with Us
+            Kết nối với chúng tôi
           </h2>
           <div className="flex justify-end space-x-4">
             <CiFacebook className="text-3xl text-[#9e645b] hover:text-[#d18b82] cursor-pointer" />
@@ -60,90 +51,58 @@ const Footer = () => {
         {/* About Us Section */}
         <div className="col-span-6 text-left">
           <h2 className="text-[#9e645b] text-lg font-semibold">
-            About Recipe Haven
+            Về Student Stress Helper
           </h2>
           <p className="text-[#9e645b] text-sm">
-            Recipe Haven is your go-to source for delicious, easy-to-follow recipes. Whether you`re a home cook or a culinary enthusiast, we`re here to inspire your next meal.
+            Student Stress Helper là nền tảng chăm sóc sức khỏe tinh thần dành cho học sinh, sinh viên. Chúng tôi mang đến các gói tư vấn chuyên sâu, giúp bạn giảm stress và sống tích cực hơn.
           </p>
           <div className="mt-4 space-y-2">
             <p className="flex items-center text-[#9e645b]">
-              <FaMapMarkerAlt className="mr-2" /> 123 Cooking Street, Flavor Town, USA
+              <FaMapMarkerAlt className="mr-2" /> 123 Đường Sức Khỏe, Quận Tư Duy, TP Hạnh Phúc
             </p>
             <p className="flex items-center text-[#9e645b]">
-              <FaPhoneAlt className="mr-2" /> 1-800-RECIPE
+              <FaPhoneAlt className="mr-2" /> 1900-123-456
             </p>
             <p className="flex items-center text-[#9e645b]">
-              <GoMail className="mr-2" /> support@recipehaven.com
+              <GoMail className="mr-2" /> support@studentstresshelper.vn
             </p>
           </div>
         </div>
 
         {/* Quick Links Section */}
         <div className="col-span-2 text-left">
-          <h2 className="text-[#9e645b] text-lg font-semibold">Quick Links</h2>
+          <h2 className="text-[#9e645b] text-lg font-semibold">Liên kết nhanh</h2>
           <ul className="text-[#9e645b] text-sm space-y-1 list-disc list-inside">
-            <li>
-              <a href="/recipes" className="hover:underline">
-                Recipes
-              </a>
-            </li>
-            <li>
-              <a href="/tips" className="hover:underline">
-                Cooking Tips
-              </a>
-            </li>
-            <li>
-              <a href="/about" className="hover:underline">
-                About Us
-              </a>
-            </li>
-            <li>
-              <a href="/contact" className="hover:underline">
-                Contact Us
-              </a>
-            </li>
+            <li><a href="/about" className="hover:underline">Về Chúng Tôi</a></li>
+            <li><a href="/packages" className="hover:underline">Gói Dịch Vụ</a></li>
+            <li><a href="/counselors" className="hover:underline">Tư Vấn Viên</a></li>
+            <li><a href="/contact" className="hover:underline">Liên Hệ</a></li>
           </ul>
         </div>
 
         {/* Policy Section */}
         <div className="col-span-2 text-left">
-          <h2 className="text-[#9e645b] text-lg font-semibold">Policy</h2>
+          <h2 className="text-[#9e645b] text-lg font-semibold">Chính sách</h2>
           <ul className="text-[#9e645b] text-sm space-y-1 list-disc list-inside">
-            <li>
-              <a href="/privacy-policy" className="hover:underline">
-                Privacy Policy
-              </a>
-            </li>
-            <li>
-              <a href="/terms-of-service" className="hover:underline">
-                Terms of Service
-              </a>
-            </li>
+            <li><a href="/privacy-policy" className="hover:underline">Chính sách bảo mật</a></li>
+            <li><a href="/terms" className="hover:underline">Điều khoản sử dụng</a></li>
           </ul>
         </div>
 
-        {/* Customer Support Section */}
+        {/* Support Section */}
         <div className="col-span-2 text-left">
-          <h2 className="text-[#9e645b] text-lg font-semibold">Customer Support</h2>
+          <h2 className="text-[#9e645b] text-lg font-semibold">Hỗ trợ</h2>
           <ul className="text-[#9e645b] text-sm space-y-1 list-disc list-inside">
-            <li>
-              <a href="/faq" className="hover:underline">
-                FAQ
-              </a>
-            </li>
-            <li>
-              <a href="/support" className="hover:underline">
-                Support
-              </a>
-            </li>
+            <li><a href="/faq" className="hover:underline">Câu hỏi thường gặp</a></li>
+            <li><a href="/support" className="hover:underline">Trung tâm hỗ trợ</a></li>
           </ul>
         </div>
       </div>
 
-      {/* Copyright Section */}
+      {/* Copyright */}
       <div className="bg-white py-4 border-t-2 border-[#9e645b]">
         <div className="text-center text-[#9e645b] text-sm" style={{ fontFamily: "Jomolhari" }}>
-          © {new Date().getFullYear()} Recipe Haven. All rights reserved.
+          © {new Date().getFullYear()} Student Stress Helper. Bản quyền được bảo hộ.
         </div>
       </div>
     </footer>

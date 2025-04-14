@@ -21,6 +21,7 @@ import ChatWithDoctor from "../page/userPage/userChatWithDoctor";
 import Recommendation from "../page/userPage/userRecommendation";
 import UserContactDoctor from "../page/userPage/userContactDoctor";
 import UserChatDoctor from "../page/userPage/userChatDoctor";
+import ApplyDoctor from "../page/userPage/userApplyDoctor";
 
 // Admin Pages
 import AdminLayout from "../components/layouts/adminLayout";
@@ -59,7 +60,7 @@ const AppRoutes = () => {
             <Route path="/assessment/recommend" element={<UserLayout><Recommendation /></UserLayout>} />
             <Route path="/contact-doctor/:id" element={<UserLayout><UserContactDoctor /></UserLayout>} />
             <Route path="/chatroom" element={<UserLayout><UserChatDoctor /></UserLayout>} />
-
+            <Route path="/apply-doctor" element={<UserLayout><ApplyDoctor /></UserLayout>} />
           </Route>
 
           {/* Route Admin */}

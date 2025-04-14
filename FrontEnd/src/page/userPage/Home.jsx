@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getToken } from "../../services/localStorageService";
 import StressChart from "../../components/stress/stressChart";
 import StressChartsCombined from "../../components/stress/stressChartsCombined";
@@ -8,6 +8,7 @@ import Daily from "../../assets/5.png";
 import Rain from "../../assets/6.png";
 import Music from "../../assets/7.png";
 import Yoga from "../../assets/8.png";
+import DoctorImg from "../../assets/9.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -99,6 +100,28 @@ export default function Home() {
           <button className="bg-brown-700 hover:bg-brown-800 text-white py-3 px-6 rounded-full">
             Liên Hệ Với Bác Sĩ →
           </button>
+        </div>
+      </div>
+            {/* Section 5 - Doctor Recruitment with Image + Button Layout */}
+            <div className="mt-16 px-6 py-10 bg-green-100 rounded-lg shadow text-center">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="w-full md:w-1/2">
+            <img
+              src={DoctorImg}
+              alt="Doctor Recruitment"
+              className="rounded-lg w-full h-auto object-cover"
+            />
+          </div>
+          <div className="w-full md:w-1/2 text-left">
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">Bạn là chuyên gia tâm lý?</h3>
+            <p className="text-gray-700 mb-5">Hãy tham gia hệ thống để hỗ trợ học sinh vượt qua căng thẳng và áp lực học tập.</p>
+            <Link
+              to="/apply-doctor"
+              className="inline-block bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-full text-sm font-medium"
+            >
+              Gửi Yêu Cầu Trở Thành Bác Sĩ Tư Vấn
+            </Link>
+          </div>
         </div>
       </div>
     </div>
