@@ -51,6 +51,15 @@ public class VideoRecommendService {
     @Value("${stress.normal.threshold:10}")
     private double normalStressThreshold;
 
+    public List<VideoResponse> getAllVideoRecommendations() {
+        List<VideoRecommend> videoRecommends = videoRecommendRepository.findAll();
+        return videoRecommends.stream()
+                .map(video -> VideoResponse.builder()
+                        .videoName(video.getVideoName())
+                        .videoUrl(video.getVideoUrl())
+                        .build())
+                .toList();
+    }
     public VideoRecommend uploadVideoForStressLevel(MultipartFile videoFile, String videoName, String stressLevel) throws IOException {
         User currentUser = getCurrentUser();
         

@@ -56,4 +56,11 @@ public class ChatRequestController {
                 .result(chatRequestService.getAcceptedRequests())
                 .build();
     }
+
+    @GetMapping("/user/accepted")
+    public ApiResponse<List<ChatRequestResponse>> getUserAcceptedRequests() {
+        return ApiResponse.<List<ChatRequestResponse>>builder()
+                .result(chatRequestService.getUserAcceptedRequests())
+                .build();
+    }
 } 

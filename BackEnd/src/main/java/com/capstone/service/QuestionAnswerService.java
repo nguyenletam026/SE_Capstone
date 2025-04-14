@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.time.ZoneId;
 
 @Slf4j
 @Service
@@ -231,12 +230,12 @@ import java.time.ZoneId;
                 .average()
                 .orElse(0.0);
 
-        String overallStressLevel =mapStressScoreToLevel(avgStressScore);
+        String overallStressLevel = mapStressScoreToLevel(avgStressScore);
         long totalQuestions = questionRepository.count();
         boolean isCompleted = dayAnswers.size() >= totalQuestions;
 
         return DailyAnswerSummaryResponse.builder()
-                .date(Date.from(entry.getKey().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+                .date(entry.getKey().atStartOfDay())
                 .averageStressScore(avgStressScore)
                 .overallStressLevel(overallStressLevel)
                 .answers(dayAnswers.stream()

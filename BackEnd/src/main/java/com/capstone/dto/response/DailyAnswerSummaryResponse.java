@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DailyAnswerSummaryResponse {
-    private Date date;
+    private LocalDateTime date;
     private Double averageStressScore;
     private String overallStressLevel;
     private List<AnswerResponse> answers;
