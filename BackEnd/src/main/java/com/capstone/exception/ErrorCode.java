@@ -36,6 +36,9 @@ public enum ErrorCode {
     INVALID_FILE_FORMAT(1023, "Invalid file format", HttpStatus.BAD_REQUEST),
     UPLOAD_FILE_FAILED(1024, "Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
     CCCD_NAME_MISMATCH(1025, "CCCD name mismatch", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_VERIFIED(1026, "User already verified", HttpStatus.BAD_REQUEST),
+    INVALID_VERIFICATION_CODE(1027, "Invalid verification code", HttpStatus.BAD_REQUEST),
+
 
     ;
 

@@ -3,6 +3,7 @@ package com.capstone.service;
 import com.capstone.dto.request.UserChangePasswordRequest;
 import com.capstone.dto.request.UserCreationRequest;
 import com.capstone.dto.request.UserUpdateRequest;
+import com.capstone.dto.request.VerifyUserRequest;
 import com.capstone.dto.response.UserResponse;
 import com.capstone.entity.User;
 import com.capstone.enums.Role;
@@ -30,26 +31,54 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final CloudinaryService cloudinaryService;
+    private final MailService mailService;
 
-    public void createUser(UserCreationRequest request,MultipartFile avtFile) throws IOException {
+    public void createUser(UserCreationRequest request, MultipartFile avtFile) throws IOException {
         if (avtFile == null || avtFile.isEmpty()) {
             throw new AppException(ErrorCode.FILE_NULL);
         }
+
         User user = userMapper.toUser(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         if (!roleRepository.existsById("USER")) {
-            roleRepository.save(com.capstone.entity.Role.builder()
-                    .name("USER")
-                    .build());
+            roleRepository.save(com.capstone.entity.Role.builder().name("USER").build());
         }
+
         com.capstone.entity.Role role = roleRepository.findByName(Role.USER.name())
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         user.setRole(role);
+
+        // tạo mã OTP
+        String verificationCode = String.valueOf((int)(Math.random() * 900000) + 100000);
+        user.setVerificationCode(verificationCode);
+        user.setVerified(false);
+
         userRepository.save(user);
+
         String avtUrl = cloudinaryService.uploadFile(avtFile, user.getId());
         user.setAvtUrl(avtUrl);
+        userRepository.save(user);
 
+        // gửi mail xác nhận
+        mailService.sendVerificationCode(user.getUsername(), user.getFirstName(), verificationCode);
+    }
+
+    public void verifyUser(VerifyUserRequest request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (user.isVerified()) {
+            throw new AppException(ErrorCode.USER_ALREADY_VERIFIED);
+        }
+
+        if (!user.getVerificationCode().equals(request.getCode())) {
+            throw new AppException(ErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        user.setVerified(true);
+        user.setVerificationCode(null); // clear code sau khi xác nhận
         userRepository.save(user);
     }
     public UserResponse getMyInfo(){

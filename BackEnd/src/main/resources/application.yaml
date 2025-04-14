@@ -9,13 +9,23 @@ spring:
     driver-class-name: org.postgresql.Driver
   servlet:
     multipart:
-      max-file-size: 10MB   # Giới hạn file tối đa 10MB
-      max-request-size: 10MB  # Giới hạn tổng request tối đa 10MB
-
+      max-file-size: 10MB
+      max-request-size: 10MB
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nhattienn12902@gmail.com
+    password: cets heit fbsc memo
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
@@ -25,13 +35,12 @@ fptai:
     key: QKIh1IJzqbTmOmt4xaw120eP8c6M0TfN
     url: https://api.fpt.ai/vision/idr/vnm
 
-
 springdoc:
   api-docs:
     enabled: true
   swagger-ui:
     enabled: true
-    path: /swagger-ui.htmlfs fdsfsdf
+    path: /swagger-ui.html
 
 aws:
   region: us-east-1
@@ -39,9 +48,9 @@ aws:
   secret-key: "Wi0iTyCmiSpltTCK6W+/jPTU5CE21dlcOixv6Z6M"
 
 cloudinary:
-    cloud-name: "dpuekoyqz"
-    api-key: "984166367576298"
-    api-secret: "AF5MoSOUXN1uqUhMlTlBcobPJg0"
+  cloud-name: "dpuekoyqz"
+  api-key: "984166367576298"
+  api-secret: "AF5MoSOUXN1uqUhMlTlBcobPJg0"
 
 stress:
   extreme:

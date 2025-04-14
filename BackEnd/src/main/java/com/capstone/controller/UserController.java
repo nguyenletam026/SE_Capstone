@@ -3,6 +3,7 @@ package com.capstone.controller;
 import com.capstone.dto.request.UserChangePasswordRequest;
 import com.capstone.dto.request.UserCreationRequest;
 import com.capstone.dto.request.UserUpdateRequest;
+import com.capstone.dto.request.VerifyUserRequest;
 import com.capstone.dto.response.ApiResponse;
 import com.capstone.dto.response.UserResponse;
 import com.capstone.exception.AppException;
@@ -37,6 +38,15 @@ public class UserController {
                 .result("User create successful")
                 .build();
     }
+
+    @PostMapping("/verify")
+    ApiResponse<String> verifyUser(@RequestBody VerifyUserRequest request) {
+        userService.verifyUser(request);
+        return ApiResponse.<String>builder()
+                .result("Tài khoản đã được xác thực thành công.")
+                .build();
+    }
+
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo(){
         return ApiResponse.<UserResponse>builder()

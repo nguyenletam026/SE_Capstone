@@ -1,243 +1,95 @@
-import * as React from "react";
-import { styled, alpha } from "@mui/material/styles";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import InputBase from "@mui/material/InputBase";
-import Badge from "@mui/material/Badge";
-import MenuItem from "@mui/material/MenuItem";
-import Menu from "@mui/material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import MailIcon from "@mui/icons-material/Mail";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import MoreIcon from "@mui/icons-material/MoreVert";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { logOut } from "../../services/authenticationService";
-
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(3),
-    width: "auto",
-  },
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
-  },
-}));
+// import mainAvatar from "../../assets/2.png";
+import defaultImage from "../../assets/3.png";
+import Bot from "../../assets/4.png";
 
 export default function Header() {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const dropdownRef = useRef();
 
-  const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const handleMenuToggle = () => setMenuOpen(!menuOpen);
 
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMobileMenuClose = () => {
-    setMobileMoreAnchorEl(null);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    handleMobileMenuClose();
-  };
-
-  const handleMobileMenuOpen = (event) => {
-    setMobileMoreAnchorEl(event.currentTarget);
-  };
-
-  const handleLogout = (event) => {
-    handleMenuClose();
+  const handleLogout = () => {
     logOut();
-    window.location.href = "/login";
+    navigate("/login");
   };
 
-  const menuId = "primary-search-account-menu";
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
-      <MenuItem onClick={handleLogout}>Log Out</MenuItem>
-    </Menu>
-  );
-
-  const mobileMenuId = "primary-search-account-menu-mobile";
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      <MenuItem>
-        <IconButton size="large" aria-label="show 2 new mails" color="inherit">
-          <Badge badgeContent={2} color="error">
-            <MailIcon />
-          </Badge>
-        </IconButton>
-        <p>Messages</p>
-      </MenuItem>
-      <MenuItem>
-        <IconButton
-          size="large"
-          aria-label="show 4 new notifications"
-          color="inherit"
-        >
-          <Badge badgeContent={4} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <p>Notifications</p>
-      </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
-        <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
-        >
-          <AccountCircle />
-        </IconButton>
-        <p>Profile</p>
-      </MenuItem>
-    </Menu>
-  );
+  // 👉 Auto close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="fixed">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{ mr: 2 }}
+    <header className="fixed top-0 left-0 w-full h-16 z-50 bg-white shadow-md px-6 flex items-center justify-between">
+      {/* Logo */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <img
+          src={Bot}
+          alt="Logo"
+          className="w-10 h-10 rounded-full object-cover"
+        />
+        <span className="text-gray-800 font-bold text-lg">Student Stress Helper</span>
+      </div>
+
+      {/* Navigation Links - Centered */}
+      <nav className="flex-1">
+        <ul className="flex justify-center space-x-6 text-sm font-semibold text-gray-700">
+          <li><Link to="/about" className="hover:text-green-600">Về Chúng Tôi</Link></li>
+          <li><Link to="/daily" className="hover:text-green-600">Daily Assessment</Link></li>
+          <li><Link to="/transactions" className="hover:text-green-600">Xem Giao Dịch</Link></li>
+          <li><Link to="/chatroom" className="hover:text-green-600">ChatRoom</Link></li>
+          <li><Link to="/plans" className="hover:text-green-600">Gói</Link></li>
+        </ul>
+      </nav>
+
+      {/* Icons & Profile */}
+      <div className="flex items-center space-x-4 relative" ref={dropdownRef}>
+        <button className="text-gray-600 text-xl hover:text-gray-800 transition">
+          🔔
+        </button>
+        <button className="text-gray-600 text-xl hover:text-gray-800 transition">
+          ☰
+        </button>
+
+        {/* Profile Dropdown */}
+        <div className="relative">
+          <button
+            onClick={handleMenuToggle}
+            className="flex items-center focus:outline-none"
           >
-            <Box
-              component={"img"}
-              style={{
-                width: "35px",
-                height: "35px",
-                borderRadius: 6,
-              }}
-              src=""
-            ></Box>
-          </IconButton>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ "aria-label": "search" }}
+            <img
+              src={defaultImage}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover cursor-pointer"
             />
-          </Search>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <IconButton
-              size="large"
-              aria-label="show 4 new mails"
-              color="inherit"
-            >
-              <Badge badgeContent={4} color="error">
-                <MailIcon />
-              </Badge>
-            </IconButton>
-            <IconButton
-              size="large"
-              aria-label="show 17 new notifications"
-              color="inherit"
-            >
-              <Badge badgeContent={17} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <IconButton
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-          </Box>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="show more"
-              aria-controls={mobileMenuId}
-              aria-haspopup="true"
-              onClick={handleMobileMenuOpen}
-              color="inherit"
-            >
-              <MoreIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
-      {renderMobileMenu}
-      {renderMenu}
-    </Box>
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg py-2 z-50">
+              <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                Settings
+              </button>
+              <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                Help & Feedback
+              </button>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
   );
 }
