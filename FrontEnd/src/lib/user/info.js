@@ -34,3 +34,20 @@ export const requestDoctor = async (formData, certificateUrl, cccdUrl) => {
 
   return axios.post(`${API_BASE}/doctors/request-doctor?${queryParams}`, body);
 };
+
+export const fetchUserInfo2 = async () => {
+  const token = getToken();
+  const response = await fetch(`${API_BASE}/users/myInfo`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user info");
+  }
+
+  const data = await response.json();
+
+  return data.result; // ✅ Chỉ trả về phần result
+};
