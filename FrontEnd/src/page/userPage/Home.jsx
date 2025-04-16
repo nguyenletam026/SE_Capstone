@@ -4,6 +4,7 @@ import { getToken } from "../../services/localStorageService";
 import StressChart from "../../components/stress/stressChart";
 import StressChartsCombined from "../../components/stress/stressChartsCombined";
 import StressHomeSection from "../../components/stress/StressHomeSection";
+import StressMonitor from "../../components/stress/StressMonitor";
 import Daily from "../../assets/5.png";
 import Rain from "../../assets/6.png";
 import Music from "../../assets/7.png";
@@ -54,6 +55,10 @@ export default function Home() {
       {/* Section 2 - Today + Weekly Chart */}
       <StressChartsCombined refreshSignal={refreshCharts} />
 
+      {/* Section 2.5 - Stress Monitoring */}
+      <div className="mt-10 px-6">
+        <StressMonitor />
+      </div>
 
       {/* Section 3 - Monthly Chart */}
       <div className="mt-10 px-6">
