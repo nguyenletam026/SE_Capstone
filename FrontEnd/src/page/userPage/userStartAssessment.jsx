@@ -8,14 +8,18 @@ export default function StartAssessment() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const checkIfAlreadyAnswered = async () => {
+    const checkIfAlreadyAnsweredToday = async () => {
       try {
         const res = await getMyAnswers();
-        if (res.code === 200 && res.result.length > 0) {
-          const latest = res.result[res.result.length - 1];
-          const today = new Date().toISOString().split("T")[0];
-          const answerDate = new Date(latest.date).toISOString().split("T")[0];
-          if (answerDate === today && latest.completed) {
+        if (res.code === 200 && Array.isArray(res.result)) {
+          const today = new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD
+  
+          const todayEntry = res.result.find((entry) => {
+            const entryDate = new Date(entry.date).toLocaleDateString("sv-SE");
+            return entryDate === today && entry.completed;
+          });
+  
+          if (todayEntry) {
             navigate("/assessment/result");
             return;
           }
@@ -26,9 +30,10 @@ export default function StartAssessment() {
         setChecking(false);
       }
     };
-
-    checkIfAlreadyAnswered();
+  
+    checkIfAlreadyAnsweredToday();
   }, [navigate]);
+  
 
   if (checking) {
     return (
