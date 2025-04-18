@@ -97,4 +97,22 @@ public class UserController {
                 .result(userService.getAllDoctor())
                 .build();
     }
+
+    @PostMapping("/{userId}/ban")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    ApiResponse<String> banUser(@PathVariable("userId") String userId) {
+        userService.banUser(userId);
+        return ApiResponse.<String>builder()
+                .result("User banned successfully")
+                .build();
+    }
+
+    @PostMapping("/{userId}/unban")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    ApiResponse<String> unbanUser(@PathVariable("userId") String userId) {
+        userService.unbanUser(userId);
+        return ApiResponse.<String>builder()
+                .result("User unbanned successfully")
+                .build();
+    }
 }

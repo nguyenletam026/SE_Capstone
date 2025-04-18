@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -40,5 +41,13 @@ public class VideoRecommendController {
         return ApiResponse.<List<VideoResponse>>builder()
                 .result(response)
                 .build();
+    }
+
+    @DeleteMapping("/delete-video")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete a video recommendation")
+    public ResponseEntity<Void> deleteVideo(@RequestBody Map<String, String> request) {
+        videoRecommendService.deleteVideo(request.get("videoUrl"));
+        return ResponseEntity.ok().build();
     }
 } 
