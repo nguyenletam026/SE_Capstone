@@ -227,4 +227,28 @@ public class StressController {
                 .result(report)
                 .build();
     }
+    
+    @Operation(
+            summary = "Get recent stress levels for continuous monitoring",
+            description = "Returns the most recent stress analyses for continuous stress monitoring"
+    )
+    @GetMapping("/monitor")
+    public ApiResponse<List<StressAnalysisResponse>> getRecentStressLevels(
+            @RequestParam(defaultValue = "5") int count) {
+        List<StressAnalysis> recentAnalyses = rekognitionService.getRecentStressAnalyses(count);
+        List<StressAnalysisResponse> response = recentAnalyses.stream()
+                .map(analysis -> StressAnalysisResponse.builder()
+                        .id(analysis.getId())
+                        .stressScore(analysis.getStressScore())
+                        .stressLevel(analysis.getStressLevel())
+                        .createdAt(analysis.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ApiResponse.<List<StressAnalysisResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Recent stress levels retrieved for monitoring")
+                .result(response)
+                .build();
+    }
 }

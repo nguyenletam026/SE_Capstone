@@ -21,6 +21,12 @@ import ChatWithDoctor from "../page/userPage/userChatWithDoctor";
 import Recommendation from "../page/userPage/userRecommendation";
 import UserContactDoctor from "../page/userPage/userContactDoctor";
 import UserChatDoctor from "../page/userPage/userChatDoctor";
+import ApplyDoctor from "../page/userPage/userApplyDoctor";
+import UserProfile from "../page/userPage/userProfile";
+import AboutUs from "../page/userPage/AboutUs";
+import SubscriptionPage from "../page/userPage/Subscription";
+import Settings from "../page/userPage/Setting";
+import HelpAndFeedback from "../page/userPage/Feedback";
 
 // Admin Pages
 import AdminLayout from "../components/layouts/adminLayout";
@@ -59,7 +65,12 @@ const AppRoutes = () => {
             <Route path="/assessment/recommend" element={<UserLayout><Recommendation /></UserLayout>} />
             <Route path="/contact-doctor/:id" element={<UserLayout><UserContactDoctor /></UserLayout>} />
             <Route path="/chatroom" element={<UserLayout><UserChatDoctor /></UserLayout>} />
-
+            <Route path="/apply-doctor" element={<UserLayout><ApplyDoctor /></UserLayout>} />
+            <Route path="/user-profile" element={<UserLayout><UserProfile /></UserLayout>} />
+            <Route path="/about" element={<UserLayout><AboutUs /></UserLayout>} />
+            <Route path="/plans" element={<UserLayout><SubscriptionPage /></UserLayout>} />
+            <Route path="/settings" element={<UserLayout><Settings /></UserLayout>} />
+            <Route path="/help" element={<UserLayout><HelpAndFeedback /></UserLayout>} />
           </Route>
 
           {/* Route Admin */}
