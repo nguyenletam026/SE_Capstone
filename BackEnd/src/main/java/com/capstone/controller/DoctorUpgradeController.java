@@ -21,15 +21,18 @@ import java.util.List;
 public class DoctorUpgradeController {
     private final DoctorUpgradeService doctorUpgradeService;
 
-    @PostMapping("/request-doctor")
+    @PostMapping(
+            value = "/request-doctor",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ApiResponse<String> requestDoctorUpgrade(
-            @RequestParam("certificateImage") MultipartFile certificateImage,
-            @RequestParam("cccdImage") MultipartFile cccdImage,
-            @RequestParam("specialization") String specialization,
-            @RequestParam("experienceYears") int experienceYears,
-            @RequestParam("description") String description,
-            @RequestParam("phoneNumber") String phoneNumber,
-            @RequestParam("hospital") String hospital) {
+            @RequestPart("certificateImage") MultipartFile certificateImage,
+            @RequestPart("cccdImage") MultipartFile cccdImage,
+            @RequestPart("specialization") String specialization,
+            @RequestPart("experienceYears") int experienceYears,
+            @RequestPart("description") String description,
+            @RequestPart("phoneNumber") String phoneNumber,
+            @RequestPart("hospital") String hospital) {
 
         DoctorUpgradeRequest request = DoctorUpgradeRequest.builder()
                 .certificateImage(certificateImage)
@@ -47,6 +50,7 @@ public class DoctorUpgradeController {
                 .result("Doctor upgrade request submitted")
                 .build();
     }
+
 
 
 
