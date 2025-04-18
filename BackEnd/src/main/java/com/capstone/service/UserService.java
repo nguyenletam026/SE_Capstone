@@ -51,9 +51,9 @@ public class UserService {
         user.setRole(role);
 
         // tạo mã OTP
-        String verificationCode = String.valueOf((int)(Math.random() * 900000) + 100000);
-        user.setVerificationCode(verificationCode);
-        user.setVerified(false);
+//        String verificationCode = String.valueOf((int)(Math.random() * 900000) + 100000);
+//        user.setVerificationCode(verificationCode);
+//        user.setVerified(false);
 
         userRepository.save(user);
 
@@ -62,25 +62,25 @@ public class UserService {
         userRepository.save(user);
 
         // gửi mail xác nhận
-        mailService.sendVerificationCode(user.getUsername(), user.getFirstName(), verificationCode);
+//        mailService.sendVerificationCode(user.getUsername(), user.getFirstName(), verificationCode);
     }
 
-    public void verifyUser(VerifyUserRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        if (user.isVerified()) {
-            throw new AppException(ErrorCode.USER_ALREADY_VERIFIED);
-        }
-
-        if (!user.getVerificationCode().equals(request.getCode())) {
-            throw new AppException(ErrorCode.INVALID_VERIFICATION_CODE);
-        }
-
-        user.setVerified(true);
-        user.setVerificationCode(null); // clear code sau khi xác nhận
-        userRepository.save(user);
-    }
+//    public void verifyUser(VerifyUserRequest request) {
+//        User user = userRepository.findByUsername(request.getUsername())
+//                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+//
+//        if (user.isVerified()) {
+//            throw new AppException(ErrorCode.USER_ALREADY_VERIFIED);
+//        }
+//
+//        if (!user.getVerificationCode().equals(request.getCode())) {
+//            throw new AppException(ErrorCode.INVALID_VERIFICATION_CODE);
+//        }
+//
+//        user.setVerified(true);
+//        user.setVerificationCode(null); // clear code sau khi xác nhận
+//        userRepository.save(user);
+//    }
     public UserResponse getMyInfo(){
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();

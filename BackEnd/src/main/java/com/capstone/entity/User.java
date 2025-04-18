@@ -27,10 +27,10 @@ public class User {
     Role role;
     String avtUrl;
 
-    @Column(name = "is_verified")
-    boolean isVerified;
-
-    @Column(name = "verification_code")
-    String verificationCode;
+//    @Column(name = "is_verified")
+//    boolean isVerified;
+//
+//    @Column(name = "verification_code")
+//    String verificationCode;
 
 }

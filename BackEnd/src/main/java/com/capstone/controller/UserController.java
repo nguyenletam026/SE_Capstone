@@ -39,13 +39,13 @@ public class UserController {
                 .build();
     }
 
-    @PostMapping("/verify")
-    ApiResponse<String> verifyUser(@RequestBody VerifyUserRequest request) {
-        userService.verifyUser(request);
-        return ApiResponse.<String>builder()
-                .result("Tài khoản đã được xác thực thành công.")
-                .build();
-    }
+//    @PostMapping("/verify")
+//    ApiResponse<String> verifyUser(@RequestBody VerifyUserRequest request) {
+//        userService.verifyUser(request);
+//        return ApiResponse.<String>builder()
+//                .result("Tài khoản đã được xác thực thành công.")
+//                .build();
+//    }
 
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo(){
