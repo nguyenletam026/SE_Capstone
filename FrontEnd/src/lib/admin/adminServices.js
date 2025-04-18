@@ -122,3 +122,25 @@ export const rejectDoctor = async (requestId) => {
     throw error;
   }
 };
+
+export const getApprovedDoctors = async () => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/approved-doctors`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    if (data.code === 1000 && Array.isArray(data.result)) {
+      return data.result;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching approved doctors:", error);
+    return [];
+  }
+};

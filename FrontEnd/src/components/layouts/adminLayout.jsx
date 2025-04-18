@@ -13,7 +13,7 @@ const AdminLayout = ({ children }) => {
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-20"}`}>
         <AdminHeader />
-        <div className="p-6 mt-16">{/* Add margin for fixed header */}
+        <div className="p-6 mt-16 overflow-x-hidden relative">{/* Add margin for fixed header */}
           {children}
         </div>
       </div>

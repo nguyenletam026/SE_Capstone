@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getDoctorRequests, approveDoctor, rejectDoctor } from "../../lib/admin/adminServices";
 import { HiSearch, HiDotsVertical } from "react-icons/hi";
+import { FaFileAlt, FaCheckCircle, FaTrashAlt } from "react-icons/fa";
 
 const AdminManageDoctor = () => {
   const [requests, setRequests] = useState([]);
   const [filter, setFilter] = useState("");
-  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [dropdown, setDropdown] = useState(null); // { id, top, left }
+  const buttonRefs = useRef({});
 
   useEffect(() => {
     fetchRequests();
@@ -19,20 +21,50 @@ const AdminManageDoctor = () => {
   const handleApprove = async (id) => {
     await approveDoctor(id);
     fetchRequests();
+    setDropdown(null);
   };
 
   const handleReject = async (id) => {
     await rejectDoctor(id);
     fetchRequests();
+    setDropdown(null);
   };
 
   const toggleDropdown = (id) => {
-    setOpenDropdownId((prev) => (prev === id ? null : id));
+    const btn = buttonRefs.current[id];
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      setDropdown((prev) =>
+        prev?.id === id
+          ? null
+          : {
+              id,
+              top: rect.bottom + window.scrollY + 4, // Cách dưới nút 4px
+              left: rect.right + window.scrollX - 192, // Canh phải với width = 192px
+            }
+      );
+    }
   };
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        dropdown &&
+        !document.getElementById("dropdown-menu")?.contains(e.target) &&
+        !Object.values(buttonRefs.current).some((ref) => ref?.contains(e.target))
+      ) {
+        setDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdown]);
+
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">🩺 Manage Doctor Requests</h2>
+    <div className="p-8 max-w-7xl mx-auto relative">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        🩺 Manage Doctor Requests
+      </h2>
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <div className="relative w-full md:w-1/3">
@@ -49,71 +81,90 @@ const AdminManageDoctor = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg shadow">
+      <div className="overflow-x-auto rounded-lg shadow relative">
         <table className="w-full text-left border border-gray-200">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
-              <th className="px-6 py-3 border-b font-semibold">Username</th>
-              <th className="px-6 py-3 border-b font-semibold">Status</th>
-              <th className="px-6 py-3 border-b font-semibold">Actions</th>
+              <th className="px-4 py-3 border-b">Username</th>
+              <th className="px-4 py-3 border-b">Specialization</th>
+              <th className="px-4 py-3 border-b">Experience</th>
+              <th className="px-4 py-3 border-b">Phone</th>
+              <th className="px-4 py-3 border-b">Hospital</th>
+              <th className="px-4 py-3 border-b">Status</th>
+              <th className="px-4 py-3 border-b">Actions</th>
             </tr>
           </thead>
           <tbody>
             {requests
-              .filter((r) =>
-                r.username.toLowerCase().includes(filter.toLowerCase())
-              )
+              .filter((r) => r.username.toLowerCase().includes(filter.toLowerCase()))
               .map((req) => (
-                <tr key={req.requestId} className="hover:bg-gray-50 transition duration-150 relative">
-                  <td className="px-6 py-4 border-b font-medium text-gray-800">{req.username}</td>
-                  <td className="px-6 py-4 border-b text-gray-700">{req.status}</td>
-                  <td className="px-6 py-4 border-b relative">
+                <tr key={req.requestId} className="hover:bg-gray-50 transition duration-150">
+                  <td className="px-4 py-4 border-b font-medium text-gray-800">{req.username}</td>
+                  <td className="px-4 py-4 border-b">{req.specialization}</td>
+                  <td className="px-4 py-4 border-b">{req.experienceYears} năm</td>
+                  <td className="px-4 py-4 border-b">{req.phoneNumber}</td>
+                  <td className="px-4 py-4 border-b">{req.hospital}</td>
+                  <td className="px-4 py-4 border-b">{req.status}</td>
+                  <td className="px-4 py-4 border-b text-right">
                     <button
+                      ref={(el) => (buttonRefs.current[req.requestId] = el)}
                       onClick={() => toggleDropdown(req.requestId)}
                       className="text-gray-600 hover:text-black"
                     >
                       <HiDotsVertical className="text-xl" />
                     </button>
-
-                    {openDropdownId === req.requestId && (
-                      <div className="absolute z-10 right-6 mt-2 bg-white border rounded shadow w-48">
-                        <a
-                          href={req.certificateUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
-                        >
-                          View Certificate
-                        </a>
-                        <button
-                          onClick={() => handleApprove(req.requestId)}
-                          className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleReject(req.requestId)}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
                   </td>
                 </tr>
               ))}
-            {requests.filter((r) =>
-              r.username.toLowerCase().includes(filter.toLowerCase())
-            ).length === 0 && (
-              <tr>
-                <td colSpan={3} className="text-center text-gray-500 py-6 italic">
-                  No doctor requests found.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
+
+      {/* 🔽 Dropdown Menu */}
+      {dropdown && (
+        <div
+          id="dropdown-menu"
+          className="fixed z-50 bg-white border rounded-xl shadow-lg w-48 animate-fade-in"
+          style={{
+            top: `${dropdown.top}px`,
+            left: `${dropdown.left}px`,
+          }}
+        >
+          <ul className="text-sm text-gray-700">
+            <li>
+              <a
+                href={
+                  requests.find((r) => r.requestId === dropdown.id)?.certificateUrl || "#"
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center px-4 py-2 hover:bg-gray-100 text-blue-600"
+              >
+                <FaFileAlt className="text-sm" />
+                <span className="ml-2">View Certificate</span>
+              </a>
+            </li>
+            <li>
+              <button
+                onClick={() => handleApprove(dropdown.id)}
+                className="flex w-full items-center px-4 py-2 hover:bg-gray-100 text-green-600"
+              >
+                <FaCheckCircle className="text-sm" />
+                <span className="ml-2">Approve</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => handleReject(dropdown.id)}
+                className="flex w-full items-center px-4 py-2 hover:bg-gray-100 text-red-600"
+              >
+                <FaTrashAlt className="text-sm" />
+                <span className="ml-2">Reject</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
