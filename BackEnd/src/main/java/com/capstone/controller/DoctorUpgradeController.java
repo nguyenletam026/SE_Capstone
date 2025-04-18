@@ -85,4 +85,12 @@ public class DoctorUpgradeController {
                 .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
                 .body(imageData);
     }
+
+    @GetMapping("/approved-doctors")
+    public ApiResponse<List<DoctorUpgradeResponse>> getApprovedDoctors() {
+        return ApiResponse.<List<DoctorUpgradeResponse>>builder()
+                .result(doctorUpgradeService.getApprovedDoctors())
+                .build();
+    }
+
 }
