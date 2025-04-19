@@ -12,7 +12,18 @@ const ChatInput = () => {
     e.preventDefault();
     if (!input.trim() || !selectedUser || !user?.id) return;
 
-    const receiverId = selectedUser?.doctorId || selectedUser?.patientId;
+    let receiverId;
+    if (selectedUser.patientId && user.id === selectedUser.patientId) {
+      receiverId = selectedUser.doctorId;
+    } else if (selectedUser.doctorId && user.id === selectedUser.doctorId) {
+      receiverId = selectedUser.patientId;
+    } else {
+      receiverId = selectedUser.patientId || selectedUser.doctorId;
+      if (receiverId === user.id) {
+        console.error("Cannot send message to yourself");
+        return;
+      }
+    }
 
     const message = {
       content: input,
@@ -21,6 +32,7 @@ const ChatInput = () => {
       timestamp: new Date().toISOString(),
     };
 
+    console.log("Sending message:", message);
     sendMessage(message);
     setMessages((prev) => [...prev, message]);
     setInput("");

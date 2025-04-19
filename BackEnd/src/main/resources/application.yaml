@@ -7,19 +7,69 @@ spring:
     username: "postgres"
     password: "edrDRqwWXGRQktsLQyoirbfDcpxhXcfI"
     driver-class-name: org.postgresql.Driver
+<<<<<<< HEAD
 
+=======
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+>>>>>>> hieuDev
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nhattienn12902@gmail.com
+    password: cets heit fbsc memo
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
 
+fptai:
+  api:
+    key: QKIh1IJzqbTmOmt4xaw120eP8c6M0TfN
+    url: https://api.fpt.ai/vision/idr/vnm
 
 springdoc:
   api-docs:
     enabled: true
   swagger-ui:
     enabled: true
+<<<<<<< HEAD
     path: /swagger-ui.html
+=======
+    path: /swagger-ui.html
+
+aws:
+  region: us-east-1
+  access-key: "AKIAZAI4GVIKCJPKKLVU"
+  secret-key: "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"
+
+cloudinary:
+  cloud-name: "dpuekoyqz"
+  api-key: "984166367576298"
+  api-secret: "AF5MoSOUXN1uqUhMlTlBcobPJg0"
+
+stress:
+  extreme:
+    threshold: 85
+  high:
+    threshold: 70
+  moderate:
+    threshold: 50
+  mild:
+    threshold: 30
+  normal:
+    threshold: 10
+  confidence:
+    threshold: 50
+>>>>>>> hieuDev

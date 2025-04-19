@@ -70,3 +70,77 @@ export const deleteRole = async (roleName) => {
     throw error;
   }
 };
+
+export const getDoctorRequests = async () => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/doctor-requests`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    if (data.code === 1000 && Array.isArray(data.result)) {
+      return data.result;
+    } else {
+      return []; // fallback nếu API lỗi
+    }
+  } catch (error) {
+    console.error("Error fetching doctor requests:", error);
+    return [];
+  }
+};
+
+export const approveDoctor = async (requestId) => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/approve-doctor/${requestId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error approving doctor:", error);
+    throw error;
+  }
+};
+
+export const rejectDoctor = async (requestId) => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/reject-doctor/${requestId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error rejecting doctor:", error);
+    throw error;
+  }
+};
+
+export const getApprovedDoctors = async () => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/approved-doctors`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    if (data.code === 1000 && Array.isArray(data.result)) {
+      return data.result;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching approved doctors:", error);
+    return [];
+  }
+};

@@ -57,9 +57,15 @@ function DoctorChatLayout() {
     const fetchPatients = async () => {
       try {
         const res = await getAcceptedChatPatients();
-        setPatients(res.result);
+        if (res && res.result) {
+          setPatients(res.result);
+        } else {
+          console.error("No patients found in response");
+          setPatients([]);
+        }
       } catch (err) {
         console.error("❌ Lỗi lấy danh sách bệnh nhân:", err);
+        setPatients([]);
       }
     };
     fetchPatients();
@@ -71,18 +77,25 @@ function DoctorChatLayout() {
     setLoading(true);
     try {
       const convo = await getConversation(user.id, patient.patientId);
+      console.log(user.id, patient.patientId);
       // Map lại để đồng bộ cấu trúc tin nhắn hiển thị
-      const formatted = convo.result.map((msg) => ({
-        id: msg.id,
-        content: msg.content,
-        senderId: msg.senderId,
-        senderName: msg.senderName,
-        senderAvatar: msg.senderAvatar,
-        timestamp: msg.timestamp,
-      }));
-      setMessages(formatted);
+      if (convo && convo.result) {
+        const formatted = convo.result.map((msg) => ({
+          id: msg.id,
+          content: msg.content,
+          senderId: msg.senderId,
+          senderName: msg.senderName,
+          senderAvatar: msg.senderAvatar,
+          timestamp: msg.timestamp,
+        }));
+        setMessages(formatted);
+      } else {
+        console.log("No conversation data found");
+        setMessages([]);
+      }
     } catch (err) {
       console.error("❌ Lỗi tải cuộc trò chuyện:", err);
+      setMessages([]);
     } finally {
       setLoading(false);
     }
@@ -93,26 +106,30 @@ function DoctorChatLayout() {
       <aside className="w-64 bg-white border-r overflow-y-auto">
         <h3 className="text-lg font-bold text-center py-4 border-b">Bệnh nhân</h3>
         <ul>
-          {patients.map((p) => (
-            <li
-              key={p.patientId}
-              onClick={() => handleSelect(p)}
-              className={`px-4 py-3 cursor-pointer hover:bg-blue-100 transition ${
-                selectedUser?.patientId === p.patientId ? "bg-blue-200 font-semibold" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3 text-black">
-                <img
-                  src={p.patientAvatar}
-                  alt={p.patientName}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <p className="text-sm">{p.patientName}</p>
+          {patients && patients.length > 0 ? (
+            patients.map((p) => (
+              <li
+                key={p.patientId}
+                onClick={() => handleSelect(p)}
+                className={`px-4 py-3 cursor-pointer hover:bg-blue-100 transition ${
+                  selectedUser?.patientId === p.patientId ? "bg-blue-200 font-semibold" : ""
+                }`}
+              >
+                <div className="flex items-center gap-3 text-black">
+                  <img
+                    src={p.patientAvatar || "https://via.placeholder.com/150"}
+                    alt={p.patientName}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-sm">{p.patientName}</p>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            ))
+          ) : (
+            <li className="px-4 py-3 text-gray-500 text-center">Không có bệnh nhân nào</li>
+          )}
         </ul>
       </aside>
 

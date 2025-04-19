@@ -3,15 +3,16 @@ package com.capstone.controller;
 import com.capstone.dto.request.UserChangePasswordRequest;
 import com.capstone.dto.request.UserCreationRequest;
 import com.capstone.dto.request.UserUpdateRequest;
+import com.capstone.dto.request.VerifyUserRequest;
 import com.capstone.dto.response.ApiResponse;
 import com.capstone.dto.response.UserResponse;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
 import com.capstone.repository.UserRepository;
 import com.capstone.service.UserService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +26,14 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
+<<<<<<< HEAD
     @PostMapping
     ApiResponse<String> createUser(@RequestBody @Valid UserCreationRequest request) {
+=======
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<String> createUser(@RequestPart("request") UserCreationRequest request,
+                                   @RequestPart(value = "avtFile", required = false) MultipartFile avtFile) throws IOException {
+>>>>>>> hieuDev
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
 
@@ -36,13 +43,21 @@ public class UserController {
                 .build();
 
     }
+
+//    @PostMapping("/verify")
+//    ApiResponse<String> verifyUser(@RequestBody VerifyUserRequest request) {
+//        userService.verifyUser(request);
+//        return ApiResponse.<String>builder()
+//                .result("Tài khoản đã được xác thực thành công.")
+//                .build();
+//    }
+
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo(){
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())
                 .build();
     }
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     ApiResponse<List<UserResponse>> getAllUsers() {
         return ApiResponse.<List<UserResponse>>builder()

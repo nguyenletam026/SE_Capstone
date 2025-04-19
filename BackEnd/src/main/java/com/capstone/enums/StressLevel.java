@@ -5,8 +5,8 @@ public enum StressLevel {
     HIGH_STRESS("High Stress"),         // Căng thẳng cao
     MODERATE_STRESS("Moderate Stress"), // Căng thẳng trung bình
     MILD_STRESS("Mild Stress"),         // Căng thẳng nhẹ
-    NORMAL("Normal"),                  // Bình thường
-    RELAXED("Relaxed");                // Thư giãn
+    NORMAL("Normal"),
+    RELAXED("Relaxed");
 
     private final String displayName;
 

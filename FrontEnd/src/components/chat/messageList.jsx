@@ -14,20 +14,33 @@ const MessageList = () => {
       setLoading(true);
       try {
         const res = await getUnreadMessages(user.id);
-        const filteredMessages = res.result.filter(
-          (msg) =>
-            msg.senderId === selectedUser.doctorId ||
-            msg.senderId === selectedUser.patientId
-        );
-        setMessages(filteredMessages);
+        if (res && res.result) {
+          if (selectedUser.doctorId || selectedUser.patientId) {
+            const filteredMessages = res.result.filter(
+              (msg) =>
+                msg.senderId === selectedUser.doctorId ||
+                msg.senderId === selectedUser.patientId
+            );
+            setMessages(filteredMessages || []);
+          } else {
+            console.error("Selected user is missing required properties");
+            setMessages([]);
+          }
+        } else {
+          console.error("No messages found in response");
+          setMessages([]);
+        }
       } catch (err) {
         console.error("Lỗi khi lấy tin nhắn chưa đọc:", err);
+        setMessages([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUnread();
+    if (selectedUser) {
+      fetchUnread();
+    }
   }, [user?.id, selectedUser, setMessages]);
 
   return (

@@ -8,6 +8,7 @@ export default function StartAssessment() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+<<<<<<< HEAD
     const checkIfAlreadyAnswered = async () => {
       try {
         const res = await getMyAnswers();
@@ -16,6 +17,20 @@ export default function StartAssessment() {
           const today = new Date().toISOString().split("T")[0];
           const answerDate = new Date(latest.date).toISOString().split("T")[0];
           if (answerDate === today && latest.completed) {
+=======
+    const checkIfAlreadyAnsweredToday = async () => {
+      try {
+        const res = await getMyAnswers();
+        if (res.code === 200 && Array.isArray(res.result)) {
+          const today = new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD
+  
+          const todayEntry = res.result.find((entry) => {
+            const entryDate = new Date(entry.date).toLocaleDateString("sv-SE");
+            return entryDate === today && entry.completed;
+          });
+  
+          if (todayEntry) {
+>>>>>>> hieuDev
             navigate("/assessment/result");
             return;
           }
@@ -26,9 +41,16 @@ export default function StartAssessment() {
         setChecking(false);
       }
     };
+<<<<<<< HEAD
 
     checkIfAlreadyAnswered();
   }, [navigate]);
+=======
+  
+    checkIfAlreadyAnsweredToday();
+  }, [navigate]);
+  
+>>>>>>> hieuDev
 
   if (checking) {
     return (

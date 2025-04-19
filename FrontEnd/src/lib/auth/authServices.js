@@ -2,14 +2,16 @@ import { OAuthConfig } from "../../configurations/configuration";
 import { getToken, setToken } from "../../services/localStorageService";
 import axios from "axios";
 
-// 🔐 Đăng nhập
 export const handleLogin = async (username, password) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/auth/token`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Login failed");
@@ -24,7 +26,6 @@ export const handleLogin = async (username, password) => {
   }
 };
 
-// 🌐 Google OAuth
 export const handleContinueWithGoogle = () => {
   const targetUrl = `${OAuthConfig.authUri}?redirect_uri=${encodeURIComponent(
     OAuthConfig.redirectUri
@@ -35,8 +36,8 @@ export const handleContinueWithGoogle = () => {
   window.location.href = targetUrl;
 };
 
-// 📩 Gửi mail reset mật khẩu
 export async function sendResetPasswordEmail(email) {
+  // Giả lập gửi mail với delay 1.5s
   return new Promise((resolve) => {
     setTimeout(() => {
       console.log(`📩 Reset link sent to ${email}`);
@@ -44,12 +45,9 @@ export async function sendResetPasswordEmail(email) {
     }, 1500);
   });
 }
-
-// 📝 Đăng ký tài khoản
 export const handleSignUp = async (formData) => {
   try {
     const data = new FormData();
-
     const jsonRequest = {
       username: formData.username,
       password: formData.password,
@@ -57,22 +55,18 @@ export const handleSignUp = async (formData) => {
       lastName: formData.lastName,
       birthdayDate: formData.birthdayDate,
     };
-
-    data.append("request", new Blob([JSON.stringify(jsonRequest)], { type: "application/json" }));
+    data.append(
+      "request",
+      new Blob([JSON.stringify(jsonRequest)], { type: "application/json" })
+    );
     if (formData.avtFile) {
       data.append("avtFile", formData.avtFile);
     }
-
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/users`,
       data,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      { headers: { "Content-Type": "multipart/form-data" } }
     );
-
     return response.data;
   } catch (error) {
     console.error("Sign up error:", error);
