@@ -1,6 +1,24 @@
 package com.capstone.repository;
 
 import com.capstone.entity.ChatMessage;
+<<<<<<< HEAD
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
+
+
+    List<ChatMessage> findByChatId(String chatId);
+
+
+    List<ChatMessage> findBySenderIdAndRecipientIdOrderByTimestampDesc(String senderId, String recipientId);
+
+
+    ChatMessage findTopBySenderIdAndRecipientIdOrderByTimestampDesc(String senderId, String recipientId);
+}
+=======
 import com.capstone.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,3 +46,4 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, String
     @Query("SELECT DISTINCT m.sender FROM ChatMessage m WHERE m.receiver = :user")
     List<User> findDistinctSenders(@Param("user") User user);
 }
+>>>>>>> hieuDev

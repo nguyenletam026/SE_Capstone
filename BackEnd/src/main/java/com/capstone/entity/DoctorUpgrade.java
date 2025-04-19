@@ -10,7 +10,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+<<<<<<< HEAD
+@Table(name = "doctor_upgrade_requests")
+=======
 @Table(name = "doctor_upgrade")
+>>>>>>> hieuDev
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DoctorUpgrade {
 
@@ -22,16 +26,25 @@ public class DoctorUpgrade {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
+<<<<<<< HEAD
+    @Lob
+    @Column(nullable = false)
+    byte[] certificateImage; // PostgreSQL dùng BYTEA thay vì BLOB
+=======
     @Column(nullable = false)
     String certificateUrl;
+>>>>>>> hieuDev
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     RequestStatus status;
+<<<<<<< HEAD
+=======
 
     String specialization;
     int experienceYears;
     String description;
     String phoneNumber;
     String hospital;
+>>>>>>> hieuDev
 }
