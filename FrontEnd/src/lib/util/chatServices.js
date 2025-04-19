@@ -19,12 +19,6 @@ export const getConversation = async (user1Id, user2Id) => {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error("Failed to load conversation");
-<<<<<<< HEAD
-    return res.json();
-  };
-
-  export const getUnreadMessages = async (userId) => {
-=======
     
     // Get the response data
     const data = await res.json();
@@ -36,7 +30,6 @@ export const getConversation = async (user1Id, user2Id) => {
   };
 
 export const getUnreadMessages = async (userId) => {
->>>>>>> hieuDev
     const token = getToken();
     const res = await fetch(`${process.env.REACT_APP_API_URL}/api/chat/unread?userId=${userId}`, {
       headers: {
@@ -44,9 +37,6 @@ export const getUnreadMessages = async (userId) => {
       },
     });
     if (!res.ok) throw new Error("Failed to fetch unread messages");
-<<<<<<< HEAD
-    return res.json();
-=======
     
     // Get the response data
     const data = await res.json();
@@ -55,5 +45,4 @@ export const getUnreadMessages = async (userId) => {
     return {
       result: data
     };
->>>>>>> hieuDev
   };
