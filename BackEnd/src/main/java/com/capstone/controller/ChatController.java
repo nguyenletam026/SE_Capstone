@@ -1,86 +1,5 @@
 package com.capstone.controller;
 
-<<<<<<< HEAD
-import com.capstone.entity.ChatMessage;
-import com.capstone.entity.ChatNotification;
-import com.capstone.service.ChatMessageService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/chat")
-@RequiredArgsConstructor
-@Tag(name = "Chat API", description = "API for handling chat messages")
-public class ChatController {
-
-    private final SimpMessagingTemplate messagingTemplate;
-    private final ChatMessageService chatMessageService;
-
-
-    private String getCurrentUserId() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
-            throw new IllegalStateException("Unauthorized access");
-        }
-        return jwt.getSubject();
-    }
-
-//web socket lay tin nhan
-    @MessageMapping("/chat")
-    public void processMessage(@RequestBody ChatMessage chatMessage) {
-        String senderId = getCurrentUserId();
-        chatMessage.setSenderId(senderId);
-
-        ChatMessage savedMsg = chatMessageService.save(chatMessage);
-        messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(), "/queue/messages",
-                new ChatNotification(
-                        String.valueOf(savedMsg.getId()),
-                        savedMsg.getSenderId(),
-                        savedMsg.getRecipientId(),
-                        savedMsg.getContent()
-                )
-        );
-    }
-
-// api gui tin nhan
-    @Operation(summary = "Send a chat message via REST API")
-    @PostMapping("/send")
-    public ResponseEntity<ChatMessage> sendMessage(@RequestBody ChatMessage chatMessage) {
-        String senderId = getCurrentUserId();
-        chatMessage.setSenderId(senderId);
-        ChatMessage savedMessage = chatMessageService.save(chatMessage);
-
-        // Gửi tin nhắn qua WebSocket để real-time notification
-        messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(), "/queue/messages",
-                new ChatNotification(
-                        String.valueOf(savedMessage.getId()),
-                        savedMessage.getSenderId(),
-                        savedMessage.getRecipientId(),
-                        savedMessage.getContent()
-                )
-        );
-
-        return ResponseEntity.ok(savedMessage);
-    }
-
-//lay danh sach tin nhan giua 2 nguoi
-    @Operation(summary = "Retrieve chat messages between two users")
-    @GetMapping("/messages/{recipientId}")
-    public ResponseEntity<List<ChatMessage>> findChatMessages(@PathVariable String recipientId) {
-        String senderId = getCurrentUserId();
-        return ResponseEntity.ok(chatMessageService.findChatMessages(recipientId));
-=======
 import com.capstone.dto.response.ChatMessageDTO;
 import com.capstone.service.ChatService;
 
@@ -161,6 +80,5 @@ public class ChatController {
     public ResponseEntity<List<ChatMessageDTO>> getRecentMessages(
             @RequestParam String userId) {
         return ResponseEntity.ok(chatService.getRecentMessages(userId));
->>>>>>> hieuDev
     }
 }

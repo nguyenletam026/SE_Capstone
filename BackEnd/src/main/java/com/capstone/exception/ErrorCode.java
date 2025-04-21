@@ -17,8 +17,6 @@ public enum ErrorCode {
     WRONG_PASSWORD(1007, "Wrong password", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED(1008, "You do not have permission", HttpStatus.FORBIDDEN),
     ROLE_NOT_EXISTED(1009, "Role not existed", HttpStatus.BAD_REQUEST),
-<<<<<<< HEAD
-=======
     ALREADY_DOCTOR(1010, "User is already a Doctor", HttpStatus.BAD_REQUEST),
     REQUEST_NOT_FOUND(1011, "Doctor upgrade request not found", HttpStatus.NOT_FOUND),
     REQUEST_ALREADY_PROCESSED(1012, "Doctor upgrade request has already been processed", HttpStatus.BAD_REQUEST),
@@ -42,7 +40,6 @@ public enum ErrorCode {
     INVALID_VERIFICATION_CODE(1027, "Invalid verification code", HttpStatus.BAD_REQUEST),
 
 
->>>>>>> hieuDev
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

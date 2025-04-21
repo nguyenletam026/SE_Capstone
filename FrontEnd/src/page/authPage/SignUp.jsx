@@ -190,4 +190,5 @@ import React, { useState } from "react";
    );
  };
  
- export default SignUp;
+export default SignUp;
+

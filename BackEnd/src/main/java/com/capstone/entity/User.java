@@ -25,8 +25,6 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "role_id")
     Role role;
-<<<<<<< HEAD
-=======
     String avtUrl;
 
 //    @Column(name = "is_verified")
@@ -35,5 +33,4 @@ public class User {
 //    @Column(name = "verification_code")
 //    String verificationCode;
 
->>>>>>> hieuDev
 }

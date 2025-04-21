@@ -12,8 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DoctorUpgradeRequest {
     MultipartFile certificateImage;
-<<<<<<< HEAD
-=======
     MultipartFile cccdImage;
 
     String specialization;
@@ -21,5 +19,4 @@ public class DoctorUpgradeRequest {
     String description;
     String phoneNumber;
     String hospital;
->>>>>>> hieuDev
 }
