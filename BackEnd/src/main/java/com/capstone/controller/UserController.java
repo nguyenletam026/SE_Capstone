@@ -26,14 +26,9 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
-<<<<<<< HEAD
-    @PostMapping
-    ApiResponse<String> createUser(@RequestBody @Valid UserCreationRequest request) {
-=======
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<String> createUser(@RequestPart("request") UserCreationRequest request,
                                    @RequestPart(value = "avtFile", required = false) MultipartFile avtFile) throws IOException {
->>>>>>> hieuDev
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
 

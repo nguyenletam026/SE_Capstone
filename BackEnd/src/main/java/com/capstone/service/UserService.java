@@ -28,11 +28,6 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
-<<<<<<< HEAD
-
-
-    public void createUser(UserCreationRequest request) {
-=======
     private final CloudinaryService cloudinaryService;
     private final MailService mailService;
 
@@ -40,7 +35,6 @@ public class UserService {
         if (avtFile == null || avtFile.isEmpty()) {
             throw new AppException(ErrorCode.FILE_NULL);
         }
->>>>>>> hieuDev
 
         User user = userMapper.toUser(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -53,9 +47,6 @@ public class UserService {
         com.capstone.entity.Role role = roleRepository.findByName(Role.USER.name())
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         user.setRole(role);
-<<<<<<< HEAD
-        userRepository.save(user);
-=======
 
         // tạo mã OTP
 //        String verificationCode = String.valueOf((int)(Math.random() * 900000) + 100000);
@@ -70,7 +61,6 @@ public class UserService {
 
         // gửi mail xác nhận
 //        mailService.sendVerificationCode(user.getUsername(), user.getFirstName(), verificationCode);
->>>>>>> hieuDev
     }
 
 //    public void verifyUser(VerifyUserRequest request) {

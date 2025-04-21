@@ -7,14 +7,10 @@ spring:
     username: "postgres"
     password: "edrDRqwWXGRQktsLQyoirbfDcpxhXcfI"
     driver-class-name: org.postgresql.Driver
-<<<<<<< HEAD
-
-=======
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
->>>>>>> hieuDev
   jpa:
     hibernate:
       ddl-auto: update
@@ -44,9 +40,6 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
-<<<<<<< HEAD
-    path: /swagger-ui.html
-=======
     path: /swagger-ui.html
 
 aws:
@@ -72,4 +65,3 @@ stress:
     threshold: 10
   confidence:
     threshold: 50
->>>>>>> hieuDev
