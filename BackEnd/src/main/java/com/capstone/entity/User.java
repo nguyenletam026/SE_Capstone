@@ -26,11 +26,4 @@ public class User {
     @JoinColumn(name = "role_id")
     Role role;
     String avtUrl;
-
-//    @Column(name = "is_verified")
-//    boolean isVerified;
-//
-//    @Column(name = "verification_code")
-//    String verificationCode;
-
 }

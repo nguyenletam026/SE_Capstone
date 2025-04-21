@@ -3,7 +3,6 @@ package com.capstone.controller;
 import com.capstone.dto.request.UserChangePasswordRequest;
 import com.capstone.dto.request.UserCreationRequest;
 import com.capstone.dto.request.UserUpdateRequest;
-import com.capstone.dto.request.VerifyUserRequest;
 import com.capstone.dto.response.ApiResponse;
 import com.capstone.dto.response.UserResponse;
 import com.capstone.exception.AppException;
@@ -15,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 @Slf4j
 @RestController
@@ -31,22 +32,11 @@ public class UserController {
                                    @RequestPart(value = "avtFile", required = false) MultipartFile avtFile) throws IOException {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
-
-        userService.createUser(request);
+        userService.createUser(request, avtFile);
         return ApiResponse.<String>builder()
                 .result("User create successful")
                 .build();
-
     }
-
-//    @PostMapping("/verify")
-//    ApiResponse<String> verifyUser(@RequestBody VerifyUserRequest request) {
-//        userService.verifyUser(request);
-//        return ApiResponse.<String>builder()
-//                .result("Tài khoản đã được xác thực thành công.")
-//                .build();
-//    }
-
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo(){
         return ApiResponse.<UserResponse>builder()
@@ -92,4 +82,3 @@ public class UserController {
                 .build();
     }
 }
-

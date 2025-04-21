@@ -21,18 +21,15 @@ import java.util.List;
 public class DoctorUpgradeController {
     private final DoctorUpgradeService doctorUpgradeService;
 
-    @PostMapping(
-            value = "/request-doctor",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping("/request-doctor")
     public ApiResponse<String> requestDoctorUpgrade(
-            @RequestPart("certificateImage") MultipartFile certificateImage,
-            @RequestPart("cccdImage") MultipartFile cccdImage,
-            @RequestPart("specialization") String specialization,
-            @RequestPart("experienceYears") int experienceYears,
-            @RequestPart("description") String description,
-            @RequestPart("phoneNumber") String phoneNumber,
-            @RequestPart("hospital") String hospital) {
+            @RequestParam("certificateImage") MultipartFile certificateImage,
+            @RequestParam("cccdImage") MultipartFile cccdImage,
+            @RequestParam("specialization") String specialization,
+            @RequestParam("experienceYears") int experienceYears,
+            @RequestParam("description") String description,
+            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("hospital") String hospital) {
 
         DoctorUpgradeRequest request = DoctorUpgradeRequest.builder()
                 .certificateImage(certificateImage)
@@ -50,7 +47,6 @@ public class DoctorUpgradeController {
                 .result("Doctor upgrade request submitted")
                 .build();
     }
-
 
 
 
@@ -89,12 +85,4 @@ public class DoctorUpgradeController {
                 .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
                 .body(imageData);
     }
-
-    @GetMapping("/approved-doctors")
-    public ApiResponse<List<DoctorUpgradeResponse>> getApprovedDoctors() {
-        return ApiResponse.<List<DoctorUpgradeResponse>>builder()
-                .result(doctorUpgradeService.getApprovedDoctors())
-                .build();
-    }
-
 }

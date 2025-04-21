@@ -94,11 +94,6 @@ public class DoctorUpgradeService {
                         .requestId(req.getId())
                         .username(req.getUser().getUsername())
                         .certificateUrl(req.getCertificateUrl())
-                        .specialization(req.getSpecialization())
-                        .experienceYears(req.getExperienceYears())
-                        .description(req.getDescription())
-                        .phoneNumber(req.getPhoneNumber())
-                        .hospital(req.getHospital())
                         .status(req.getStatus())
                         .build())
                 .collect(Collectors.toList());
@@ -115,22 +110,4 @@ public class DoctorUpgradeService {
             throw new RuntimeException("Error downloading certificate image: " + e.getMessage());
         }
     }
-
-    public List<DoctorUpgradeResponse> getApprovedDoctors() {
-        return doctorUpgradeRepository.findByStatus(RequestStatus.APPROVED).stream()
-                .map(req -> DoctorUpgradeResponse.builder()
-                        .requestId(req.getId())
-                        .username(req.getUser().getUsername())
-                        .certificateUrl(req.getCertificateUrl())
-                        .specialization(req.getSpecialization())
-                        .experienceYears(req.getExperienceYears())
-                        .description(req.getDescription())
-                        .phoneNumber(req.getPhoneNumber())
-                        .hospital(req.getHospital())
-                        .status(req.getStatus())
-                        .build())
-                .collect(Collectors.toList());
-    }
-
-
 }
