@@ -18,5 +18,6 @@ public class UserResponse {
     Date birthdayDate;
     RoleResponse role;
     String avtUrl;
+    Boolean banned;
 
 }

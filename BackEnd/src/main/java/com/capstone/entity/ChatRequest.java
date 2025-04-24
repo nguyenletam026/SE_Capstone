@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +28,11 @@ public class ChatRequest {
     @JoinColumn(name = "doctor_id", nullable = false)
     private User doctor;
 
+    // Add reference to the booked schedule slot
+    @ManyToOne
+    @JoinColumn(name = "doctor_schedule_id")
+    private DoctorSchedule doctorSchedule;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RequestStatus status;
@@ -40,4 +44,4 @@ public class ChatRequest {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
-} 
+}
