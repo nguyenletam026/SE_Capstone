@@ -29,9 +29,11 @@ export default function StressHomeSection({ onRefreshCharts }) {
 
       if (closestItem && closestItem.stress_analyses?.length) {
         let closestEntry = closestItem.stress_analyses[0];
-        let smallestCreatedDiff = Math.abs(new Date(closestEntry.createdAt) - now);
+        let smallestCreatedDiff = Math.abs(
+          new Date(closestEntry.createdAt) - now
+        );
 
-        closestItem.stress_analyses.forEach(entry => {
+        closestItem.stress_analyses.forEach((entry) => {
           const diff = Math.abs(new Date(entry.createdAt) - now);
           if (diff < smallestCreatedDiff) {
             closestEntry = entry;
@@ -42,7 +44,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
         const score = closestEntry.stressScore ?? 100;
         setStressScore(Math.round(score));
         setStressLevel(closestEntry.stressLevel ?? "Unknown");
-        setBgColor((100 - score) < 50 ? "#ef4444" : "#9BB168");
+        setBgColor(100 - score < 50 ? "#ef4444" : "#9BB168");
       }
     }
   };
@@ -52,14 +54,21 @@ export default function StressHomeSection({ onRefreshCharts }) {
   }, []);
 
   return (
-    <div className="relative text-white text-center pb-24 overflow-hidden" style={{ backgroundColor: bgColor }}>
+    <div
+      className="relative text-white text-center pb-24 overflow-hidden"
+      style={{ backgroundColor: bgColor }}
+    >
       <div className="pt-6">
         <p className="text-sm font-semibold uppercase">Xin Chào Người Dùng</p>
-        <p className="text-xs underline mb-4 cursor-pointer">Thiết Lập Profile</p>
+        <p className="text-xs underline mb-4 cursor-pointer">
+          Thiết Lập Profile
+        </p>
         <p className="text-6xl font-bold">{stressScore}</p>
         <p className="text-6xl mt-2">😊</p>
         <p className="mt-2 font-bold text-lg">
-          {stressLevel ? `Bạn Đang Có Tâm Trạng: ${stressLevel}` : "Đang tải..."}
+          {stressLevel
+            ? `Bạn Đang Có Tâm Trạng: ${stressLevel}`
+            : "Đang tải..."}
         </p>
       </div>
 
@@ -68,15 +77,8 @@ export default function StressHomeSection({ onRefreshCharts }) {
       </div>
 
       <div className="mt-6">
-        {!showWebcam ? (
-          <button
-            onClick={() => setShowWebcam(true)}
-            className="bg-white text-brown-700 px-4 py-2 rounded font-semibold"
-          >
-            Bắt Đầu Phân Tích Bằng Camera 📸
-          </button>
-        ) : (
-          <div className="flex flex-col items-center space-y-4">
+        {showWebcam ? (
+          <div className="flex flex-col items-center gap-4">
             <WebcamCapture
               onResult={() => {
                 refreshDailyStress();
@@ -86,11 +88,18 @@ export default function StressHomeSection({ onRefreshCharts }) {
             />
             <button
               onClick={() => setShowWebcam(false)}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow"
             >
               Thoát Chế Độ Camera ❌
             </button>
           </div>
+        ) : (
+          <button
+            onClick={() => setShowWebcam(true)}
+            className="bg-black text-brown-700 px-6 py-2 rounded-lg font-semibold shadow hover:scale-105 transition"
+          >
+            Bắt Đầu Phân Tích Bằng Camera 📸
+          </button>
         )}
       </div>
 

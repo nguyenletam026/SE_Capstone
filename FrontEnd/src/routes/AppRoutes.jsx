@@ -39,6 +39,7 @@ import AdminManageDoctor from "../page/adminPage/adminManageDoctor";
 import DoctorLayout from "../components/layouts/doctorLayout";
 import DoctorHome from "../page/doctorPage/doctorHome";
 import DoctorChatPage from "../page/doctorPage/doctorChatPage";
+import PendingRequests from "../page/doctorPage/doctorPendingRequest";
 
 const AppRoutes = () => {
   return (
@@ -85,6 +86,8 @@ const AppRoutes = () => {
           <Route element={<ProtectedRoute allowedRoles={["ROLE_DOCTOR"]} />}>
             <Route path="/doctor-home" element={<DoctorLayout><DoctorHome /></DoctorLayout>} />
             <Route path="/doctor-chat" element={<DoctorLayout><DoctorChatPage /></DoctorLayout>} />
+            <Route path="/doctor-pending-requests" element={<DoctorLayout><PendingRequests /></DoctorLayout>} />
+            
           </Route>
             
           {/* Dang phat trien */}
