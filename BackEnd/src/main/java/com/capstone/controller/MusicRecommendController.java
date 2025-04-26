@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -43,6 +44,7 @@ public class MusicRecommendController {
                 .result(response)
                 .build();
     }
+
     @GetMapping("/get-all-music-recommend")
     @Operation(summary = "Get all music recommendations")
     public ApiResponse<List<RecommendationResponse>> getAllRecommendations() {
@@ -50,5 +52,13 @@ public class MusicRecommendController {
         return ApiResponse.<List<RecommendationResponse>>builder()
                 .result(response)
                 .build();
+    }
+
+    @DeleteMapping("/delete-music")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete a music recommendation")
+    public ResponseEntity<Void> deleteMusic(@RequestBody Map<String, String> request) {
+        musicRecommendService.deleteMusic(request.get("musicUrl"));
+        return ResponseEntity.ok().build();
     }
 } 

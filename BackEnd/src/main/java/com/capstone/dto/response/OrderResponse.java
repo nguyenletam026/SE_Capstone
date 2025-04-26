@@ -19,4 +19,8 @@ public class OrderResponse {
     private Double totalAmount;
     private Date orderDate;
     private List<OrderItemResponse> items;
+    private String address;
+    private String phoneNumber;
+    private String paymentMethod;
+    private String status;
 } 
