@@ -96,7 +96,8 @@ export default function DoctorLayout({ children }) {
         </header>
 
         {/* Page content */}
-        <div className="flex-1 px-6 py-6 md:px-10 bg-gray-50">{children}</div>
+        <div className="flex-1 p-0 bg-gray-50">{children}</div>
+
 
         {/* Footer */}
         <footer className="bg-gray-100 text-center text-sm py-4 text-gray-600 mt-auto">
