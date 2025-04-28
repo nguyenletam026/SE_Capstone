@@ -33,4 +33,5 @@ public class User {
     String verificationToken;
     Date verificationTokenExpiry;
     Boolean emailVerified = false;
+    Boolean banned = false;
 }

@@ -32,8 +32,23 @@ public class ProductOrder {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderItem> orderItems;
     
+    @Column(nullable = true) // Allow null initially, to be set during checkout
+    String address;
+    
+    @Column(nullable = true) // Allow null initially
+    String phoneNumber;
+    
+    @Column(nullable = true) // e.g., "COD", "USER_BALANCE"
+    String paymentMethod;
+    
+    @Column(nullable = false)
+    String status; // e.g., "PENDING_CONFIRMATION", "PREPARING", "SHIPPING", "DELIVERED", "COMPLETED", "CANCELLED"
+    
     @PrePersist
     protected void onCreate() {
         orderDate = new Date();
+        if (status == null) {
+            status = "PENDING_CONFIRMATION"; // Default status
+        }
     }
 } 
