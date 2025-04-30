@@ -39,6 +39,10 @@ public class OrderMapper {
                 .totalAmount(order.getTotalAmount())
                 .orderDate(order.getOrderDate())
                 .items(items)
+                .address(order.getAddress())
+                .phoneNumber(order.getPhoneNumber())
+                .paymentMethod(order.getPaymentMethod())
+                .status(order.getStatus())
                 .build();
     }
 

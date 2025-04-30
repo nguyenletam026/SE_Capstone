@@ -28,10 +28,8 @@ public enum ErrorCode {
     FACE_COMPARISON_FAILED(1018, "Face comparison failed", HttpStatus.INTERNAL_SERVER_ERROR),
     UNKNOWN_ERROR(1019, "Unknown error", HttpStatus.INTERNAL_SERVER_ERROR),
 
-    RESOURCE_NOT_FOUND(1020, "Resource not found", HttpStatus.NOT_FOUND),
-    DUPLICATE_RESOURCE(1021, "Resource already exists", HttpStatus.CONFLICT),
+    RESOURCE_NOT_FOUND(1020, "Resource not found", HttpStatus.NOT_FOUND),    DUPLICATE_RESOURCE(1021, "Resource already exists", HttpStatus.CONFLICT),
     INVALID_REQUEST(1022, "Invalid request parameters", HttpStatus.BAD_REQUEST),
-    INVALID_PARAM(1042, "Invalid parameter value", HttpStatus.BAD_REQUEST),
     DAILY_LIMIT_EXCEEDED(429, "Daily limit exceeded", HttpStatus.TOO_MANY_REQUESTS),
     INTERNAL_SERVER_ERROR(500, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_FILE_FORMAT(1023, "Invalid file format", HttpStatus.BAD_REQUEST),
@@ -49,10 +47,19 @@ public enum ErrorCode {
     INVALID_TIME_RANGE(1035, "Invalid time range", HttpStatus.BAD_REQUEST),
     SCHEDULE_NOT_FOUND(1036, "Doctor schedule not found", HttpStatus.NOT_FOUND),
     REQUEST_ALREADY_SENT(1037, "Request already sent, please wait for our response", HttpStatus.BAD_REQUEST),
-    INVALID_VERIFICATION_TOKEN(1038, "Invalid verification token", HttpStatus.BAD_REQUEST),
-    EXPIRED_VERIFICATION_TOKEN(1039, "Verification token has expired", HttpStatus.BAD_REQUEST),
+    INVALID_VERIFICATION_TOKEN(1038, "Invalid verification token", HttpStatus.BAD_REQUEST),    EXPIRED_VERIFICATION_TOKEN(1039, "Verification token has expired", HttpStatus.BAD_REQUEST),
     EMAIL_ALREADY_VERIFIED(1040, "Email is already verified", HttpStatus.BAD_REQUEST),
     EMAIL_NOT_VERIFIED(1041, "Email is not verified", HttpStatus.FORBIDDEN),
+    NO_AVAILABLE_SLOTS(1042, "No available appointment slots", HttpStatus.CONFLICT),
+    INVALID_PARAM(1043, "Invalid parameter", HttpStatus.BAD_REQUEST),
+    USER_BANNED(1044, "User is banned", HttpStatus.FORBIDDEN),
+
+    CART_NOT_FOUND(1045, "Cart not found", HttpStatus.NOT_FOUND),
+    CART_ITEM_NOT_FOUND(1046, "Cart item not found", HttpStatus.NOT_FOUND),
+    CART_EMPTY(1047, "Cart is empty", HttpStatus.BAD_REQUEST),
+
+    MUSIC_NOT_FOUND(1048, "Music not found", HttpStatus.NOT_FOUND),
+    VIDEO_NOT_FOUND(1049, "Video not found", HttpStatus.NOT_FOUND),
 
     ;
 
