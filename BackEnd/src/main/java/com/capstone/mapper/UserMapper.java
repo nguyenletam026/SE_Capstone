@@ -8,7 +8,9 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    @Mapping(target = "balance", constant = "0.0")
     User toUser(UserCreationRequest request);
+    
     @Mapping(source = "id", target = "id")
     @Mapping(source = "firstName", target = "firstName")
     @Mapping(source = "lastName", target = "lastName")
@@ -17,6 +19,6 @@ public interface UserMapper {
     @Mapping(source = "birthdayDate", target = "birthdayDate")
     @Mapping(source = "role", target = "role")
     @Mapping(source = "avtUrl", target = "avtUrl")
-
+    @Mapping(source = "banned", target = "banned")
     UserResponse toUserResponse(User user);
 }
