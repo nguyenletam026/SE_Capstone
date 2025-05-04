@@ -76,6 +76,12 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request){
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // Check if user is banned
+        if (user.getBanned()) {
+            throw new AppException(ErrorCode.USER_BANNED); // You'll need to define this ErrorCode
+        }
+
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!authenticated){

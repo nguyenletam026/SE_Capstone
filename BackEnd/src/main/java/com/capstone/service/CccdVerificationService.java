@@ -78,9 +78,7 @@ public class CccdVerificationService {
 
                 log.info("Comparing CCCD name: '{}' vs user name1: '{}' and user name2: '{}'", nameFromCccd, userFullName1, userFullName2);
 
-                if (!nameFromCccd.equals(userFullName1) && !nameFromCccd.equals(userFullName2)) {
-                    throw new AppException(ErrorCode.CCCD_NAME_MISMATCH);
-                }
+
             } else {
                 throw new AppException(ErrorCode.INVALID_CERTIFICATE);
             }
