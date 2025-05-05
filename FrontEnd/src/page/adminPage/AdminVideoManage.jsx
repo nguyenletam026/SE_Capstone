@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Dialog } from "@headlessui/react"; // hoặc bạn có thể dùng modal từ bất kỳ UI lib nào
-import { getAllRecommendedVideos } from "../../lib/admin/videoServices";
+import { getAllRecommendedVideos } from "../../lib/util/videoMusicRecommend";
 
 export default function AdminVideoManage() {
   const [videos, setVideos] = useState([]);
