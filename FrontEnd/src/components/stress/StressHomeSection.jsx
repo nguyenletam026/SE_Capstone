@@ -50,6 +50,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
   };
 
   useEffect(() => {
+    setShowWebcam(false);
     refreshDailyStress();
   }, []);
 
@@ -77,30 +78,31 @@ export default function StressHomeSection({ onRefreshCharts }) {
       </div>
 
       <div className="mt-6">
-        {showWebcam ? (
-          <div className="flex flex-col items-center gap-4">
-            <WebcamCapture
-              onResult={() => {
-                refreshDailyStress();
-                setShowWebcam(false);
-                onRefreshCharts();
-              }}
-            />
-            <button
-              onClick={() => setShowWebcam(false)}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow"
-            >
-              Thoát Chế Độ Camera ❌
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowWebcam(true)}
-            className="bg-black text-brown-700 px-6 py-2 rounded-lg font-semibold shadow hover:scale-105 transition"
-          >
-            Bắt Đầu Phân Tích Bằng Camera 📸
-          </button>
-        )}
+      {showWebcam ? (
+  <div className="flex flex-col items-center gap-4">
+    <WebcamCapture
+      onResult={() => {
+        refreshDailyStress();
+        setShowWebcam(false);
+        onRefreshCharts();
+      }}
+    />
+    <button
+      onClick={() => setShowWebcam(false)}
+      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow"
+    >
+      Thoát Chế Độ Camera ❌
+    </button>
+  </div>
+) : (
+  <button
+    onClick={() => setShowWebcam(true)}
+    className="bg-black text-brown-700 px-6 py-2 rounded-lg font-semibold shadow hover:scale-105 transition"
+  >
+    Bắt Đầu Phân Tích Bằng Camera 📸
+  </button>
+)}
+
       </div>
 
       {/* Đường cong đẹp */}
