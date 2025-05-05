@@ -27,6 +27,7 @@ public class ChatRequestService {
     private final ChatRequestRepository chatRequestRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final DoctorScheduleService doctorScheduleService;
 
     public ChatRequest createChatRequest(String doctorId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -119,9 +120,7 @@ public class ChatRequestService {
 
         chatRequest.setStatus(RequestStatus.APPROVED);
         return chatRequestRepository.save(chatRequest);
-    }
-
-    public ChatRequest rejectChatRequest(String requestId) {
+    }    public ChatRequest rejectChatRequest(String requestId) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User doctor = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -134,6 +133,18 @@ public class ChatRequestService {
         }
 
         chatRequest.setStatus(RequestStatus.REJECTED);
+        
+        // Release the appointment slot if one was booked
+        if (chatRequest.getDoctorSchedule() != null) {
+            try {
+                boolean released = doctorScheduleService.releaseAppointmentSlot(chatRequest.getDoctorSchedule().getId());
+                log.info("Released appointment slot {} for rejected chat request {}: {}", 
+                        chatRequest.getDoctorSchedule().getId(), chatRequest.getId(), released);
+            } catch (Exception e) {
+                log.error("Failed to release appointment slot for rejected chat request {}: ", chatRequest.getId(), e);
+            }
+        }
+        
         return chatRequestRepository.save(chatRequest);
     }
 

@@ -5,6 +5,7 @@ import com.capstone.dto.response.ChatPaymentResponse;
 import com.capstone.dto.response.PatientChatResponse;
 import com.capstone.entity.ChatPayment;
 import com.capstone.entity.ChatRequest;
+import com.capstone.entity.DoctorSchedule;
 import com.capstone.entity.User;
 import com.capstone.enums.RequestStatus;
 import com.capstone.exception.AppException;
@@ -37,8 +38,8 @@ public class ChatPaymentService {
     private final SystemConfigService systemConfigService;
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    
-    @Transactional
+    private final DoctorScheduleService doctorScheduleService;
+      @Transactional
     public ChatPaymentResponse createChatPayment(ChatPaymentRequest request) {
         log.info("Starting chat payment creation with request: {}", request);
         
@@ -48,7 +49,7 @@ public class ChatPaymentService {
         User patient = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         log.info("Found patient: {}", patient.getUsername());
-        
+
         User doctor = userRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         log.info("Found doctor: {}", doctor.getUsername());
@@ -58,6 +59,17 @@ public class ChatPaymentService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         
+        // Check if doctor has available schedule slots right now
+        Optional<DoctorSchedule> availableSchedule = doctorScheduleService.findAvailableScheduleForDoctor(doctor);
+        if (availableSchedule.isEmpty()) {
+            log.error("No available schedule slots for doctor {} at current time", doctor.getUsername());
+            throw new AppException(ErrorCode.NO_AVAILABLE_SLOTS, 
+                    "Bác sĩ hiện không có lịch trống hoặc đã hết slot. Vui lòng thử lại sau.");
+        }
+        
+        DoctorSchedule schedule = availableSchedule.get();
+        log.info("Found available schedule slot: {} for doctor {}", schedule.getId(), doctor.getUsername());
+
         // Check for existing chat request or create new one
         ChatRequest chatRequest;
         Optional<ChatRequest> existingRequest = chatRequestRepository
@@ -74,13 +86,24 @@ public class ChatPaymentService {
                 throw new AppException(ErrorCode.DUPLICATE_RESOURCE, "Đã tồn tại thanh toán cho yêu cầu tư vấn này");
             }
         } else {
+            // Atomically book the appointment slot before creating the chat request
+            boolean slotBooked = doctorScheduleService.bookAppointmentSlot(schedule.getId());
+            if (!slotBooked) {
+                log.error("Failed to book appointment slot for schedule: {} - slot may have been taken by another user", schedule.getId());
+                throw new AppException(ErrorCode.NO_AVAILABLE_SLOTS, 
+                        "Slot đã được đặt bởi người khác. Vui lòng thử lại.");
+            }
+            
+            log.info("Successfully booked appointment slot for schedule: {}", schedule.getId());
+            
             chatRequest = ChatRequest.builder()
                     .patient(patient)
                     .doctor(doctor)
+                    .doctorSchedule(schedule)  // Link to the booked schedule
                     .status(RequestStatus.PENDING)
                     .build();
             chatRequest = chatRequestRepository.save(chatRequest);
-            log.info("Created new chat request: {}", chatRequest.getId());
+            log.info("Created new chat request: {} with schedule: {}", chatRequest.getId(), schedule.getId());
         }
         
         // Get the current cost per hour from system config
@@ -108,8 +131,7 @@ public class ChatPaymentService {
                 .hours(request.getHours())
                 .expiresAt(expiresAt)
                 .build();
-        
-        try {
+          try {
             // Deduct amount from user's balance
             patient.setBalance(patient.getBalance() - amount);
             userRepository.save(patient);
@@ -147,6 +169,16 @@ public class ChatPaymentService {
             
             return ChatPaymentResponse.fromEntity(payment);
         } catch (Exception e) {
+            // If payment processing fails and we just booked a new slot, release it
+            if (existingRequest.isEmpty() && chatRequest != null && chatRequest.getDoctorSchedule() != null) {
+                try {
+                    boolean released = doctorScheduleService.releaseAppointmentSlot(chatRequest.getDoctorSchedule().getId());
+                    log.info("Released appointment slot {} due to payment failure: {}", 
+                            chatRequest.getDoctorSchedule().getId(), released);
+                } catch (Exception releaseException) {
+                    log.error("Failed to release appointment slot during rollback: ", releaseException);
+                }
+            }
             log.error("Error processing chat payment: ", e);
             throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR, "Không thể xử lý thanh toán. Vui lòng thử lại sau.");
         }
@@ -158,8 +190,7 @@ public class ChatPaymentService {
         
         return ChatPaymentResponse.fromEntity(payment);
     }
-    
-    public boolean isChatActive(ChatRequest chatRequest) {
+      public boolean isChatActive(ChatRequest chatRequest) {
         // Get current time
         LocalDateTime now = LocalDateTime.now();
         
@@ -171,6 +202,17 @@ public class ChatPaymentService {
             chatRequest.setStatus(RequestStatus.PAYMENT_REQUIRED);
             chatRequestRepository.save(chatRequest);
             log.info("Chat request {} marked as PAYMENT_REQUIRED due to expiration", chatRequest.getId());
+            
+            // Release the appointment slot if one was booked
+            if (chatRequest.getDoctorSchedule() != null) {
+                try {
+                    boolean released = doctorScheduleService.releaseAppointmentSlot(chatRequest.getDoctorSchedule().getId());
+                    log.info("Released appointment slot {} for expired chat request {}: {}", 
+                            chatRequest.getDoctorSchedule().getId(), chatRequest.getId(), released);
+                } catch (Exception e) {
+                    log.error("Failed to release appointment slot for expired chat request {}: ", chatRequest.getId(), e);
+                }
+            }
         }
         
         return isActive;
