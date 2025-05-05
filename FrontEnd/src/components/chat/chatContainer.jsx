@@ -8,7 +8,7 @@ const ChatContainer = () => {
   const { selectedUser } = useChat();
 
   if (!selectedUser) {
-    return <div className="flex items-center justify-center h-full">Chọn bệnh nhân để bắt đầu trò chuyện.</div>;
+    return <div className="flex items-center justify-center h-full">Chọn đoạn đối thoại để bắt đầu trò chuyện.</div>;
   }
 
   return (

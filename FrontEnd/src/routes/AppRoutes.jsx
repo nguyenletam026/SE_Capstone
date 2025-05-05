@@ -34,6 +34,7 @@ import AdminHome from "../page/adminPage/adminHome";
 import AdminManageRole from "../page/adminPage/adminManageRole";
 import AdminManageUser from "../page/adminPage/adminManageUser";
 import AdminManageDoctor from "../page/adminPage/adminManageDoctor";
+import AdminVideoManage from "../page/adminPage/AdminVideoManage";
 
 // Doctor Pages
 import DoctorLayout from "../components/layouts/doctorLayout";
@@ -80,6 +81,8 @@ const AppRoutes = () => {
             <Route path="/admin-role" element={<AdminLayout><AdminManageRole /></AdminLayout>} />
             <Route path="/admin-user" element={<AdminLayout><AdminManageUser /></AdminLayout>} />
             <Route path="/admin-doctor" element={<AdminLayout><AdminManageDoctor /></AdminLayout>} />
+            <Route path="/admin-video" element={<AdminLayout><AdminVideoManage/></AdminLayout>} />
+            <Route path="/admin-music" element={<AdminLayout><AdminVideoManage/></AdminLayout>} />
           </Route>
 
           {/* Route Doctor */}
