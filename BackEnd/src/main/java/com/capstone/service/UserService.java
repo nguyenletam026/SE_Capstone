@@ -75,6 +75,7 @@ public class UserService {
         com.capstone.entity.Role role = roleRepository.findByName(Role.USER.name())
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         user.setRole(role);
+        user.setBanned(false);
         
         // Generate verification token (6 digits)
         String verificationToken = generateVerificationToken();
@@ -88,14 +89,14 @@ public class UserService {
         user.setVerificationToken(verificationToken);
         user.setVerificationTokenExpiry(tokenExpiry);
         user.setEmailVerified(false);
+        user.setBalance(0.0); // Đảm bảo balance được đặt giá trị trước khi lưu
         
         userRepository.save(user);
         
         // Sử dụng phương thức uploadAvatarSafe để xử lý avatar
         String avtUrl = cloudinaryService.uploadAvatarSafe(avtFile, user.getId());
         user.setAvtUrl(avtUrl);
-        user.setBalance(0.0);
-
+        
         userRepository.save(user);
         
         // Send verification email
@@ -162,6 +163,8 @@ public class UserService {
     }
     public List<UserResponse> getAllUser() {
         return userRepository.findAll().stream()
+                .filter(user -> !user.getRole().getName().equals(Role.ADMIN.name()) 
+                                 && !user.getRole().getName().equals(Role.DOCTOR.name()))
                 .map(userMapper::toUserResponse).toList();
     }
     public UserResponse getUserById(String id) {
@@ -198,5 +201,19 @@ public class UserService {
         return userRepository.findAll().stream()
                 .filter(user -> user.getRole().getName().equals(Role.TEACHER.name()))
                 .map(userMapper::toUserResponse).toList();
+    }
+
+    public void banUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.setBanned(true);
+        userRepository.save(user);
+    }
+
+    public void unbanUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.setBanned(false);
+        userRepository.save(user);
     }
 }

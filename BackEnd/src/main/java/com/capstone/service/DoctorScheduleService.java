@@ -213,6 +213,79 @@ public class DoctorScheduleService {
         doctorScheduleRepository.delete(schedule);
     }
     
+    /**
+     * Check if a doctor has available appointment slots right now
+     */
+    public Optional<DoctorSchedule> findAvailableScheduleForDoctor(User doctor) {
+        LocalDate currentDate = LocalDate.now();
+        java.time.LocalTime currentTime = java.time.LocalTime.now();
+        
+        return doctorScheduleRepository.findAvailableScheduleForDoctorNow(doctor, currentDate, currentTime);
+    }
+    
+    /**
+     * Atomically book an appointment slot - returns true if successful, false if no slots available
+     */
+    @Transactional
+    public boolean bookAppointmentSlot(String scheduleId) {
+        int updatedRows = doctorScheduleRepository.incrementCurrentAppointments(scheduleId);
+        return updatedRows > 0;
+    }
+    
+    /**
+     * Release an appointment slot (when booking is cancelled or expires)
+     */
+    @Transactional
+    public boolean releaseAppointmentSlot(String scheduleId) {
+        int updatedRows = doctorScheduleRepository.decrementCurrentAppointments(scheduleId);
+        return updatedRows > 0;
+    }
+      /**
+     * Get doctors that have available appointment slots at the specified date and time
+     */
+    public List<User> getDoctorsWithAvailableSlots(LocalDate date, java.time.LocalTime time) {
+        System.out.println("Finding doctors with available slots for date: " + date + " and time: " + time);
+        
+        // First get all schedules for this date 
+        List<DoctorSchedule> schedules = doctorScheduleRepository.findByDate(date);
+        System.out.println("Found " + schedules.size() + " schedules for date: " + date);
+        
+        if (schedules.isEmpty()) {
+            System.out.println("No schedules found for date: " + date);
+            return List.of();
+        }
+        
+        // Filter schedules by time and available slots
+        List<User> doctors = schedules.stream()
+                .filter(schedule -> {
+                    // Check if schedule is available at the requested time
+                    boolean isTimeInRange = !time.isBefore(schedule.getStartTime()) && 
+                                       !time.isAfter(schedule.getEndTime());
+                    
+                    // Check if schedule has available capacity and is marked as available
+                    boolean hasSlots = schedule.getCurrentAppointments() < schedule.getMaxAppointments() 
+                                     && schedule.getIsAvailable();
+                    
+                    // Debug logging
+                    System.out.println("Schedule ID: " + schedule.getId() + 
+                                      ", Doctor: " + schedule.getDoctor().getFirstName() + " " + 
+                                      schedule.getDoctor().getLastName() + 
+                                      ", isTimeInRange: " + isTimeInRange +
+                                      ", currentAppointments: " + schedule.getCurrentAppointments() +
+                                      ", maxAppointments: " + schedule.getMaxAppointments() +
+                                      ", isAvailable: " + schedule.getIsAvailable() +
+                                      ", hasAvailableSlots: " + (hasSlots && isTimeInRange));
+                    
+                    return isTimeInRange && hasSlots;
+                })
+                .map(DoctorSchedule::getDoctor)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        System.out.println("Returning " + doctors.size() + " doctors with available slots");
+        return doctors;
+    }
+    
     private DoctorScheduleResponse mapToResponse(DoctorSchedule schedule) {
         User doctor = schedule.getDoctor();
         String specialization = "";
@@ -237,4 +310,4 @@ public class DoctorScheduleService {
                 .isAvailable(schedule.getIsAvailable())
                 .build();
     }
-} 
+}

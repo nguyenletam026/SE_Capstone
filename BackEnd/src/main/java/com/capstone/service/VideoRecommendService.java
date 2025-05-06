@@ -144,4 +144,12 @@ public class VideoRecommendService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
+
+    public void deleteVideo(String videoUrl) {
+        // Find the video by URL and delete it
+        VideoRecommend video = videoRecommendRepository.findByVideoUrl(videoUrl)
+                .orElseThrow(() -> new AppException(ErrorCode.VIDEO_NOT_FOUND));
+        
+        videoRecommendRepository.delete(video);
+    }
 } 

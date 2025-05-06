@@ -185,4 +185,12 @@ public class MusicRecommendService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
+
+    public void deleteMusic(String musicUrl) {
+        // Find the music by URL and delete it
+        MusicRecommend music = musicRecommendRepository.findByMusicUrl(musicUrl)
+                .orElseThrow(() -> new AppException(ErrorCode.MUSIC_NOT_FOUND));
+        
+        musicRecommendRepository.delete(music);
+    }
 } 
