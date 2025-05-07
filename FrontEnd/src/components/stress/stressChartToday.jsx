@@ -65,17 +65,57 @@ export default function TodayChart({ refreshSignal, onDataStatus }) {
       return;
     }
 
-    // For now, let's use sample data
-    // In a real implementation, process the actual data here
+    // Find today's data
+    const today = new Date();
+    const todayData = data.find(item => {
+      const itemDate = new Date(item.end_date);
+      return itemDate.toDateString() === today.toDateString();
+    });
+
+    if (!todayData || !todayData.stress_analyses || todayData.stress_analyses.length === 0) {
+      setChartData(null);
+      if (onDataStatus) onDataStatus(false);
+      return;
+    }
+
+    // Process stress analyses for today
+    const stressAnalyses = todayData.stress_analyses.sort((a, b) => 
+      new Date(a.createdAt) - new Date(b.createdAt)
+    );
+
+    const labels = stressAnalyses.map(analysis => 
+      new Date(analysis.createdAt).toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    );
+
+    const stressData = stressAnalyses.map(analysis => analysis.stressScore);
+
+    // Determine color based on average stress level
+    const avgStress = stressData.reduce((sum, score) => sum + score, 0) / stressData.length;
+    let backgroundColor, borderColor;
+    
+    if (avgStress > 70) {
+      backgroundColor = "rgba(239, 68, 68, 0.2)";
+      borderColor = "rgba(239, 68, 68, 1)";
+    } else if (avgStress > 40) {
+      backgroundColor = "rgba(251, 191, 36, 0.2)";
+      borderColor = "rgba(251, 191, 36, 1)";
+    } else {
+      backgroundColor = "rgba(34, 197, 94, 0.2)";
+      borderColor = "rgba(34, 197, 94, 1)";
+    }
+
     const chartData = {
-      labels: ["8:00", "10:00", "12:00", "14:00", "16:00", "18:00"],
+      labels,
       datasets: [
         {
           label: "Stress hôm nay",
-          data: [45, 60, 75, 65, 50, 40],
+          data: stressData,
           fill: true,
-          backgroundColor: "rgba(34, 197, 94, 0.2)",
-          borderColor: "rgba(34, 197, 94, 1)",
+          backgroundColor,
+          borderColor,
           tension: 0.4,
         },
       ],

@@ -61,19 +61,46 @@ export default function StressChart({ refreshSignal }) {
       return;
     }
 
-    // Process data here...
-    // This is placeholder logic - replace with actual data processing
+    // Sort data by date (most recent first) and take last 6 months
+    const sortedData = data
+      .sort((a, b) => new Date(b.end_date) - new Date(a.end_date))
+      .slice(0, 6)
+      .reverse(); // Reverse to show chronological order
+
+    const labels = sortedData.map(item => {
+      const date = new Date(item.end_date);
+      return date.toLocaleDateString('vi-VN', { 
+        month: 'short', 
+        year: '2-digit' 
+      });
+    });
+
+    const stressData = sortedData.map(item => item.average_stress_score);
+
+    // Calculate average stress for color determination
+    const avgStress = stressData.reduce((sum, score) => sum + score, 0) / stressData.length;
+    let backgroundColor, borderColor;
     
-    // Example data format
+    if (avgStress > 70) {
+      backgroundColor = "rgba(239, 68, 68, 0.2)";
+      borderColor = "rgba(239, 68, 68, 1)";
+    } else if (avgStress > 40) {
+      backgroundColor = "rgba(251, 191, 36, 0.2)";
+      borderColor = "rgba(251, 191, 36, 1)";
+    } else {
+      backgroundColor = "rgba(34, 197, 94, 0.2)";
+      borderColor = "rgba(34, 197, 94, 1)";
+    }
+    
     const chartData = {
-      labels: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
+      labels,
       datasets: [
         {
-          label: "Mức độ stress",
-          data: [65, 59, 80, 81, 56, 55, 40],
+          label: "Mức độ stress trung bình",
+          data: stressData,
           fill: true,
-          backgroundColor: "rgba(75, 192, 192, 0.2)",
-          borderColor: "rgba(75, 192, 192, 1)",
+          backgroundColor,
+          borderColor,
           tension: 0.4,
         },
       ],
