@@ -28,6 +28,7 @@ const sidebarItems = [
   { to: "/admin-video", icon: <FaPhotoVideo />, label: "Video" },
   { to: "/admin-deposits", icon: <FaMoneyBillWave />, label: "Deposits" },
   { to: "/admin-settings", icon: <FaCog />, label: "Setting" },
+  { to: "/admin-order", icon: <FaShoppingBag />, label: "Order Management" },
 ];
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
