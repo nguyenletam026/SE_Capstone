@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getToken } from "../services/localStorageService";
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL, // Sử dụng tên biến mới
@@ -6,7 +7,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -4,7 +4,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 
 export const getUsers = async () => {
   try {
-    const response = await fetch(`${API_URL}/users`, {
+    const response = await fetch(`${API_URL}/api/users`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

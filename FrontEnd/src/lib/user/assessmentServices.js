@@ -179,18 +179,46 @@ export const getMyAnswers = async () => {
         console.error("API error:", res.status, res.statusText);
         return { result: [] };
       }
+
+      const responseData = await res.json();
+      console.log("API response data:", responseData);
       
-      const data = await res.json();
-      console.log("API response data:", JSON.stringify(data));
-      console.log("Currently available doctors:", data.result ? data.result.length : 0, "doctors found");
-      
-      if (data.result && data.result.length > 0) {
-        console.log("Doctor IDs:", data.result.map(doc => doc.id).join(", "));
-      }
-      
-      return data;
+      return responseData;
     } catch (error) {
-      console.error("Error fetching currently available doctors:", error);
+      console.error("Error fetching available doctors:", error);
+      return { result: [] };
+    }
+  };
+
+  // New function to get doctors with available appointment slots
+  export const getDoctorsWithAvailableSlots = async () => {
+    const token = getToken();
+    
+    console.log("Fetching doctors with available appointment slots");
+    
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/api/doctor-schedules/current/doctors/available-slots`;
+      console.log("API URL:", apiUrl);
+      
+      const res = await fetch(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      console.log("API response status:", res.status, res.statusText);
+      
+      if (!res.ok) {
+        console.error("API error:", res.status, res.statusText);
+        return { result: [] };
+      }
+
+      const responseData = await res.json();
+      console.log("API response data:", responseData);
+      
+      return responseData;
+    } catch (error) {
+      console.error("Error fetching doctors with available slots:", error);
       return { result: [] };
     }
   };
