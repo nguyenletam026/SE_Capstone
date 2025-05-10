@@ -6,7 +6,7 @@ import ChatContainer from "../../components/chat/chatContainer";
 import { useAuth } from "../../context/AuthContext";
 import { ChatProvider, useChat } from "../../context/ChatContext";
 import { fetchUserInfo } from "../../lib/user/info";
-import { getAllDoctorRecommend, getDoctorsForToday, getDoctorsByDateTime, getCurrentAvailableDoctors } from "../../lib/user/assessmentServices";
+import { getAllDoctorRecommend, getDoctorsForToday, getDoctorsByDateTime, getCurrentAvailableDoctors, getDoctorsWithAvailableSlots } from "../../lib/user/assessmentServices";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { 
@@ -206,14 +206,14 @@ function UserChatLayout() {
   const fetchDoctors = async () => {
     setLoadingDoctors(true);
     try {
-      console.log("Fetching currently available doctors using server time");
+      console.log("Fetching doctors with available appointment slots");
       
-      // Get doctors scheduled for the current server time
-      const doctorsRes = await getCurrentAvailableDoctors();
+      // Get doctors with available slots at the current server time
+      const doctorsRes = await getDoctorsWithAvailableSlots();
       const scheduledDoctors = doctorsRes.result || [];
       
       if (scheduledDoctors.length > 0) {
-        console.log("Found available doctors:", scheduledDoctors.length);
+        console.log("Found doctors with available slots:", scheduledDoctors.length);
         
         // Format doctors for display
         const formattedDoctors = scheduledDoctors.map(d => ({

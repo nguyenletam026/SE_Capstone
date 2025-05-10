@@ -1,43 +1,60 @@
-import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Upload,
+  Spin,
+  Typography,
+  Image,
+  Space,
+  message,
+  Popconfirm,
+  Card,
+  Row,
+  Col
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  UploadOutlined,
+  EyeOutlined,
+  ShoppingOutlined
+} from "@ant-design/icons";
+import { toast } from "react-toastify"; // Vẫn giữ lại react-toastify theo code gốc, có thể thay bằng message/notification của AntD
 import { formatCurrency } from "../../lib/utils";
 import { getToken } from "../../services/localStorageService";
+import { motion } from "framer-motion";
 
 const API_BASE = process.env.REACT_APP_API_URL;
+const { Title, Text } = Typography;
 
 export default function AdminManageProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    stock: "",
-  });
-  const [image, setImage] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [form] = Form.useForm();
+  const [fileList, setFileList] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const token = getToken();
       const response = await fetch(`${API_BASE}/api/products`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (!response.ok) {
-        throw new Error("Failed to fetch products");
+        const errorData = await response.json().catch(() => ({ message: "Failed to fetch products" }));
+        throw new Error(errorData.message || "Failed to fetch products");
       }
-
       const data = await response.json();
       setProducts(data.result || []);
     } catch (error) {
@@ -45,140 +62,97 @@ export default function AdminManageProducts() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const handleOpenModal = (product = null) => {
+    if (product) {
+      setEditingProduct(product);
+      form.setFieldsValue({
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+      });
+      if (product.imageUrl) {
+        setImagePreview(product.imageUrl);
+        // Ant Design Upload component expects a specific file object structure
+        setFileList([{
+          uid: '-1',
+          name: 'image.png',
+          status: 'done',
+          url: product.imageUrl,
+        }]);
+      } else {
+        setImagePreview(null);
+        setFileList([]);
+      }
+    } else {
+      setEditingProduct(null);
+      form.resetFields();
+      setImagePreview(null);
+      setFileList([]);
+    }
+    setIsModalVisible(true);
   };
 
-  const openCreateModal = () => {
-    setEditMode(false);
-    setCurrentProduct(null);
-    setFormData({
-      name: "",
-      description: "",
-      price: "",
-      stock: "",
-    });
-    setImage(null);
+  const handleCancelModal = () => {
+    setIsModalVisible(false);
+    setEditingProduct(null);
+    form.resetFields();
     setImagePreview(null);
-    setModalOpen(true);
+    setFileList([]);
   };
 
-  const openEditModal = (product) => {
-    setEditMode(true);
-    setCurrentProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      stock: product.stock,
-    });
-    setImagePreview(product.imageUrl);
-    setImage(null);
-    setModalOpen(true);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedImage = e.target.files[0];
-      setImage(selectedImage);
-      setImagePreview(URL.createObjectURL(selectedImage));
-    }
-  };
-
-  const validateForm = () => {
-    if (!formData.name.trim()) {
-      toast.error("Product name is required");
-      return false;
-    }
-    if (!formData.description.trim()) {
-      toast.error("Description is required");
-      return false;
-    }
-    if (isNaN(parseFloat(formData.price)) || parseFloat(formData.price) <= 0) {
-      toast.error("Price must be a positive number");
-      return false;
-    }
-    if (isNaN(parseInt(formData.stock)) || parseInt(formData.stock) < 0) {
-      toast.error("Stock must be a non-negative number");
-      return false;
-    }
-    if (!editMode && !image) {
-      toast.error("Please upload an image for the product");
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
+  const handleFormSubmit = async (values) => {
     try {
       const token = getToken();
-      const formDataObj = new FormData();
+      const formData = new FormData();
       
-      // Create product data object
       const productData = {
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
+        name: values.name,
+        description: values.description,
+        price: parseFloat(values.price),
+        stock: parseInt(values.stock),
       };
       
-      // Add product data as a JSON string in the 'data' part
-      const jsonBlob = new Blob([JSON.stringify(productData)], { 
-        type: 'application/json' 
-      });
-      formDataObj.append("data", jsonBlob);
-      
-      // Add image if available
-      if (image) {
-        formDataObj.append("image", image);
+      const jsonBlob = new Blob([JSON.stringify(productData)], { type: 'application/json' });
+      formData.append("data", jsonBlob);
+
+      if (fileList.length > 0 && fileList[0].originFileObj) {
+        formData.append("image", fileList[0].originFileObj);
       }
 
-      // Determine URL and method based on edit mode
-      const url = editMode 
-        ? `${API_BASE}/api/products/${currentProduct.id}`
+      const url = editingProduct
+        ? `${API_BASE}/api/products/${editingProduct.id}`
         : `${API_BASE}/api/products`;
-      const method = editMode ? "PUT" : "POST";
-
-      console.log("Sending request to:", url);
+      const method = editingProduct ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: formDataObj,
+        body: formData,
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
-        const errorData = JSON.parse(errorText || '{}');
-        const errorMessage = errorData?.message || `Failed to ${editMode ? "update" : "create"} product`;
-        throw new Error(errorMessage);
+        const errorData = await response.json().catch(() => ({ message: `Failed to ${editingProduct ? "update" : "create"} product` }));
+        throw new Error(errorData.message || `Failed to ${editingProduct ? "update" : "create"} product`);
       }
 
-      toast.success(`Product ${editMode ? "updated" : "created"} successfully`);
-      setModalOpen(false);
+      toast.success(`Product ${editingProduct ? "updated" : "created"} successfully`);
+      handleCancelModal();
       fetchProducts();
     } catch (error) {
       toast.error(error.message);
     }
   };
 
-  const handleDelete = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) {
-      return;
-    }
-
+  const handleDeleteProduct = async (productId) => {
     try {
       const token = getToken();
       const response = await fetch(`${API_BASE}/api/products/${productId}`, {
@@ -187,11 +161,10 @@ export default function AdminManageProducts() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (!response.ok) {
-        throw new Error("Failed to delete product");
+        const errorData = await response.json().catch(() => ({ message: "Failed to delete product" }));
+        throw new Error(errorData.message || "Failed to delete product");
       }
-
       toast.success("Product deleted successfully");
       fetchProducts();
     } catch (error) {
@@ -199,218 +172,236 @@ export default function AdminManageProducts() {
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Manage Health Products
-        </h1>
-        <button
-          onClick={openCreateModal}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Add New Product
-        </button>
-      </div>
+  const handleUploadChange = ({ fileList: newFileList, file }) => {
+    setFileList(newFileList);
+    if (file.status === 'done' || file.status === 'uploading') {
+        if (file.originFileObj) {
+             const reader = new FileReader();
+             reader.onload = (e) => setImagePreview(e.target.result);
+             reader.readAsDataURL(file.originFileObj);
+        }
+    } else if (file.status === 'removed') {
+        const isExistingImage = editingProduct && editingProduct.imageUrl && fileList.length === 0;
+        if (isExistingImage) {
+          // If removing the placeholder for an existing image, keep showing the existing image
+          setImagePreview(editingProduct.imageUrl);
+        } else {
+          setImagePreview(null);
+        }
+    }
+  };
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {products.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                    No products found
-                  </td>
-                </tr>
-              ) : (
-                products.map((product) => (
-                  <tr key={product.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {product.imageUrl && (
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <img
-                              className="h-10 w-10 rounded-full object-cover"
-                              src={product.imageUrl}
-                              alt={product.name}
-                            />
-                          </div>
-                        )}
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {product.name}
-                          </div>
-                          <div className="text-sm text-gray-500 line-clamp-1">
-                            {product.description}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {formatCurrency(product.price)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {product.stock}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => openEditModal(product)}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Create/Edit Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">
-                {editMode ? "Edit Product" : "Add New Product"}
-              </h3>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <span className="text-2xl">&times;</span>
-              </button>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Product Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Product name"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Product description"
-                  rows={3}
-                />
-              </div>
-              <div className="mb-4 grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Price
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    placeholder="Price"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Stock
-                  </label>
-                  <input
-                    type="number"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    placeholder="Stock quantity"
-                    min="0"
-                  />
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Product Image
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full text-gray-700 py-2"
-                />
-                {imagePreview && (
-                  <div className="mt-2">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="h-40 object-contain"
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="mr-2 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  {editMode ? "Update" : "Create"}
-                </button>
-              </div>
-            </form>
+  const columns = [
+    {
+      title: "Product",
+      dataIndex: "name",
+      key: "name",
+      render: (text, record) => (
+        <Space>
+          <Image
+            width={60}
+            height={60}
+            src={record.imageUrl || "https://via.placeholder.com/60?text=No+Image"}
+            alt={record.name}
+            style={{ objectFit: 'cover', borderRadius: '4px' }}
+            preview={{
+                mask: <EyeOutlined />,
+            }}
+          />
+          <div>
+            <Text strong>{record.name}</Text>
+            <br />
+            <Text type="secondary" ellipsis={{ tooltip: record.description }} style={{maxWidth: 200}}>
+              {record.description}
+            </Text>
           </div>
-        </div>
-      )}
-    </div>
+        </Space>
+      ),
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      key: "price",
+      render: (price) => formatCurrency(price),
+      sorter: (a, b) => a.price - b.price,
+    },
+    {
+      title: "Stock",
+      dataIndex: "stock",
+      key: "stock",
+      sorter: (a, b) => a.stock - b.stock,
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      align: 'center',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => handleOpenModal(record)}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Are you sure you want to delete this product?"
+            onConfirm={() => handleDeleteProduct(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="dashed" danger icon={<DeleteOutlined />}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="container mx-auto px-4 py-8"
+    >
+      <Card bordered={false} className="shadow-lg">
+        <Row justify="space-between" align="middle" className="mb-6">
+          <Col>
+            <Title level={2} className="m-0 flex items-center">
+             <ShoppingOutlined className="mr-3" /> Manage Health Products
+            </Title>
+          </Col>
+          <Col>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              size="large"
+              onClick={() => handleOpenModal()}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all"
+            >
+              Add New Product
+            </Button>
+          </Col>
+        </Row>
+
+        <Spin spinning={loading} tip="Loading products..." size="large">
+          <Table
+            columns={columns}
+            dataSource={products}
+            rowKey="id"
+            pagination={{ pageSize: 5, showSizeChanger: true, pageSizeOptions: ['5', '10', '20'] }}
+            scroll={{ x: 'max-content' }}
+            className="mt-4"
+          />
+        </Spin>
+      </Card>
+
+      <Modal
+        title={
+          <Title level={4} className="m-0">
+            {editingProduct ? "Edit Product" : "Add New Product"}
+          </Title>
+        }
+        visible={isModalVisible}
+        onCancel={handleCancelModal}
+        footer={null} // Custom footer below
+        destroyOnClose
+        width={600}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFormSubmit}
+          className="mt-4"
+        >
+          <Form.Item
+            name="name"
+            label="Product Name"
+            rules={[{ required: true, message: "Please input the product name!" }]}
+          >
+            <Input placeholder="Enter product name" />
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ required: true, message: "Please input the description!" }]}
+          >
+            <Input.TextArea rows={3} placeholder="Enter product description" />
+          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="price"
+                label="Price"
+                rules={[
+                  { required: true, message: "Please input the price!" },
+                  { type: 'number', min: 0.01, message: "Price must be greater than 0" }
+                ]}
+              >
+                <InputNumber
+                  className="w-full"
+                  formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                  placeholder="Enter price"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="stock"
+                label="Stock Quantity"
+                rules={[
+                  { required: true, message: "Please input the stock quantity!" },
+                  { type: 'number', min: 0, message: "Stock cannot be negative" }
+                ]}
+              >
+                <InputNumber className="w-full" placeholder="Enter stock quantity" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item
+            name="image"
+            label="Product Image"
+            rules={[{ required: !editingProduct && fileList.length === 0, message: "Please upload an image!" }]}
+          >
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onChange={handleUploadChange}
+              beforeUpload={() => false} // Prevent auto upload, handle manually
+              maxCount={1}
+              accept="image/*"
+            >
+              {fileList.length < 1 && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </Form.Item>
+          {imagePreview && !fileList.length && editingProduct && editingProduct.imageUrl && ( // Show existing image if no new file is selected for edit
+            <div className="mb-4">
+                <Text type="secondary">Current Image:</Text>
+                <Image width={100} src={imagePreview} alt="Current product" className="mt-2 rounded" />
+            </div>
+          )}
+
+
+          <Form.Item className="text-right mt-6">
+            <Space>
+              <Button onClick={handleCancelModal}>
+                Cancel
+              </Button>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                {editingProduct ? "Update Product" : "Create Product"}
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </motion.div>
   );
-} 
+}

@@ -1,28 +1,110 @@
 import React, { useEffect, useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { getAllVideoRecommend } from "../../lib/util/videoMusicRecommend";
+import { FiUpload, FiTrash2, FiX, FiVideo } from "react-icons/fi";
+import { getToken } from "../../services/localStorageService";
 
 export default function AdminVideoManage() {
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadData, setUploadData] = useState({
+    file: null,
+    name: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        const res = await getAllVideoRecommend();
-        if (res.code === 1000) {
-          setVideos(res.result);
-        }
-      } catch (error) {
-        console.error("❌ Lỗi khi lấy danh sách video:", error);
-      }
-    };
     fetchVideos();
   }, []);
 
+  const fetchVideos = async () => {
+    try {
+      const res = await getAllVideoRecommend();
+      if (res.code === 1000) {
+        setVideos(res.result);
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi lấy danh sách video:", error);
+    }
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!uploadData.file || !uploadData.name) {
+      alert("Vui lòng chọn file video và nhập tên video!");
+      return;
+    }
+
+    setIsLoading(true);
+    const formData = new FormData();
+    formData.append("video", uploadData.file);
+    formData.append("name", uploadData.name);
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/recommend-video/MODERATE_STRESS`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        alert("Upload video thành công!");
+        setIsUploadModalOpen(false);
+        setUploadData({ file: null, name: "" });
+        fetchVideos();
+      } else {
+        alert("Lỗi khi upload video!");
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi upload video:", error);
+      alert("Lỗi khi upload video!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (videoUrl) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa video này?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/delete-video`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ videoUrl }),
+      });
+
+      if (response.ok) {
+        alert("Xóa video thành công!");
+        fetchVideos();
+      } else {
+        alert("Lỗi khi xóa video!");
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi xóa video:", error);
+      alert("Lỗi khi xóa video!");
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">🎥 Quản lý video gợi ý stress</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">🎥 Quản lý video gợi ý stress</h1>
+        <button
+          onClick={() => setIsUploadModalOpen(true)}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+        >
+          <FiUpload />
+          Thêm video mới
+        </button>
+      </div>
 
       {videos.length === 0 ? (
         <p className="text-gray-500">Không có video nào.</p>
@@ -33,20 +115,22 @@ export default function AdminVideoManage() {
               key={idx}
               className="bg-white shadow-md hover:shadow-lg transition-shadow rounded-2xl p-6 flex flex-col items-start space-y-3 transform hover:scale-[1.02]"
             >
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-6 h-6 text-blue-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <FiVideo className="w-6 h-6 text-blue-500" />
+                  <h3 className="font-semibold text-gray-800 truncate max-w-[80%]">
+                    {video.videoName}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => handleDelete(video.videoUrl)}
+                  className="text-red-500 hover:text-red-600 transition-colors"
                 >
-                  <path d="M4.5 3A1.5 1.5 0 003 4.5v11A1.5 1.5 0 004.5 17h11a1.5 1.5 0 001.5-1.5v-11A1.5 1.5 0 0015.5 3h-11zm4.75 3.75l5.25 3-5.25 3v-6z" />
-                </svg>
-                <h3 className="font-semibold text-gray-800 truncate max-w-[80%]">
-                  {video.videoName}
-                </h3>
+                  <FiTrash2 className="w-5 h-5" />
+                </button>
               </div>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition font-medium"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition font-medium w-full"
                 onClick={() => setSelectedVideo(video.videoUrl)}
               >
                 🎬 Xem video
@@ -56,7 +140,7 @@ export default function AdminVideoManage() {
         </div>
       )}
 
-      {/* Popup xem video */}
+      {/* Modal xem video */}
       {selectedVideo && (
         <Dialog
           open={true}
@@ -80,6 +164,65 @@ export default function AdminVideoManage() {
           </div>
         </Dialog>
       )}
+
+      {/* Modal upload video */}
+      <Dialog
+        open={isUploadModalOpen}
+        onClose={() => !isLoading && setIsUploadModalOpen(false)}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Thêm video mới</h2>
+            <button
+              onClick={() => !isLoading && setIsUploadModalOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FiX className="w-6 h-6" />
+            </button>
+          </div>
+          <form onSubmit={handleUpload} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tên video
+              </label>
+              <input
+                type="text"
+                value={uploadData.name}
+                onChange={(e) => setUploadData({ ...uploadData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tên video"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                File video
+              </label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => setUploadData({ ...uploadData, file: e.target.files[0] })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <button
+              type="submit"
+              className={`w-full bg-blue-500 text-white py-2 rounded-md font-medium ${
+                isLoading
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-600 transition-colors"
+              }`}
+              disabled={isLoading}
+            >
+              {isLoading ? "Đang xử lý..." : "Upload video"}
+            </button>
+          </form>
+        </div>
+      </Dialog>
     </div>
   );
 }

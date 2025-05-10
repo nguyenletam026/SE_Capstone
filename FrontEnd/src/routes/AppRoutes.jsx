@@ -48,6 +48,7 @@ import AdminDepositHistory from "../page/adminPage/AdminDepositHistory";
 import AdminDoctorSchedule from "../page/adminPage/AdminDoctorSchedule";
 import AdminQuestionManage from "../page/adminPage/AdminQuestionManage";
 import AdminSetting from "../page/adminPage/adminSetting";
+import AdminOrderManagement from "../page/adminPage/AdminOrderManagementPage";
 
 // Doctor Pages
 import DoctorLayout from "../components/layouts/doctorLayout";
@@ -118,6 +119,7 @@ const AppRoutes = () => {
             <Route path="/admin-deposits" element={<AdminDepositHistory />} />
             <Route path="/admin-questions" element={<AdminLayout><AdminQuestionManage /></AdminLayout>} />
             <Route path="/admin-settings" element={<AdminLayout><AdminSetting /></AdminLayout>} />
+            <Route path="/admin-order" element={<AdminLayout><AdminOrderManagement /></AdminLayout>} />
           </Route>
 
           {/* Route Doctor */}

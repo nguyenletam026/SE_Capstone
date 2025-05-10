@@ -3,25 +3,28 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getProductById } from "../../lib/user/productServices";
 import { formatCurrency } from "../../lib/utils";
 import { toast } from "react-toastify";
+import { useCart } from "../../context/CartContext";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingProduct, setLoadingProduct] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const { addItem, loading: cartLoading } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        setLoading(true);
+        setLoadingProduct(true);
         const response = await getProductById(id);
         setProduct(response.result);
+        setQuantity(1);
       } catch (error) {
         toast.error("Failed to load product details");
         navigate("/products");
       } finally {
-        setLoading(false);
+        setLoadingProduct(false);
       }
     };
 
@@ -30,43 +33,23 @@ export default function ProductDetail() {
     }
   }, [id, navigate]);
 
-  const handleAddToCart = () => {
-    // Get current cart from local storage
-    const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
-    
-    // Check if product already in cart
-    const existingItemIndex = cartItems.findIndex(item => item.id === product.id);
-    
-    if (existingItemIndex !== -1) {
-      // Update quantity if product already in cart
-      const newQuantity = cartItems[existingItemIndex].quantity + quantity;
-      
-      if (newQuantity > product.stock) {
-        toast.warning(`Cannot add more than ${product.stock} items due to stock limitations`);
+  const handleLocalAddToCart = () => {
+    if (!product) return;
+
+    if (quantity > product.stock) {
+      toast.warning(`Cannot add more than ${product.stock} items due to stock limitations.`);
+      setQuantity(product.stock > 0 ? product.stock : 1);
+      return;
+    }
+    if (product.stock <= 0){
+        toast.error("This product is out of stock.");
         return;
-      }
-      
-      cartItems[existingItemIndex].quantity = newQuantity;
-    } else {
-      // Add new product to cart
-      cartItems.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        quantity: quantity,
-        stock: product.stock
-      });
     }
     
-    // Save updated cart to local storage
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-    
-    toast.success(`${product.name} added to cart`);
-    navigate("/products");
+    addItem(product.id, quantity);
   };
 
-  if (loading) {
+  if (loadingProduct || cartLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -91,7 +74,7 @@ export default function ProductDetail() {
   return (
     <div className="container mx-auto px-4 py-8">
       <button
-        onClick={() => navigate("/products")}
+        onClick={() => navigate(-1)}
         className="mb-6 inline-flex items-center text-blue-500 hover:text-blue-700"
       >
         <svg
@@ -106,7 +89,7 @@ export default function ProductDetail() {
             clipRule="evenodd"
           />
         </svg>
-        Back to Products
+        Back
       </button>
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden md:flex">
@@ -115,72 +98,79 @@ export default function ProductDetail() {
             <img
               src={product.imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-96 object-cover"
             />
           ) : (
-            <div className="w-full h-full min-h-[300px] bg-gray-200 flex items-center justify-center">
+            <div className="w-full h-96 min-h-[300px] bg-gray-200 flex items-center justify-center">
               <span className="text-gray-500">No image available</span>
             </div>
           )}
         </div>
-        <div className="p-6 md:w-1/2">
-          <h1 className="text-3xl font-bold mb-2 text-gray-800">
-            {product.name}
-          </h1>
-          <p className="text-2xl font-bold text-blue-600 mb-4">
-            {formatCurrency(product.price)}
-          </p>
-          <div className="bg-gray-100 p-4 rounded mb-6">
-            <h2 className="font-bold text-lg mb-2 text-gray-800">
-              Product Details
-            </h2>
-            <p className="text-gray-700 mb-4">{product.description}</p>
-            <p className="text-gray-700">
-              <span className="font-semibold">Availability:</span>{" "}
-              {product.stock > 0
-                ? `In Stock (${product.stock} available)`
-                : "Out of Stock"}
+        <div className="p-6 md:w-1/2 flex flex-col justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 text-gray-800">
+              {product.name}
+            </h1>
+            <p className="text-2xl font-bold text-blue-600 mb-4">
+              {formatCurrency(product.price)}
             </p>
+            <div className="bg-gray-50 p-4 rounded mb-6">
+              <h2 className="font-bold text-lg mb-2 text-gray-800">
+                Product Details
+              </h2>
+              <p className="text-gray-700 mb-4 whitespace-pre-line">{product.description}</p>
+              <p className="text-gray-700">
+                <span className="font-semibold">Availability:</span>{" "}
+                {product.stock > 0
+                  ? <span className="text-green-600 font-semibold">In Stock ({product.stock} available)</span>
+                  : <span className="text-red-600 font-semibold">Out of Stock</span>}
+              </p>
+            </div>
           </div>
 
           {product.stock > 0 ? (
-            <>
+            <div className="mt-auto">
               <div className="flex items-center mb-6">
-                <span className="mr-4 font-semibold">Quantity:</span>
-                <div className="flex">
+                <span className="mr-4 font-semibold text-gray-700">Quantity:</span>
+                <div className="flex border border-gray-300 rounded-md">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-1 bg-gray-200 rounded-l text-gray-800 hover:bg-gray-300"
+                    className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-l-md focus:outline-none"
+                    aria-label="Decrease quantity"
                   >
                     -
                   </button>
-                  <span className="px-4 py-1 border-t border-b">
+                  <span className="px-4 py-2 text-gray-800 border-l border-r border-gray-300">
                     {quantity}
                   </span>
                   <button
                     onClick={() =>
                       setQuantity(Math.min(product.stock, quantity + 1))
                     }
-                    className="px-3 py-1 bg-gray-200 rounded-r text-gray-800 hover:bg-gray-300"
+                    className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-r-md focus:outline-none"
+                    aria-label="Increase quantity"
                   >
                     +
                   </button>
                 </div>
               </div>
               <button
-                onClick={handleAddToCart}
-                className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onClick={handleLocalAddToCart}
+                disabled={cartLoading || product.stock <= 0}
+                className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:bg-gray-400 transition-colors duration-150 ease-in-out"
               >
-                Add to Cart
+                {cartLoading ? 'Adding...' : 'Add to Cart'}
               </button>
-            </>
+            </div>
           ) : (
-            <button
-              disabled
-              className="w-full py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-            >
-              Out of Stock
-            </button>
+            <div className="mt-auto">
+              <button
+                disabled
+                className="w-full py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+              >
+                Out of Stock
+              </button>
+            </div>
           )}
         </div>
       </div>

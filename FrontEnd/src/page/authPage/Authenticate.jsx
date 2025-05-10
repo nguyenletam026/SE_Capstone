@@ -26,7 +26,7 @@ export default function Authenticate() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/");
+      navigate("/home");
     }
   }, [isLoggedIn, navigate]);
 

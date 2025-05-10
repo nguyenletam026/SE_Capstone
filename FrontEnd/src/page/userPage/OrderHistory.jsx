@@ -16,7 +16,8 @@ import {
   InboxOutlined,
   UpOutlined,
   CalendarOutlined,
-  CreditCardOutlined
+  CreditCardOutlined,
+  CloseCircleOutlined
 } from "@ant-design/icons";
 
 export default function OrderHistory() {
@@ -69,32 +70,50 @@ export default function OrderHistory() {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
-
-  // Status badge component with appropriate colors
-  const OrderStatusBadge = ({ orderDate }) => {
-    const date = new Date(orderDate);
-    const now = new Date();
-    const daysDifference = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+  // Status badge component with appropriate colors based on actual order status
+  const OrderStatusBadge = ({ status }) => {
+    let displayText, color, icon;
     
-    let status, color, icon;
-    
-    if (daysDifference < 1) {
-      status = "Processing";
-      color = "bg-yellow-100 text-yellow-800";
-      icon = <ClockCircleOutlined />;
-    } else if (daysDifference < 3) {
-      status = "Shipped";
-      color = "bg-blue-100 text-blue-800";
-      icon = <ShoppingOutlined />;
-    } else {
-      status = "Delivered";
-      color = "bg-green-100 text-green-800";
-      icon = <TagOutlined />;
+    switch (status) {
+      case 'PENDING_CONFIRMATION':
+        displayText = "Pending Confirmation";
+        color = "bg-yellow-100 text-yellow-800";
+        icon = <ClockCircleOutlined />;
+        break;
+      case 'PREPARING':
+        displayText = "Preparing";
+        color = "bg-orange-100 text-orange-800";
+        icon = <ClockCircleOutlined />;
+        break;
+      case 'SHIPPING':
+        displayText = "Shipping";
+        color = "bg-blue-100 text-blue-800";
+        icon = <ShoppingOutlined />;
+        break;
+      case 'DELIVERED':
+        displayText = "Delivered";
+        color = "bg-green-100 text-green-800";
+        icon = <TagOutlined />;
+        break;
+      case 'COMPLETED':
+        displayText = "Completed";
+        color = "bg-green-100 text-green-800";
+        icon = <TagOutlined />;
+        break;
+      case 'CANCELLED':
+        displayText = "Cancelled";
+        color = "bg-red-100 text-red-800";
+        icon = <CloseCircleOutlined />;
+        break;
+      default:
+        displayText = "Processing";
+        color = "bg-yellow-100 text-yellow-800";
+        icon = <ClockCircleOutlined />;
     }
     
     return (
       <span className={`flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${color}`}>
-        <span className="mr-1">{icon}</span> {status}
+        <span className="mr-1">{icon}</span> {displayText}
       </span>
     );
   };
@@ -169,13 +188,12 @@ export default function OrderHistory() {
               onClick={() => toggleOrderDetails(order.id)}
             >
               <div className="flex flex-col md:flex-row justify-between">
-                <div className="mb-4 md:mb-0">
-                  <div className="flex items-center mb-2">
+                <div className="mb-4 md:mb-0">                  <div className="flex items-center mb-2">
                     <h3 className="font-bold text-lg text-gray-800 mr-3">
                       <FileTextOutlined className="mr-2" />
                       Order #{order.id.substring(0, 8)}...
                     </h3>
-                    <OrderStatusBadge orderDate={order.orderDate} />
+                    <OrderStatusBadge status={order.status} />
                   </div>
                   <div className="flex items-center text-gray-600 text-sm">
                     <CalendarOutlined className="mr-2" />
