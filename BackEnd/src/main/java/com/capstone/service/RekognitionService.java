@@ -498,16 +498,14 @@ public class RekognitionService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        
-        try {
-            // Currently limited to 5 most recent analyses
-            return stressAnalysisRepository.findFirst5ByUserOrderByCreatedAtDesc(user);
-        } catch (Exception e) {
-            log.error("Error retrieving recent stress analyses: {}", e.getMessage());
-            // Fallback to standard method if the custom query fails
-            return stressAnalysisRepository.findByUserOrderByCreatedAtDesc(user).stream()
-                    .limit(5) // Fixed at 5 for now
-                    .collect(Collectors.toList());
-        }
+        return stressAnalysisRepository.findByUserOrderByCreatedAtDesc(user).stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+    
+    public List<StressAnalysis> getStressAnalysesForUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return stressAnalysisRepository.findByUserOrderByCreatedAtDesc(user);
     }
 }

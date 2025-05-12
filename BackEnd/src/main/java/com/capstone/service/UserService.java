@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
 
@@ -30,6 +31,34 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final CloudinaryService cloudinaryService;
+    
+    @PostConstruct
+    public void initRoles() {
+        // Initialize roles if they don't exist
+        if (!roleRepository.existsById("USER")) {
+            roleRepository.save(com.capstone.entity.Role.builder()
+                    .name("USER")
+                    .build());
+        }
+        
+        if (!roleRepository.existsById("ADMIN")) {
+            roleRepository.save(com.capstone.entity.Role.builder()
+                    .name("ADMIN")
+                    .build());
+        }
+        
+        if (!roleRepository.existsById("DOCTOR")) {
+            roleRepository.save(com.capstone.entity.Role.builder()
+                    .name("DOCTOR")
+                    .build());
+        }
+        
+        if (!roleRepository.existsById("TEACHER")) {
+            roleRepository.save(com.capstone.entity.Role.builder()
+                    .name("TEACHER")
+                    .build());
+        }
+    }
 
     public void createUser(UserCreationRequest request,MultipartFile avtFile) throws IOException {
         if (avtFile == null || avtFile.isEmpty()) {
@@ -93,6 +122,11 @@ public class UserService {
     public List<UserResponse> getAllDoctor() {
         return userRepository.findAll().stream()
                 .filter(user -> user.getRole().getName().equals(Role.DOCTOR.name()))
+                .map(userMapper::toUserResponse).toList();
+    }
+    public List<UserResponse> getAllTeacher() {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole().getName().equals(Role.TEACHER.name()))
                 .map(userMapper::toUserResponse).toList();
     }
 }

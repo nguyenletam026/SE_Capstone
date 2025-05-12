@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 @Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -51,6 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TEACHER')")
     ApiResponse<UserResponse> getUserById(@PathVariable("userId") String userId) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUserById(userId))
@@ -79,6 +80,14 @@ public class UserController {
         userService.changePassword(request);
         return ApiResponse.<String>builder()
                 .result("Password change successful")
+                .build();
+    }
+
+    @GetMapping("/teachers")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TEACHER')")
+    ApiResponse<List<UserResponse>> getAllTeachers() {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getAllTeacher())
                 .build();
     }
 }

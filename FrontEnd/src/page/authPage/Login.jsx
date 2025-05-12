@@ -23,6 +23,7 @@ export default function Login() {
       const decoded = jwtDecode(token);
       if (decoded.scope === "ROLE_ADMIN") navigate("/admin-dashboard");
       else if (decoded.scope === "ROLE_DOCTOR") navigate("/doctor-home");
+      else if (decoded.scope === "ROLE_TEACHER") navigate("/teacher-home");
       else navigate("/home");
     }
   }, []);
@@ -37,6 +38,8 @@ export default function Login() {
         navigate("/admin-dashboard");
       } else if (decoded.scope === "ROLE_DOCTOR") {
         navigate("/doctor-home");
+      } else if (decoded.scope === "ROLE_TEACHER") {
+        navigate("/teacher-home");
       } else {
         navigate("/home");
       }

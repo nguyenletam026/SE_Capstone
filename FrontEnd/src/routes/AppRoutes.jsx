@@ -35,14 +35,21 @@ import AdminHome from "../page/adminPage/adminHome";
 import AdminManageRole from "../page/adminPage/adminManageRole";
 import AdminManageUser from "../page/adminPage/adminManageUser";
 import AdminManageDoctor from "../page/adminPage/adminManageDoctor";
-import AdminVideoManage from "../page/adminPage/AdminVideoManage";
-import AdminMusicManage from "../page/adminPage/AdminMusicManage";
+import AdminManageTeacher from "../page/adminPage/AdminManageTeacher";
 
 // Doctor Pages
 import DoctorLayout from "../components/layouts/doctorLayout";
 import DoctorHome from "../page/doctorPage/doctorHome";
 import DoctorChatPage from "../page/doctorPage/doctorChatPage";
 import PendingRequests from "../page/doctorPage/doctorPendingRequest";
+
+// Teacher Pages
+import TeacherLayout from "../components/layouts/TeacherLayout";
+import TeacherHome from "../page/teacherPage/TeacherHome";
+import TeacherClasses from "../page/teacherPage/TeacherClasses";
+import ClassDetail from "../page/teacherPage/ClassDetail";
+import StudentDetail from "../page/teacherPage/StudentDetail";
+import TeacherStressAnalysis from "../page/teacherPage/TeacherStressAnalysis";
 
 const AppRoutes = () => {
   return (
@@ -84,8 +91,7 @@ const AppRoutes = () => {
             <Route path="/admin-role" element={<AdminLayout><AdminManageRole /></AdminLayout>} />
             <Route path="/admin-user" element={<AdminLayout><AdminManageUser /></AdminLayout>} />
             <Route path="/admin-doctor" element={<AdminLayout><AdminManageDoctor /></AdminLayout>} />
-            <Route path="/admin-video" element={<AdminLayout><AdminVideoManage /></AdminLayout>} />
-            <Route path="/admin-music" element={<AdminLayout><AdminMusicManage /></AdminLayout>} />
+            <Route path="/admin-teacher" element={<AdminLayout><AdminManageTeacher /></AdminLayout>} />
           </Route>
 
           {/* Route Doctor */}
@@ -93,9 +99,17 @@ const AppRoutes = () => {
             <Route path="/doctor-home" element={<DoctorLayout><DoctorHome /></DoctorLayout>} />
             <Route path="/doctor-chat" element={<DoctorLayout><DoctorChatPage /></DoctorLayout>} />
             <Route path="/doctor-pending-requests" element={<DoctorLayout><PendingRequests /></DoctorLayout>} />
-
           </Route>
 
+          {/* Route Teacher */}
+          <Route element={<ProtectedRoute allowedRoles={["ROLE_TEACHER"]} />}>
+            <Route path="/teacher-home" element={<TeacherLayout><TeacherHome /></TeacherLayout>} />
+            <Route path="/teacher-classes" element={<TeacherLayout><TeacherClasses /></TeacherLayout>} />
+            <Route path="/teacher-classes/:classId" element={<TeacherLayout><ClassDetail /></TeacherLayout>} />
+            <Route path="/teacher-student/:studentId" element={<TeacherLayout><StudentDetail /></TeacherLayout>} />
+            <Route path="/teacher-stress-analysis" element={<TeacherLayout><TeacherStressAnalysis /></TeacherLayout>} />
+          </Route>
+            
           {/* Dang phat trien */}
         </Routes>
       </Router>

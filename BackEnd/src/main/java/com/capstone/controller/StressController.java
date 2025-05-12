@@ -17,11 +17,17 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Collections;
 
 @RestController
 @Tag(name = "Stress Analysis", description = "API for stress analysis using facial recognition")
@@ -250,5 +256,136 @@ public class StressController {
                 .message("Recent stress levels retrieved for monitoring")
                 .result(response)
                 .build();
+    }
+    
+    @Operation(
+            summary = "Get stress data for a specific user",
+            description = "Fetches stress data for a specific user by user ID"
+    )
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_TEACHER')")
+    public ApiResponse<Map<String, Object>> getStressDataForUser(@PathVariable String userId) {
+        List<StressAnalysis> stressAnalyses = rekognitionService.getStressAnalysesForUser(userId);
+        
+        // If no stress analyses are found, return empty data
+        if (stressAnalyses.isEmpty()) {
+            Map<String, Object> emptyData = new HashMap<>();
+            emptyData.put("currentLevel", "NO_DATA");
+            emptyData.put("weeklyAverage", "NO_DATA");
+            emptyData.put("trend", "stable");
+            emptyData.put("history", Collections.emptyList());
+            
+            Map<String, String> emptyRecommendations = new HashMap<>();
+            emptyRecommendations.put("comment", "No stress data available for this user");
+            emptyRecommendations.put("advice", "No recommendations available");
+            
+            emptyData.put("recommendations", emptyRecommendations);
+            
+            return ApiResponse.<Map<String, Object>>builder()
+                    .message("No stress data found for user")
+                    .result(emptyData)
+                    .build();
+        }
+        
+        // Calculate current level (most recent)
+        StressAnalysis mostRecent = stressAnalyses.get(0);
+        String currentLevel = mostRecent.getStressLevel();
+        
+        // Calculate weekly average
+        List<StressAnalysis> weeklyAnalyses = stressAnalyses.stream()
+                .filter(analysis -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime sevenDaysAgo = now.minusDays(7);
+                    Date analysisDate = analysis.getCreatedAt();
+                    LocalDateTime analysisDateTime = analysisDate.toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    return analysisDateTime.isAfter(sevenDaysAgo);
+                })
+                .toList();
+        
+        String weeklyAverage = "NO_DATA";
+        if (!weeklyAnalyses.isEmpty()) {
+            double avgScore = weeklyAnalyses.stream()
+                    .mapToDouble(StressAnalysis::getStressScore)
+                    .average()
+                    .orElse(0.0);
+            weeklyAverage = rekognitionService.mapStressScoreToLevel(avgScore);
+        }
+        
+        // Determine trend (simplified)
+        String trend = "stable";
+        if (weeklyAnalyses.size() >= 3) {
+            double firstHalfAvg = weeklyAnalyses.subList(weeklyAnalyses.size()/2, weeklyAnalyses.size()).stream()
+                    .mapToDouble(StressAnalysis::getStressScore)
+                    .average()
+                    .orElse(0.0);
+            double secondHalfAvg = weeklyAnalyses.subList(0, weeklyAnalyses.size()/2).stream()
+                    .mapToDouble(StressAnalysis::getStressScore)
+                    .average()
+                    .orElse(0.0);
+            
+            if (secondHalfAvg - firstHalfAvg > 0.3) {
+                trend = "increasing";
+            } else if (firstHalfAvg - secondHalfAvg > 0.3) {
+                trend = "decreasing";
+            }
+        }
+        
+        // Format history
+        List<Map<String, Object>> history = stressAnalyses.stream()
+                .limit(10) // Most recent 10 entries
+                .map(analysis -> {
+                    Map<String, Object> entry = new HashMap<>();
+                    entry.put("level", analysis.getStressLevel());
+                    entry.put("date", analysis.getCreatedAt());
+                    entry.put("note", "Stress analysis from facial recognition");
+                    return entry;
+                })
+                .collect(Collectors.toList());
+        
+        // Generate recommendations based on current level
+        Map<String, String> recommendations = generateRecommendations(currentLevel);
+        
+        // Compile response
+        Map<String, Object> result = new HashMap<>();
+        result.put("currentLevel", currentLevel);
+        result.put("weeklyAverage", weeklyAverage);
+        result.put("trend", trend);
+        result.put("history", history);
+        result.put("recommendations", recommendations);
+        
+        return ApiResponse.<Map<String, Object>>builder()
+                .message("Stress data retrieved for user")
+                .result(result)
+                .build();
+    }
+    
+    private Map<String, String> generateRecommendations(String stressLevel) {
+        String comment;
+        String advice;
+        
+        switch (stressLevel) {
+            case "HIGH":
+                comment = "The student is showing signs of high stress levels";
+                advice = "Consider checking in with the student and offering support resources";
+                break;
+            case "MEDIUM":
+                comment = "The student is experiencing moderate stress levels";
+                advice = "Monitor the situation and suggest stress management techniques";
+                break;
+            case "LOW":
+                comment = "The student appears to be managing stress well";
+                advice = "Continue to provide a supportive environment";
+                break;
+            default:
+                comment = "Not enough data to assess stress levels";
+                advice = "Encourage regular check-ins";
+        }
+        
+        Map<String, String> recommendations = new HashMap<>();
+        recommendations.put("comment", comment);
+        recommendations.put("advice", advice);
+        return recommendations;
     }
 }

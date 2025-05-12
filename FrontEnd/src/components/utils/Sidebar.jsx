@@ -2,6 +2,7 @@ import { FaChartBar, FaUser, FaProjectDiagram, FaBars } from "react-icons/fa";
 import { FaMusic } from "react-icons/fa6";
 import { FaUserDoctor } from "react-icons/fa6";
 import { FaPhotoVideo } from "react-icons/fa";
+import { FaChalkboardTeacher } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
@@ -21,6 +22,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         <SidebarItem to="/admin-role" icon={<FaProjectDiagram />} label="Role" isOpen={isOpen} />
         <SidebarItem to="/admin-user" icon={<FaUser />} label="User" isOpen={isOpen} />
         <SidebarItem to="/admin-doctor" icon={<FaUserDoctor />} label="Doctor" isOpen={isOpen} />
+        <SidebarItem to="/admin-teacher" icon={<FaChalkboardTeacher />} label="Teacher" isOpen={isOpen} />
         <SidebarItem to="/admin-music" icon={<FaMusic />} label="Music" isOpen={isOpen} />
         <SidebarItem to="/admin-video" icon={<FaPhotoVideo />} label="Video" isOpen={isOpen} />
       </nav>

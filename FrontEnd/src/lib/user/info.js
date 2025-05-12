@@ -1,11 +1,11 @@
 import axios from "axios";
 import { getToken } from "../../services/localStorageService";
 
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 export const fetchUserInfo = async () => {
   const token = getToken();
-  const response = await fetch(`${API_BASE}/users/myInfo`, {
+  const response = await fetch(`${API_BASE}/api/users/myInfo`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -32,12 +32,12 @@ export const requestDoctor = async (formData, certificateUrl, cccdUrl) => {
     cccdImage: cccdUrl,
   };
 
-  return axios.post(`${API_BASE}/doctors/request-doctor?${queryParams}`, body);
+  return axios.post(`${API_BASE}/api/doctors/request-doctor?${queryParams}`, body);
 };
 
 export const fetchUserInfo2 = async () => {
   const token = getToken();
-  const response = await fetch(`${API_BASE}/users/myInfo`, {
+  const response = await fetch(`${API_BASE}/api/users/myInfo`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
