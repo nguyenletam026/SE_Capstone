@@ -82,8 +82,8 @@ const AppRoutes = () => {
             <Route path="/admin-role" element={<AdminLayout><AdminManageRole /></AdminLayout>} />
             <Route path="/admin-user" element={<AdminLayout><AdminManageUser /></AdminLayout>} />
             <Route path="/admin-doctor" element={<AdminLayout><AdminManageDoctor /></AdminLayout>} />
-            <Route path="/admin-video" element={<AdminLayout><AdminVideoManage/></AdminLayout>} />
-            <Route path="/admin-music" element={<AdminLayout><AdminMusicManage/></AdminLayout>} />
+            <Route path="/admin-video" element={<AdminLayout><AdminVideoManage /></AdminLayout>} />
+            <Route path="/admin-music" element={<AdminLayout><AdminMusicManage /></AdminLayout>} />
           </Route>
 
           {/* Route Doctor */}
@@ -91,9 +91,9 @@ const AppRoutes = () => {
             <Route path="/doctor-home" element={<DoctorLayout><DoctorHome /></DoctorLayout>} />
             <Route path="/doctor-chat" element={<DoctorLayout><DoctorChatPage /></DoctorLayout>} />
             <Route path="/doctor-pending-requests" element={<DoctorLayout><PendingRequests /></DoctorLayout>} />
-            
+
           </Route>
-            
+
           {/* Dang phat trien */}
         </Routes>
       </Router>

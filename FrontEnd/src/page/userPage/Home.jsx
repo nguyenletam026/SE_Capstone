@@ -107,8 +107,8 @@ export default function Home() {
           </button>
         </div>
       </div>
-            {/* Section 5 - Doctor Recruitment with Image + Button Layout */}
-            <div className="mt-16 px-6 py-10 bg-green-100 rounded-lg shadow text-center">
+      {/* Section 5 - Doctor Recruitment with Image + Button Layout */}
+      <div className="mt-16 px-6 py-10 bg-green-100 rounded-lg shadow text-center">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="w-full md:w-1/2">
             <img
