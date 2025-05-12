@@ -14,7 +14,6 @@ export default function StressHomeSection({ onRefreshCharts }) {
     if (data.code === 1000) {
       const now = new Date();
 
-      // Tìm dữ liệu có end_date gần nhất với thời điểm hiện tại
       let closestItem = null;
       let smallestDiff = Infinity;
 
@@ -44,12 +43,27 @@ export default function StressHomeSection({ onRefreshCharts }) {
         const score = closestEntry.stressScore ?? 100;
         setStressScore(Math.round(score));
         setStressLevel(closestEntry.stressLevel ?? "Unknown");
-        setBgColor(100 - score < 50 ? "#ef4444" : "#9BB168");
+
+        // Update background color by score range
+        if (score < 50) {
+          setBgColor("#ef4444"); // red
+        } else if (score < 70) {
+          setBgColor("#eab308"); // yellow
+        } else {
+          setBgColor("#9BB168"); // green
+        }
       }
     }
   };
 
+  const getStressIcon = () => {
+    if (stressScore < 50) return <span className="text-6xl">😟</span>;
+    if (stressScore < 70) return <span className="text-6xl">😐</span>;
+    return <span className="text-6xl">😊</span>;
+  };
+
   useEffect(() => {
+    setShowWebcam(false);
     refreshDailyStress();
   }, []);
 
@@ -60,15 +74,11 @@ export default function StressHomeSection({ onRefreshCharts }) {
     >
       <div className="pt-6">
         <p className="text-sm font-semibold uppercase">Xin Chào Người Dùng</p>
-        <p className="text-xs underline mb-4 cursor-pointer">
-          Thiết Lập Profile
-        </p>
+        <p className="text-xs underline mb-4 cursor-pointer">Thiết Lập Profile</p>
         <p className="text-6xl font-bold">{stressScore}</p>
-        <p className="text-6xl mt-2">😊</p>
+        <div className="flex justify-center">{getStressIcon()}</div>
         <p className="mt-2 font-bold text-lg">
-          {stressLevel
-            ? `Bạn Đang Có Tâm Trạng: ${stressLevel}`
-            : "Đang tải..."}
+          {stressLevel ? `Bạn Đang Có Tâm Trạng: ${stressLevel}` : "Đang tải..."}
         </p>
       </div>
 
