@@ -43,14 +43,35 @@ export const rejectChatRequest = async (requestId) => {
 // Lấy danh sách bệnh nhân đã được chấp nhận
 export const getAcceptedChatPatients = async () => {
   const token = getToken();
-  const res = await fetch(`${API_BASE}/api/chat-requests/accepted`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!res.ok) throw new Error("Failed to fetch accepted chat patients");
-  return res.json();
+  console.log("Token:", token); // Debug token
+  console.log("API URL:", `${API_BASE}/api/chat-requests/accepted`); // Debug API URL
+  
+  try {
+    const res = await fetch(`${API_BASE}/api/chat-requests/accepted`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error("API Error:", {
+        status: res.status,
+        statusText: res.statusText,
+        errorData
+      });
+      throw new Error("Failed to fetch accepted chat patients");
+    }
+    
+    const data = await res.json();
+    console.log("API Response:", data); // Debug response
+    return data;
+  } catch (error) {
+    console.error("Error details:", error);
+    throw error;
+  }
 };
+
 export const getAcceptedChatDoctor = async () => {
   const token = getToken();
   const res = await fetch(`${API_BASE}/api/chat-requests/user/accepted`, {

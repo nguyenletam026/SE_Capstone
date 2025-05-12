@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getAllDoctorRecommend } from "../../lib/user/assessmentServices";
-import { requestChatWithDoctor } from "../../lib/util/chatServices";
+import { requestChatWithDoctor, createChatPayment } from "../../lib/util/chatServices";
 
 export default function UserContactDoctor() {
   const { id } = useParams();
@@ -9,6 +9,8 @@ export default function UserContactDoctor() {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
+  const [hours, setHours] = useState(1);
+  const [totalAmount, setTotalAmount] = useState(100000); // 100,000 VND per hour
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -25,15 +27,27 @@ export default function UserContactDoctor() {
     fetchDoctor();
   }, [id]);
 
+  useEffect(() => {
+    setTotalAmount(hours * 100000);
+  }, [hours]);
+
   const handleRequestChat = async () => {
     setRequesting(true);
     try {
+      console.log('Creating payment with:', { doctorId: id, hours });
+      // Create payment first
+      const paymentRes = await createChatPayment(id, hours);
+      
+      // Then create chat request
       await requestChatWithDoctor(id);
-      alert("Đã gửi yêu cầu trò chuyện thành công!");
+      
+      alert("Đã gửi yêu cầu trò chuyện và thanh toán thành công!");
       navigate("/home");
     } catch (err) {
-      console.error("Failed to request chat", err);
-      alert("Đã có lỗi xảy ra khi gửi yêu cầu.");
+      console.error("Failed to request chat or make payment", err);
+      // Check if the error has a specific message
+      const errorMessage = err.response?.data?.message || err.message || "Đã có lỗi xảy ra khi gửi yêu cầu hoặc thanh toán.";
+      alert(errorMessage);
     } finally {
       setRequesting(false);
     }
@@ -70,12 +84,40 @@ export default function UserContactDoctor() {
             Ngày sinh: {new Date(doctor.birthdayDate).toLocaleDateString()}
           </p>
 
+          {/* Payment Section */}
+          <div className="w-full mb-6 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3">Chi phí tư vấn</h3>
+            <p className="text-sm text-gray-600 mb-2">Giá: 100,000 VND/giờ</p>
+            
+            <div className="flex items-center gap-3 mb-4">
+              <label className="text-sm font-medium">Số giờ:</label>
+              <select
+                value={hours}
+                onChange={(e) => setHours(parseInt(e.target.value))}
+                className="border rounded px-2 py-1"
+                disabled={requesting}
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
+                  <option key={h} value={h}>
+                    {h} giờ
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="text-right">
+              <p className="text-sm font-medium">
+                Tổng tiền: {totalAmount.toLocaleString()} VND
+              </p>
+            </div>
+          </div>
+
           <button
             onClick={handleRequestChat}
             disabled={requesting}
-            className="bg-brown-700 hover:bg-brown-800 text-black font-semibold px-6 py-2 rounded-full shadow hover:shadow-md transition-all w-full mb-3 disabled:opacity-50"
+            className="bg-brown-700 hover:bg-brown-800 text-white font-semibold px-6 py-2 rounded-full shadow hover:shadow-md transition-all w-full mb-3 disabled:opacity-50"
           >
-            {requesting ? "Đang gửi..." : "Liên Hệ Ngay"}
+            {requesting ? "Đang xử lý..." : "Thanh toán và gửi yêu cầu"}
           </button>
 
           <button

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
-import { getUnreadMessages } from "../../lib/util/chatServices"; // Cần tạo API call này
+import { getConversation } from "../../lib/util/chatServices";
 
 const MessageList = () => {
   const { messages, selectedUser, setMessages } = useChat();
@@ -9,29 +9,20 @@ const MessageList = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchUnread = async () => {
+    const fetchMessages = async () => {
       if (!user?.id || !selectedUser) return;
       setLoading(true);
       try {
-        const res = await getUnreadMessages(user.id);
-        if (res && res.result) {
-          if (selectedUser.doctorId || selectedUser.patientId) {
-            const filteredMessages = res.result.filter(
-              (msg) =>
-                msg.senderId === selectedUser.doctorId ||
-                msg.senderId === selectedUser.patientId
-            );
-            setMessages(filteredMessages || []);
-          } else {
-            console.error("Selected user is missing required properties");
-            setMessages([]);
-          }
+        const receiverId = selectedUser.doctorId || selectedUser.patientId;
+        const res = await getConversation(user.id, receiverId);
+        if (res && Array.isArray(res)) {
+          setMessages(res);
         } else {
-          console.error("No messages found in response");
+          console.error("Invalid conversation response format");
           setMessages([]);
         }
       } catch (err) {
-        console.error("Lỗi khi lấy tin nhắn chưa đọc:", err);
+        console.error("Lỗi khi tải tin nhắn:", err);
         setMessages([]);
       } finally {
         setLoading(false);
@@ -39,7 +30,7 @@ const MessageList = () => {
     };
 
     if (selectedUser) {
-      fetchUnread();
+      fetchMessages();
     }
   }, [user?.id, selectedUser, setMessages]);
 
@@ -52,17 +43,27 @@ const MessageList = () => {
       ) : (
         messages.map((msg, index) => (
           <div
-            key={index}
-            className={`mb-2 flex ${msg.senderId === user.id ? "justify-end" : "justify-start"}`}
+            key={msg.id || index}
+            className={`mb-2 flex ${msg.senderId === user?.id ? "justify-end" : "justify-start"}`}
           >
             <div
               className={`max-w-xs px-3 py-2 rounded-lg text-sm shadow ${
-                msg.senderId === user.id
+                msg.senderId === user?.id
                   ? "bg-blue-500 text-white"
                   : "bg-gray-200 text-gray-800"
               }`}
             >
-              {msg.content}
+              {msg.imageUrl && (
+                <img
+                  src={msg.imageUrl}
+                  alt="Sent"
+                  className="max-w-full rounded-lg mb-2"
+                />
+              )}
+              <p>{msg.content}</p>
+              <p className="text-xs mt-1 opacity-70">
+                {new Date(msg.timestamp).toLocaleTimeString()}
+              </p>
             </div>
           </div>
         ))

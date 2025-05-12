@@ -11,8 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface ChatRequestRepository extends JpaRepository<ChatRequest, String> {
-    List<ChatRequest> findByDoctorAndStatus(User doctor, RequestStatus status);
-    List<ChatRequest> findByPatientAndStatus(User patient, RequestStatus status);
     Optional<ChatRequest> findByPatientAndDoctorAndStatus(User patient, User doctor, RequestStatus status);
     boolean existsByPatientAndDoctorAndStatus(User patient, User doctor, RequestStatus status);
+    List<ChatRequest> findByDoctorAndStatus(User doctor, RequestStatus status);
+    List<ChatRequest> findByPatientAndStatus(User patient, RequestStatus status);
+    Optional<ChatRequest> findFirstByPatientAndDoctorAndStatusOrderByCreatedAtDesc(User patient, User doctor, RequestStatus status);
+    List<ChatRequest> findByPatientAndDoctorAndStatusOrderByCreatedAtDesc(User patient, User doctor, RequestStatus status);
 } 

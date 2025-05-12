@@ -26,4 +26,7 @@ public class User {
     @JoinColumn(name = "role_id")
     Role role;
     String avtUrl;
+    @Column(nullable = false)
+    Double balance = 0.0;
+
 }

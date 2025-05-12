@@ -27,6 +27,7 @@ import AboutUs from "../page/userPage/AboutUs";
 import SubscriptionPage from "../page/userPage/Subscription";
 import Settings from "../page/userPage/Setting";
 import HelpAndFeedback from "../page/userPage/Feedback";
+import DepositPage from "../pages/DepositPage";
 
 // Admin Pages
 import AdminLayout from "../components/layouts/adminLayout";
@@ -72,6 +73,7 @@ const AppRoutes = () => {
             <Route path="/plans" element={<UserLayout><SubscriptionPage /></UserLayout>} />
             <Route path="/settings" element={<UserLayout><Settings /></UserLayout>} />
             <Route path="/help" element={<UserLayout><HelpAndFeedback /></UserLayout>} />
+            <Route path="/deposit" element={<UserLayout><DepositPage /></UserLayout>} />
           </Route>
 
           {/* Route Admin */}

@@ -23,5 +23,6 @@ public class ChatMessageDTO {
     private boolean read;
     private String emotionalState;
     private String imageUrl;
-
+    private LocalDateTime expiresAt;
+    private boolean expired;
 }

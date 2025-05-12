@@ -1,7 +1,13 @@
 package com.capstone.enums;
 
-public enum  RequestStatus {
+public enum RequestStatus {
     PENDING,
     APPROVED,
-    REJECTED
+    REJECTED,
+    PAYMENT_REQUIRED;
+
+    @Override
+    public String toString() {
+        return this.name();
+    }
 }

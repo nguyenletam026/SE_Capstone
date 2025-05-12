@@ -59,7 +59,12 @@ export default function Header() {
           </li> */}
           <li>
             <Link to="/chatroom" className="hover:text-green-600">
-              ChatRoom
+              Tư Vấn Trực Tuyến
+            </Link>
+          </li>
+          <li>
+            <Link to="/deposit" className="hover:text-green-600">
+              Nạp Tiền
             </Link>
           </li>
           <li>

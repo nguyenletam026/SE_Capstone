@@ -36,6 +36,9 @@ public enum ErrorCode {
     INVALID_FILE_FORMAT(1023, "Invalid file format", HttpStatus.BAD_REQUEST),
     UPLOAD_FILE_FAILED(1024, "Failed to upload file", HttpStatus.INTERNAL_SERVER_ERROR),
     CCCD_NAME_MISMATCH(1025, "CCCD name mismatch", HttpStatus.BAD_REQUEST),
+    DEPOSIT_NOT_FOUND(1026, "Deposit transaction not found", HttpStatus.NOT_FOUND),
+    PAYMENT_NOT_FOUND(1027, "Payment information not found", HttpStatus.NOT_FOUND),
+    PAYMENT_REQUIRED(1028, "Payment required to continue", HttpStatus.PAYMENT_REQUIRED),
 
     ;
 
