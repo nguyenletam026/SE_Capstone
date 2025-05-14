@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getDailyStress } from "../../lib/user/stressServices";
 import WebcamCapture from "../utils/WebcamCapture";
 import Bot from "../../assets/4.png";
+import Modal from "react-modal";
 
 export default function StressHomeSection({ onRefreshCharts }) {
   const [bgColor, setBgColor] = useState("#9BB168");
@@ -44,28 +45,34 @@ export default function StressHomeSection({ onRefreshCharts }) {
         setStressScore(Math.round(score));
         setStressLevel(closestEntry.stressLevel ?? "Unknown");
 
-        // Update background color by score range
-        if (score < 50) {
-          setBgColor("#ef4444"); // red
-        } else if (score < 70) {
-          setBgColor("#eab308"); // yellow
+        if (score > 70) {
+          setBgColor("#ef4444"); //red
+        } else if (score > 50) {
+          setBgColor("#eab308"); //yellow
         } else {
-          setBgColor("#9BB168"); // green
+          setBgColor("#9BB168");  //green
         }
       }
     }
   };
 
   const getStressIcon = () => {
-    if (stressScore < 50) return <span className="text-6xl">😟</span>;
-    if (stressScore < 70) return <span className="text-6xl">😐</span>;
+    if (stressScore > 70) return <span className="text-6xl">😟</span>;
+    if (stressScore > 50) return <span className="text-6xl">😐</span>;
     return <span className="text-6xl">😊</span>;
   };
 
-  useEffect(() => {
-    setShowWebcam(false);
-    refreshDailyStress();
-  }, []);
+  <div className="flex justify-center">
+    <div className="max-w-[100%] w-full h-[320px] overflow-hidden rounded-lg shadow">
+      <WebcamCapture
+        onResult={() => {
+          refreshDailyStress();
+          setShowWebcam(false);
+          onRefreshCharts();
+        }}
+      />
+    </div>
+  </div>
 
   return (
     <div
@@ -82,13 +89,36 @@ export default function StressHomeSection({ onRefreshCharts }) {
         </p>
       </div>
 
-      <div className="mt-6 relative z-10 flex justify-center">
-        <img src={Bot} alt="Bot" className="w-40 h-40" />
+      <div className="mt-6 flex justify-center">
+        <img
+          src={Bot}
+          alt="Bot"
+          className="w-40 h-40 relative z-0"
+          style={{ pointerEvents: "none" }}
+        />
       </div>
 
       <div className="mt-6">
-        {showWebcam ? (
-          <div className="flex flex-col items-center gap-4">
+        <button
+          onClick={() => setShowWebcam(true)}
+          className="bg-black text-white px-6 py-2 rounded-lg font-semibold shadow hover:scale-105 transition"
+        >
+          Bắt Đầu Phân Tích Bằng Camera 📸
+        </button>
+
+        <Modal
+          isOpen={showWebcam}
+          onRequestClose={() => setShowWebcam(false)}
+          contentLabel="Phân tích stress qua camera"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xl mt-6"
+        >
+          <div className="bg-white rounded-xl p-6 shadow-lg w-full max-w-3xl relative">
+
+            <h2 className="text-xl font-bold mb-2 text-center">
+              Phân tích stress qua camera
+            </h2>
+
             <WebcamCapture
               onResult={() => {
                 refreshDailyStress();
@@ -96,24 +126,19 @@ export default function StressHomeSection({ onRefreshCharts }) {
                 onRefreshCharts();
               }}
             />
-            <button
-              onClick={() => setShowWebcam(false)}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow"
-            >
-              Thoát Chế Độ Camera ❌
-            </button>
+
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowWebcam(false)}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+              >
+                Thoát Chế Độ Camera ❌
+              </button>
+            </div>
           </div>
-        ) : (
-          <button
-            onClick={() => setShowWebcam(true)}
-            className="bg-black text-brown-700 px-6 py-2 rounded-lg font-semibold shadow hover:scale-105 transition"
-          >
-            Bắt Đầu Phân Tích Bằng Camera 📸
-          </button>
-        )}
+        </Modal>
       </div>
 
-      {/* Đường cong đẹp */}
       <svg
         className="absolute bottom-0 left-0 w-full h-[100px]"
         viewBox="0 0 1440 320"
