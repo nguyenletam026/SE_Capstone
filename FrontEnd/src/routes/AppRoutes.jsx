@@ -28,6 +28,9 @@ import SubscriptionPage from "../page/userPage/Subscription";
 import Settings from "../page/userPage/Setting";
 import HelpAndFeedback from "../page/userPage/Feedback";
 import DepositPage from "../pages/DepositPage";
+import ProductList from "../page/userPage/ProductList";
+import ProductDetail from "../page/userPage/ProductDetail";
+import OrderHistory from "../page/userPage/OrderHistory";
 
 // Admin Pages
 import AdminLayout from "../components/layouts/adminLayout";
@@ -36,6 +39,7 @@ import AdminManageRole from "../page/adminPage/adminManageRole";
 import AdminManageUser from "../page/adminPage/adminManageUser";
 import AdminManageDoctor from "../page/adminPage/adminManageDoctor";
 import AdminManageTeacher from "../page/adminPage/AdminManageTeacher";
+import AdminManageProducts from "../page/adminPage/AdminManageProducts";
 
 // Doctor Pages
 import DoctorLayout from "../components/layouts/doctorLayout";
@@ -83,6 +87,9 @@ const AppRoutes = () => {
             <Route path="/settings" element={<UserLayout><Settings /></UserLayout>} />
             <Route path="/help" element={<UserLayout><HelpAndFeedback /></UserLayout>} />
             <Route path="/deposit" element={<UserLayout><DepositPage /></UserLayout>} />
+            <Route path="/products" element={<UserLayout><ProductList /></UserLayout>} />
+            <Route path="/products/:id" element={<UserLayout><ProductDetail /></UserLayout>} />
+            <Route path="/orders" element={<UserLayout><OrderHistory /></UserLayout>} />
           </Route>
 
           {/* Route Admin */}
@@ -92,6 +99,7 @@ const AppRoutes = () => {
             <Route path="/admin-user" element={<AdminLayout><AdminManageUser /></AdminLayout>} />
             <Route path="/admin-doctor" element={<AdminLayout><AdminManageDoctor /></AdminLayout>} />
             <Route path="/admin-teacher" element={<AdminLayout><AdminManageTeacher /></AdminLayout>} />
+            <Route path="/admin-products" element={<AdminLayout><AdminManageProducts /></AdminLayout>} />
           </Route>
 
           {/* Route Doctor */}

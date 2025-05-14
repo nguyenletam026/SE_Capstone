@@ -22,7 +22,7 @@ public enum ErrorCode {
     REQUEST_ALREADY_PROCESSED(1012, "Doctor upgrade request has already been processed", HttpStatus.BAD_REQUEST),
     INVALID_CERTIFICATE(1013, "Invalid doctor certificate", HttpStatus.BAD_REQUEST),
     FILE_UPLOAD_ERROR(1014, "Error occurred while uploading the certificate", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_NULL(1015, "File is null", HttpStatus.BAD_REQUEST),
+    FILE_NULL(1015, "File is null or empty", HttpStatus.BAD_REQUEST),
     INVALID_IMAGE_URL(1016, "Invalid image url", HttpStatus.BAD_REQUEST),
     FAILED_TO_PROCESS_IMAGE(1017, "Failed to process image", HttpStatus.INTERNAL_SERVER_ERROR),
     FACE_COMPARISON_FAILED(1018, "Face comparison failed", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -39,6 +39,10 @@ public enum ErrorCode {
     DEPOSIT_NOT_FOUND(1026, "Deposit transaction not found", HttpStatus.NOT_FOUND),
     PAYMENT_NOT_FOUND(1027, "Payment information not found", HttpStatus.NOT_FOUND),
     PAYMENT_REQUIRED(1028, "Payment required to continue", HttpStatus.PAYMENT_REQUIRED),
+    PRODUCT_NOT_FOUND(1029, "Product not found", HttpStatus.NOT_FOUND),
+    ORDER_NOT_FOUND(1030, "Order not found", HttpStatus.NOT_FOUND),
+    INSUFFICIENT_STOCK(1031, "Insufficient stock", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_BALANCE(1032, "Insufficient balance", HttpStatus.BAD_REQUEST),
 
     ;
 

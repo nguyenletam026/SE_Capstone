@@ -44,7 +44,7 @@ export default function Header() {
         <ul className="flex justify-center space-x-6 text-sm font-semibold text-gray-700">
           <li>
             <Link to="/about" className="hover:text-green-600">
-              Về Chúng Tôi
+              About Us
             </Link>
           </li>
           <li>
@@ -52,26 +52,22 @@ export default function Header() {
               Daily Assessment
             </Link>
           </li>
-          {/* <li>
-            <Link to="/transactions" className="hover:text-green-600">
-              Xem Giao Dịch
+          <li>
+            <Link to="/products" className="hover:text-green-600">
+              Health Products
             </Link>
-          </li> */}
+          </li>
           <li>
             <Link to="/chatroom" className="hover:text-green-600">
-              Tư Vấn Trực Tuyến
+              Doctor  Advice
             </Link>
           </li>
           <li>
             <Link to="/deposit" className="hover:text-green-600">
-              Nạp Tiền
+              Deposit
             </Link>
           </li>
-          <li>
-            <Link to="/plans" className="hover:text-green-600">
-              Gói
-            </Link>
-          </li>
+          
         </ul>
       </nav>
 
@@ -114,6 +110,12 @@ export default function Header() {
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 My Profile
+              </Link>
+              <Link
+                to="/orders"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Order History
               </Link>
               <Link
                 to="/settings"

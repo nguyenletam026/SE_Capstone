@@ -3,8 +3,11 @@
 import Header from "../header/Header";
 import Footer from "../footer/userFooter";
 import PropTypes from "prop-types";
+import { useLocation } from "react-router-dom";
 
 const UserLayout = ({ children }) => {
+  const location = useLocation();
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Fixed Header */}
