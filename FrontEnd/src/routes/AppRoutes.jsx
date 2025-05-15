@@ -31,6 +31,7 @@ import DepositPage from "../pages/DepositPage";
 import ProductList from "../page/userPage/ProductList";
 import ProductDetail from "../page/userPage/ProductDetail";
 import OrderHistory from "../page/userPage/OrderHistory";
+import CartPage from "../page/userPage/CartPage";
 
 // Admin Pages
 import AdminLayout from "../components/layouts/adminLayout";
@@ -90,6 +91,7 @@ const AppRoutes = () => {
             <Route path="/products" element={<UserLayout><ProductList /></UserLayout>} />
             <Route path="/products/:id" element={<UserLayout><ProductDetail /></UserLayout>} />
             <Route path="/orders" element={<UserLayout><OrderHistory /></UserLayout>} />
+            <Route path="/cart" element={<UserLayout><CartPage /></UserLayout>} />
           </Route>
 
           {/* Route Admin */}

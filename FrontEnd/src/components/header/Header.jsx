@@ -3,8 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { logOut } from "../../services/authenticationService";
 import defaultImage from "../../assets/3.png";
 import Bot from "../../assets/4.png";
+import { ShoppingCartOutlined, BellOutlined, MenuOutlined } from "@ant-design/icons";
 
-export default function Header() {
+export default function Header({ cartItemsCount = 0 }) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef();
@@ -81,14 +82,24 @@ export default function Header() {
           Trở thành bác sĩ tâm lý
         </Link>
 
+        {/* Cart Icon */}
+        <Link to="/cart" className="relative">
+          <ShoppingCartOutlined style={{ fontSize: '24px' }} className="text-gray-600 hover:text-blue-600 transition-colors" />
+          {cartItemsCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              {cartItemsCount > 99 ? '99+' : cartItemsCount}
+            </span>
+          )}
+        </Link>
+
         {/* Notification Icon */}
-        <button className="text-gray-600 text-xl hover:text-gray-800 transition">
-          🔔
+        <button className="text-gray-600 hover:text-gray-800 transition">
+          <BellOutlined style={{ fontSize: '22px' }} />
         </button>
 
         {/* Hamburger Icon */}
-        <button className="text-gray-600 text-xl hover:text-gray-800 transition">
-          ☰
+        <button className="text-gray-600 hover:text-gray-800 transition">
+          <MenuOutlined style={{ fontSize: '22px' }} />
         </button>
 
         {/* Profile Dropdown */}
