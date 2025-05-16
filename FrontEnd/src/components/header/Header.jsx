@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { logOut } from "../../services/authenticationService";
+// import { logOut } from "../../services/authenticationService";
+import { useAuth } from "../../context/AuthContext";
 import defaultImage from "../../assets/3.png";
 import Bot from "../../assets/4.png";
 import { ShoppingCartOutlined, BellOutlined, MenuOutlined } from "@ant-design/icons";
@@ -9,12 +10,12 @@ export default function Header({ cartItemsCount = 0 }) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef();
-
+  const { logout } = useAuth();
   const handleMenuToggle = () => setMenuOpen(!menuOpen);
   const handleLogout = () => {
-    logOut();
-    navigate("/login");
-  };
+  logout();              // sẽ clear cả user và token
+  navigate("/login");
+};
 
   useEffect(() => {
     function handleClickOutside(event) {

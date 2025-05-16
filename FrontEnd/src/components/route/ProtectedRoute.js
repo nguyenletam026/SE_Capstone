@@ -5,18 +5,22 @@ export default function ProtectedRoute({ allowedRoles }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <p>Loading...</p>;
+    // Tránh render quá sớm → lỗi loop
+    return null; // hoặc <LoadingScreen />
   }
 
   if (!user) {
-    console.warn("User not logged in, redirecting to login...");
+    console.warn("❌ User not logged in, redirecting to /login...");
     return <Navigate to="/login" replace />;
   }
 
-  // Kiểm tra role có hợp lệ không
   const userRoles = Array.isArray(user.role) ? user.role : [user.role];
+
+  console.log("✅ userRoles:", userRoles);
+  console.log("✅ allowedRoles:", allowedRoles);
+
   if (!allowedRoles.some((role) => userRoles.includes(role))) {
-    console.warn(`User role ${userRoles} not authorized, redirecting to /`);
+    console.warn(`⛔ User role ${userRoles} not authorized, redirecting to /`);
     return <Navigate to="/" replace />;
   }
 
