@@ -1,8 +1,6 @@
-// 📁 context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { getToken, removeToken, setToken } from "../services/localStorageService";
-import { fetchUserInfo } from "../lib/user/info"; // 👈 Thêm dòng này
+import { getToken, setToken, removeToken } from "../services/localStorageService";
 
 const AuthContext = createContext();
 
@@ -10,44 +8,33 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const token = getToken();
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
+  const initializeUserFromToken = () => {
+    const token = getToken();
+    if (token) {
       try {
         const decoded = jwtDecode(token);
-        const scope = decoded.scope;
-        const email = decoded.sub;
-
-        // 🔁 Gọi API /myInfo để lấy id + avatar + tên
-        const infoRes = await fetchUserInfo(); // 👈 Lấy từ API
-        const { id, username, firstName, lastName, avtUrl } = infoRes.result;
-
         setUser({
-          id,
-          email: username,
-          name: `${firstName} ${lastName}`,
-          avatar: avtUrl,
-          role: scope,
+          email: decoded.sub,
+          role: decoded.scope,
         });
       } catch (err) {
-        console.error("Auth init failed:", err);
+        console.error("❌ Invalid token, clearing storage...");
         removeToken();
-      } finally {
-        setLoading(false);
+        setUser(null);
       }
-    };
+    } else {
+      setUser(null);
+    }
+    setLoading(false);
+  };
 
-    initializeAuth();
+  useEffect(() => {
+    initializeUserFromToken();
   }, []);
 
   const login = (token) => {
     setToken(token);
-    window.location.reload(); // Reload để chạy lại `useEffect` và fetch myInfo
+    initializeUserFromToken();
   };
 
   const logout = () => {

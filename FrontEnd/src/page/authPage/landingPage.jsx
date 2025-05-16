@@ -1,3 +1,5 @@
+// 📁 pages/LandingPage.jsx
+import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import aiImg from "../../assets/4.png";
@@ -7,13 +9,18 @@ import anAvatar from "../../assets/3.png";
 import phucAvatar from "../../assets/3.png";
 import linhAvatar from "../../assets/3.png";
 import Footer from "../../components/footer/userFooter";
+// import { removeToken } from "../../services/localStorageService";
 
 export default function LandingPage() {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // removeToken();
+    console.log("🧹 Đã xóa token/localStorage khi vào trang Landing");
+  }, []);
+
   return (
     <div className="bg-gradient-to-b from-green-100 to-white min-h-screen">
-      {/* Hero Section */}
       <section className="text-center py-20 bg-green-600 text-white">
         <motion.h1
           className="text-5xl font-bold"
@@ -34,7 +41,6 @@ export default function LandingPage() {
         </button>
       </section>
 
-      {/* Features Section */}
       <section className="py-20">
         <h2 className="text-4xl font-bold text-center text-gray-800">Why Choose Us?</h2>
         <div className="flex flex-wrap justify-center mt-10 gap-6">
@@ -56,7 +62,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
       <section className="py-20 bg-gray-100">
         <h2 className="text-4xl font-bold text-center text-gray-800">What Students Say</h2>
         <div className="flex flex-wrap justify-center mt-10 gap-6">
@@ -66,7 +71,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Policy Section */}
       <section className="py-20 bg-white">
         <motion.div
           className="max-w-5xl mx-auto text-gray-700 px-6"
@@ -87,7 +91,6 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* Call to Action */}
       <section className="text-center py-20 bg-green-700 text-white">
         <h2 className="text-3xl font-bold">Ready to Reduce Stress?</h2>
         <p className="mt-2 text-lg">Join thousands of students improving their mental health.</p>
@@ -98,7 +101,8 @@ export default function LandingPage() {
           Join Now
         </button>
       </section>
-      <Footer/>
+
+      <Footer />
     </div>
   );
 }

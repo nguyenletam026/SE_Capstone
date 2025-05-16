@@ -1,6 +1,7 @@
+// 📁 pages/Home.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { getToken } from "../../services/localStorageService";
+import { useAuth } from "../../context/AuthContext";
 import StressChart from "../../components/stress/stressChart";
 import StressChartsCombined from "../../components/stress/stressChartsCombined";
 import StressHomeSection from "../../components/stress/StressHomeSection";
@@ -13,33 +14,16 @@ import DoctorImg from "../../assets/9.png";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
   const [refreshCharts, setRefreshCharts] = useState(0);
 
   useEffect(() => {
-    const accessToken = getToken();
-    if (!accessToken) {
+    if (!loading && !user) {
       navigate("/login", { replace: true });
-      return;
     }
+  }, [loading, user]);
 
-    fetch(`${process.env.REACT_APP_API_URL}/users/myInfo`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setUserDetails(data.result);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error:", err);
-        navigate("/login", { replace: true });
-      });
-  }, []);
-
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-xl">Loading...</p>
@@ -70,22 +54,10 @@ export default function Home() {
         <h2 className="text-2xl font-bold mb-6">Các Biện Pháp Giảm Stress</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            {
-              title: "Lịch Sinh Hoạt Cho Một Ngày Vui Vẻ",
-              img: Daily,
-            },
-            {
-              title: "Nghe Âm Thanh Mưa Thư Giãn",
-              img: Rain,
-            },
-            {
-              title: "Âm Nhạc Giúp Cân Bằng Cảm Xúc",
-              img: Music,
-            },
-            {
-              title: "Tập Yoga Giảm Căng Thẳng",
-              img: Yoga,
-            },
+            { title: "Lịch Sinh Hoạt Cho Một Ngày Vui Vẻ", img: Daily },
+            { title: "Nghe Âm Thanh Mưa Thư Giãn", img: Rain },
+            { title: "Âm Nhạc Giúp Cân Bằng Cảm Xúc", img: Music },
+            { title: "Tập Yoga Giảm Căng Thẳng", img: Yoga },
           ].map((item, index) => (
             <div
               key={index}
@@ -107,6 +79,7 @@ export default function Home() {
           </button>
         </div>
       </div>
+
       {/* Section 5 - Doctor Recruitment with Image + Button Layout */}
       <div className="mt-16 px-6 py-10 bg-green-100 rounded-lg shadow text-center">
         <div className="flex flex-col md:flex-row items-center gap-6">
