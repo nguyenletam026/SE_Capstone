@@ -5,10 +5,13 @@ import missionImage from "../../assets/8.png";
 import valuesImage from "../../assets/12.png";
 import { motion } from "framer-motion";
 
+const SectionTitle = ({ children }) => (
+  <h2 className="text-2xl font-semibold mb-4 text-[#2b3a29]">{children}</h2>
+);
+
 const AboutUs = () => {
   return (
-    <div className="bg-gradient-to-br from-[#f0fdf4] via-[#e0f7ec] to-[#c2f0db] text-gray-800 px-6 py-12 font-sans max-w-7xl mx-auto">
-      {/* Title */}
+    <div className="bg-gradient-to-br from-[#f0fdf4] via-[#e0f7ec] to-[#c2f0db] text-gray-800 px-6 py-12 font-sans min-h-screen w-full">
       <motion.h1
         className="text-4xl font-bold mb-6 text-center text-[#2b3a29]"
         initial={{ opacity: 0, y: -20 }}
@@ -18,20 +21,21 @@ const AboutUs = () => {
         Về Chúng Tôi
       </motion.h1>
 
-      {/* Introduction */}
       <motion.section
-        className="mb-12"
+        className="mb-16 px-6 lg:px-12"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
       >
         <p className="text-lg leading-relaxed text-justify">
-          Student Stress Helper là nền tảng hướng đến việc chăm sóc sức khỏe tinh thần cho học sinh, sinh viên tại Việt Nam. Chúng tôi hiểu rằng áp lực học tập, các mối quan hệ và định hướng tương lai có thể gây ra nhiều căng thẳng, lo âu cho giới trẻ. Vì vậy, Student Stress Helper ra đời với mục tiêu cung cấp công cụ hỗ trợ, tư vấn và kết nối với các chuyên gia tâm lý hàng đầu để đồng hành cùng bạn trên hành trình tìm lại sự cân bằng trong cuộc sống.
+          Student Stress Helper là nền tảng hướng đến việc chăm sóc sức khỏe tinh thần cho học sinh, sinh viên tại Việt Nam.
+          Chúng tôi hiểu rằng áp lực học tập, các mối quan hệ và định hướng tương lai có thể gây ra nhiều căng thẳng, lo âu cho giới trẻ.
+          Vì vậy, Student Stress Helper ra đời với mục tiêu cung cấp công cụ hỗ trợ, tư vấn và kết nối với các chuyên gia tâm lý hàng đầu
+          để đồng hành cùng bạn trên hành trình tìm lại sự cân bằng trong cuộc sống.
         </p>
       </motion.section>
 
-      {/* Mission Section */}
       <motion.section
         className="grid md:grid-cols-2 gap-10 mb-16 items-center"
         initial={{ opacity: 0, x: -50 }}
@@ -41,7 +45,7 @@ const AboutUs = () => {
       >
         <img src={missionImage} alt="Mission" className="rounded-lg shadow-lg" />
         <div>
-          <h2 className="text-2xl font-semibold mb-4 text-[#2b3a29]">Sứ Mệnh Của Chúng Tôi</h2>
+          <SectionTitle>Sứ Mệnh Của Chúng Tôi</SectionTitle>
           <p className="text-md leading-relaxed">
             Chúng tôi cam kết tạo ra một môi trường trực tuyến lành mạnh, nơi các bạn trẻ có thể:
           </p>
@@ -54,7 +58,6 @@ const AboutUs = () => {
         </div>
       </motion.section>
 
-      {/* Values Section */}
       <motion.section
         className="grid md:grid-cols-2 gap-10 mb-16 items-center"
         initial={{ opacity: 0, x: 50 }}
@@ -63,7 +66,7 @@ const AboutUs = () => {
         transition={{ duration: 0.7 }}
       >
         <div>
-          <h2 className="text-2xl font-semibold mb-4 text-[#2b3a29]">Giá Trị Cốt Lõi</h2>
+          <SectionTitle>Giá Trị Cốt Lõi</SectionTitle>
           <ul className="list-decimal pl-6 text-md space-y-2">
             <li>Sự lắng nghe không phán xét.</li>
             <li>Tôn trọng quyền riêng tư và bảo mật thông tin người dùng.</li>
@@ -74,44 +77,43 @@ const AboutUs = () => {
         <img src={valuesImage} alt="Values" className="rounded-lg shadow-lg" />
       </motion.section>
 
-      {/* Team Section */}
       <motion.section
-        className="text-center mb-20"
+        className="grid md:grid-cols-2 gap-10 mb-20 items-center px-6 lg:px-12"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
       >
-        <h2 className="text-2xl font-semibold mb-6 text-[#2b3a29]">Đội Ngũ Của Chúng Tôi</h2>
-        <p className="mb-4 text-md">
-          Student Stress Helper được xây dựng bởi những con người đam mê trong lĩnh vực sức khỏe tinh thần, công nghệ và giáo dục. Chúng tôi kết nối:
-        </p>
-        <ul className="list-disc list-inside inline-block text-left text-md space-y-1">
-          <li>Các nhà tâm lý học lâm sàng.</li>
-          <li>Kỹ sư phần mềm, chuyên gia AI.</li>
-          <li>Chuyên gia giáo dục và giảng viên đại học.</li>
-          <li>Sinh viên với nhiệt huyết lan toả sự tích cực.</li>
-        </ul>
-        <div className="mt-8 flex justify-center">
-          <img src={teamImage} alt="Team" className="rounded-lg shadow-lg w-full max-w-2xl" />
+        <img src={teamImage} alt="Team" className="rounded-lg shadow-lg w-full max-w-2xl mx-auto" />
+
+        <div>
+          <SectionTitle>Đội Ngũ Của Chúng Tôi</SectionTitle>
+          <p className="mb-4 text-md">
+            Student Stress Helper được xây dựng bởi những con người đam mê trong lĩnh vực sức khỏe tinh thần, công nghệ và giáo dục. Chúng tôi kết nối:
+          </p>
+          <ul className="list-disc pl-6 text-md space-y-1">
+            <li>Các nhà tâm lý học lâm sàng.</li>
+            <li>Kỹ sư phần mềm, chuyên gia AI.</li>
+            <li>Chuyên gia giáo dục và giảng viên đại học.</li>
+            <li>Sinh viên với nhiệt huyết lan toả sự tích cực.</li>
+          </ul>
         </div>
       </motion.section>
 
-      {/* Commitment Section */}
       <motion.section
-        className="mb-16"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        className="mb-16 px-6 lg:px-12"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
+        transition={{ duration: 0.8 }}
       >
-        <h2 className="text-2xl font-semibold mb-4 text-[#2b3a29]">Cam Kết Của Chúng Tôi</h2>
-        <p className="text-md leading-relaxed">
-          Student Stress Helper luôn đặt người dùng làm trung tâm. Chúng tôi không chỉ cung cấp dịch vụ - chúng tôi đồng hành. Mỗi tính năng đều được thiết kế nhằm thúc đẩy sự phát triển cá nhân, cải thiện đời sống tinh thần và giúp bạn học cách yêu thương bản thân đúng cách.
+        <SectionTitle>Cam Kết Của Chúng Tôi</SectionTitle>
+        <p className="text-lg leading-relaxed text-justify">
+          Student Stress Helper luôn đặt người dùng làm trung tâm. Chúng tôi không chỉ cung cấp dịch vụ - chúng tôi đồng hành.
+          Mỗi tính năng đều được thiết kế nhằm thúc đẩy sự phát triển cá nhân, cải thiện đời sống tinh thần và giúp bạn học cách yêu thương bản thân đúng cách.
         </p>
       </motion.section>
 
-      {/* Call to Action */}
       <motion.section
         className="text-center"
         initial={{ opacity: 0, scale: 0.9 }}

@@ -15,11 +15,11 @@ export default function Recommendation() {
         // Always fetch all doctors regardless of recommendation type
         const doctorRes = await getAllDoctorRecommend();
         setDoctors(doctorRes.result);
-        
+
         // Still try to get user-specific recommendation if available
-      try {
-        const recommendRes = await getMyRecommendation();
-        setData(recommendRes.result);
+        try {
+          const recommendRes = await getMyRecommendation();
+          setData(recommendRes.result);
         } catch (err) {
           console.log("No specific recommendation available, showing all doctors");
           // If no recommendation (user hasn't done assessment), set a default state
@@ -57,7 +57,7 @@ export default function Recommendation() {
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
         <h2 className="text-2xl font-bold text-center mb-6 text-brown-700">
           {data?.recommendationType === "GENERAL" || data?.stressLevel === "NO_DATA"
-            ? "Danh sách bác sĩ có thể tư vấn" 
+            ? "Danh sách bác sĩ có thể tư vấn"
             : `Gợi ý phù hợp cho bạn hôm nay (${data?.stressLevel})`}
         </h2>
 
@@ -69,25 +69,25 @@ export default function Recommendation() {
               {data?.recommendationType === "DOCTOR_ADVISE" && !showAllDoctors ? (
                 // Show recommended doctors
                 data.recommendations.map((rec) => {
-                const full = doctors.find((d) => d.id === rec.recommendName);
-                if (!full) return null;
-                return (
-                  <div
-                    key={full.id}
-                    className="border rounded-lg p-4 flex items-center gap-4 shadow bg-white cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSelectDoctor(full.id)}
-                  >
-                    <img
-                      src={full.avtUrl || "https://via.placeholder.com/80"}
-                      alt={full.firstName}
-                      className="w-20 h-20 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="font-bold text-lg">{full.lastName} {full.firstName}</p>
-                      <p className="text-sm text-gray-500">{full.username}</p>
+                  const full = doctors.find((d) => d.id === rec.recommendName);
+                  if (!full) return null;
+                  return (
+                    <div
+                      key={full.id}
+                      className="border rounded-lg p-4 flex items-center gap-4 shadow bg-white cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSelectDoctor(full.id)}
+                    >
+                      <img
+                        src={full.avtUrl || "https://via.placeholder.com/80"}
+                        alt={full.firstName}
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="font-bold text-lg">{full.lastName} {full.firstName}</p>
+                        <p className="text-sm text-gray-500">{full.username}</p>
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
                 })
               ) : (
                 // Show all doctors
@@ -110,10 +110,10 @@ export default function Recommendation() {
                 ))
               )}
             </div>
-            
+
             {data?.recommendationType === "DOCTOR_ADVISE" && (
               <div className="mt-4 text-center">
-                <button 
+                <button
                   onClick={() => setShowAllDoctors(!showAllDoctors)}
                   className="text-blue-600 hover:underline"
                 >
@@ -121,7 +121,7 @@ export default function Recommendation() {
                 </button>
               </div>
             )}
-            
+
             {data?.recommendationType !== "DOCTOR_ADVISE" && doctors.length === 0 && (
               <p className="text-center text-gray-500 my-4">Không có bác sĩ nào hiện có.</p>
             )}
@@ -141,11 +141,11 @@ export default function Recommendation() {
                 </audio>
               </div>
             ))}
-            
+
             <div className="mt-4">
-              <button 
+              <button
                 onClick={() => setShowAllDoctors(true)}
-                className="text-blue-600 hover:underline"
+                className="inline-block bg-[#2b3a29] hover:bg-[#1e291e] text-white font-semibold px-6 py-3 rounded-full text-sm transition"
               >
                 Xem danh sách bác sĩ để tư vấn
               </button>
@@ -166,9 +166,9 @@ export default function Recommendation() {
                 </video>
               </div>
             ))}
-            
+
             <div className="mt-4">
-              <button 
+              <button
                 onClick={() => setShowAllDoctors(true)}
                 className="text-blue-600 hover:underline"
               >
@@ -177,7 +177,7 @@ export default function Recommendation() {
             </div>
           </div>
         )}
-        
+
         {/* General case - Show all doctors by default */}
         {(data?.recommendationType === "GENERAL" || data?.stressLevel === "NO_DATA") && !showAllDoctors && (
           <div>

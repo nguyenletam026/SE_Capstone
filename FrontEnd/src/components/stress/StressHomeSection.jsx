@@ -47,7 +47,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
 
         if (score > 70) {
           setBgColor("#ef4444"); //red
-        } else if (score > 50) {
+        } else if (score > 40) {
           setBgColor("#eab308"); //yellow
         } else {
           setBgColor("#9BB168");  //green
@@ -58,7 +58,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
 
   const getStressIcon = () => {
     if (stressScore > 70) return <span className="text-6xl">😟</span>;
-    if (stressScore > 50) return <span className="text-6xl">😐</span>;
+    if (stressScore > 40) return <span className="text-6xl">😐</span>;
     return <span className="text-6xl">😊</span>;
   };
 
