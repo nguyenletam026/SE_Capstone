@@ -37,15 +37,15 @@ export default function AssessmentResult() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left Section */}
       <div className="w-1/2 bg-[#9BB168] flex flex-col items-center justify-center text-white text-center px-6">
         <img src={Bot} alt="Bot" className="w-56 h-56 mb-6" />
         <h2 className="text-3xl font-bold mb-2">Kết Quả Đánh Giá</h2>
         <p className="text-lg mb-4">Trạng thái tổng thể của bạn hôm nay là:</p>
         <p className="text-2xl font-bold mb-2">{result.overallStressLevel}</p>
-        <p className="text-lg mb-6">Điểm trung bình: {result.averageStressScore}</p>
+        <p className="text-lg mb-6">
+          Điểm trung bình: {Math.round(result.averageStressScore)}
+        </p>
 
-        {/* Button to go to recommendation */}
         <button
           onClick={() => navigate("/assessment/recommend")}
           className="mt-4 bg-black text-brown-700 font-semibold py-2 px-6 rounded-full hover:bg-brown-800 hover:text-white transition"
@@ -54,7 +54,6 @@ export default function AssessmentResult() {
         </button>
       </div>
 
-      {/* Right Section */}
       <div className="w-1/2 bg-yellow-100 p-10">
         <h3 className="text-2xl font-bold mb-6 text-brown-700">Chi Tiết Câu Trả Lời</h3>
         <ul className="space-y-6">

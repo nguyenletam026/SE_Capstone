@@ -1,4 +1,3 @@
-// 📁 pages/Home.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -21,7 +20,7 @@ export default function Home() {
     if (!loading && !user) {
       navigate("/login", { replace: true });
     }
-  }, [loading, user]);
+  }, [loading, user, navigate]);
 
   if (loading || !user) {
     return (
@@ -49,10 +48,11 @@ export default function Home() {
         <StressChart key={refreshCharts} />
       </div>
 
-      {/* Section 4 - Tips */}
-      <div className="mt-10 px-6">
-        <h2 className="text-2xl font-bold mb-6">Các Biện Pháp Giảm Stress</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Section 4 - Tips*/}
+      <div className="mt-16 px-6">
+        <h2 className="text-3xl font-bold text-center mb-10 text-green-800">🌿 Các Biện Pháp Giảm Stress</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
             { title: "Lịch Sinh Hoạt Cho Một Ngày Vui Vẻ", img: Daily },
             { title: "Nghe Âm Thanh Mưa Thư Giãn", img: Rain },
@@ -61,26 +61,28 @@ export default function Home() {
           ].map((item, index) => (
             <div
               key={index}
-              className="border rounded-lg overflow-hidden shadow-sm"
+              className="rounded-2xl shadow-xl bg-white overflow-hidden hover:scale-[1.03] transition transform duration-300 ease-in-out"
             >
               <img
                 src={item.img}
                 alt={item.title}
-                className="h-32 w-full object-cover"
+                className="h-48 w-full object-cover"
               />
-              <div className="p-2 text-sm font-medium">{item.title}</div>
+              <div className="p-4 text-center">
+                <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="text-center mt-8">
-          <button className="bg-brown-700 hover:bg-brown-800 text-white py-3 px-6 rounded-full">
-            Liên Hệ Với Bác Sĩ →
+        <div className="text-center mt-12">
+          <button className="bg-green-600 hover:bg-green-700 text-white text-lg py-3 px-8 rounded-full shadow-lg transition duration-300">
+            Liên Hệ Với Bác Sĩ Tư Vấn →
           </button>
         </div>
       </div>
 
-      {/* Section 5 - Doctor Recruitment with Image + Button Layout */}
+      {/* Section 5 - Doctor Recruitment */}
       <div className="mt-16 px-6 py-10 bg-green-100 rounded-lg shadow text-center">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="w-full md:w-1/2">
