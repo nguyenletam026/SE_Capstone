@@ -56,6 +56,12 @@ const ChatContainer = () => {
     // Check if chat is expired
     if (messages && messages.length > 0 && messages[0] && messages[0].expired) {
       alert("Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.");
+      
+      // Tự động chuyển hướng đến trang thanh toán
+      const doctorId = selectedUser.doctorId;
+      if (window.confirm("Bạn có muốn chuyển đến trang thanh toán không?")) {
+        navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
+      }
       return;
     }
 
@@ -64,8 +70,46 @@ const ChatContainer = () => {
     setSending(true);
 
     try {
-      const receiverId = selectedUser.doctorId || selectedUser.patientId;
+      // Debug the selected user object to understand its structure
+      console.log("Selected user in handleSend:", selectedUser);
+      console.log("Current user:", user);
+      
+      // Determine the correct recipient ID based on the selected user structure
+      let receiverId;
+      
+      // For doctors: selectedUser contains patientId
+      // For patients: selectedUser contains doctorId
+      if (selectedUser.doctorId) {
+        // Patient is sending to doctor
+        receiverId = selectedUser.doctorId;
+        console.log("Patient sending to doctor:", receiverId);
+      } else if (selectedUser.patientId) {
+        // Doctor is sending to patient
+        receiverId = selectedUser.patientId;
+        console.log("Doctor sending to patient:", receiverId);
+      } else {
+        // Try to find the ID in other properties
+        const possibleKeys = Object.keys(selectedUser);
+        console.log("Available keys in selectedUser:", possibleKeys);
+        
+        if (possibleKeys.includes('requestId')) {
+          // This might be a chat request object
+          console.log("Using requestId as fallback");
+          receiverId = selectedUser.requestId;
+        } else {
+          console.error("Cannot determine recipient - selectedUser:", selectedUser);
+          throw new Error("Không thể xác định người nhận tin nhắn");
+        }
+      }
+      
+      if (!receiverId) {
+        throw new Error("ID người nhận không hợp lệ");
+      }
+      
+      console.log("Sending message from", user.id, "to", receiverId);
+      
       const response = await sendMessage(content, user.id, receiverId);
+      console.log("Message send response:", response);
       
       // Add message to state immediately after successful send
       if (response) {
@@ -85,10 +129,12 @@ const ChatContainer = () => {
       const errorMessage = err.message;
       
       // If payment is required, redirect to payment page
-      if (errorMessage.includes("Vui lòng thanh toán")) {
+      if (errorMessage.includes("Vui lòng thanh toán") || 
+          errorMessage.includes("Payment required") ||
+          errorMessage.includes("hết hạn")) {
         const doctorId = selectedUser.doctorId;
-        if (window.confirm(errorMessage + "\n\nBạn có muốn chuyển đến trang thanh toán không?")) {
-          navigate(`/contact-doctor/${doctorId}`);
+        if (window.confirm("Phiên chat đã hết hạn hoặc chưa được thanh toán.\n\nBạn có muốn chuyển đến trang thanh toán không?")) {
+          navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
           return;
         }
       } else {
@@ -106,12 +152,54 @@ const ChatContainer = () => {
     // Check if chat is expired
     if (messages && messages.length > 0 && messages[0] && messages[0].expired) {
       alert("Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.");
+      
+      // Redirect to payment page
+      const doctorId = selectedUser.doctorId;
+      if (window.confirm("Bạn có muốn chuyển đến trang thanh toán không?")) {
+        navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
+      }
       return;
     }
 
     setSending(true);
     try {
-      const receiverId = selectedUser.doctorId || selectedUser.patientId;
+      // Debug the selected user object to understand its structure
+      console.log("Selected user in handleImageUpload:", selectedUser);
+      
+      // Determine the correct recipient ID based on the selected user structure
+      let receiverId;
+      
+      // For doctors: selectedUser contains patientId
+      // For patients: selectedUser contains doctorId
+      if (selectedUser.doctorId) {
+        // Patient is sending to doctor
+        receiverId = selectedUser.doctorId;
+        console.log("Patient sending image to doctor:", receiverId);
+      } else if (selectedUser.patientId) {
+        // Doctor is sending to patient
+        receiverId = selectedUser.patientId;
+        console.log("Doctor sending image to patient:", receiverId);
+      } else {
+        // Try to find the ID in other properties
+        const possibleKeys = Object.keys(selectedUser);
+        console.log("Available keys in selectedUser:", possibleKeys);
+        
+        if (possibleKeys.includes('requestId')) {
+          // This might be a chat request object
+          console.log("Using requestId as fallback");
+          receiverId = selectedUser.requestId;
+        } else {
+          console.error("Cannot determine recipient - selectedUser:", selectedUser);
+          throw new Error("Không thể xác định người nhận tin nhắn");
+        }
+      }
+      
+      if (!receiverId) {
+        throw new Error("ID người nhận không hợp lệ");
+      }
+      
+      console.log("Sending image from", user.id, "to", receiverId);
+      
       const formData = new FormData();
       formData.append("image", file);
       formData.append("content", "");
@@ -161,34 +249,43 @@ const ChatContainer = () => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages && messages.filter(msg => msg && msg.senderId).map((msg) => (
-          <div
-            key={msg.id || msg.timestamp}
-            className={`flex ${
-              msg.senderId === user?.id ? "justify-end" : "justify-start"
-            }`}
-          >
+        {messages && messages.filter(msg => msg && msg.senderId).map((msg, index) => {
+          // Generate a unique key for each message
+          const messageKey = msg.id ? 
+            `msg-${msg.id}` : 
+            (msg.timestamp ? 
+              `time-${msg.timestamp}-${index}` : 
+              `idx-${index}-${msg.content?.substring(0, 10)}`);
+            
+          return (
             <div
-              className={`max-w-[70%] rounded-lg p-3 ${
-                msg.senderId === user?.id
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100"
+              key={messageKey}
+              className={`flex ${
+                msg.senderId === user?.id ? "justify-end" : "justify-start"
               }`}
             >
-              {msg.imageUrl && (
-                <img
-                  src={msg.imageUrl}
-                  alt="Sent"
-                  className="max-w-full rounded-lg mb-2"
-                />
-              )}
-              <p>{msg.content}</p>
-              <p className="text-xs mt-1 opacity-70">
-                {new Date(msg.timestamp).toLocaleTimeString()}
-              </p>
+              <div
+                className={`max-w-[70%] rounded-lg p-3 ${
+                  msg.senderId === user?.id
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100"
+                }`}
+              >
+                {msg.imageUrl && (
+                  <img
+                    src={msg.imageUrl}
+                    alt="Sent"
+                    className="max-w-full rounded-lg mb-2"
+                  />
+                )}
+                <p>{msg.content}</p>
+                <p className="text-xs mt-1 opacity-70">
+                  {new Date(msg.timestamp).toLocaleTimeString()}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 

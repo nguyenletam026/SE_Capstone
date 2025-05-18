@@ -12,7 +12,17 @@ const ChatHeader = () => {
     );
   }
 
-  const name = selectedUser.doctorName || selectedUser.patientName || "Không xác định";
+  // Determine the name based on available properties
+  let name = "Không xác định";
+  if (selectedUser.doctorName) {
+    name = selectedUser.doctorName;
+  } else if (selectedUser.patientName) {
+    name = selectedUser.patientName;
+  }
+  
+  console.log("Selected user in header:", selectedUser);
+  console.log("Display name:", name);
+  
   const isExpired = messages && messages.length > 0 && messages[0] && messages[0].expired;
 
   return (

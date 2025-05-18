@@ -59,6 +59,19 @@ public class CloudinaryService {
         }
     }
 
+    /**
+     * Upload avatar file nếu có, trả về URL mặc định nếu không có file
+     * @param file File avatar (có thể null)
+     * @param userId ID của người dùng
+     * @return URL của avatar (Cloudinary URL hoặc URL mặc định)
+     */
+    public String uploadAvatarSafe(MultipartFile file, String userId) throws IOException {
+        if (file == null || file.isEmpty()) {
+            return "/default-avatar.png"; // Trả về URL avatar mặc định
+        }
+        
+        return uploadFile(file, userId); // Sử dụng phương thức upload hiện có
+    }
 
     public String uploadMusic(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {

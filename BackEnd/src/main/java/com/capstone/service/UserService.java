@@ -60,10 +60,7 @@ public class UserService {
         }
     }
 
-    public void createUser(UserCreationRequest request,MultipartFile avtFile) throws IOException {
-        if (avtFile == null || avtFile.isEmpty()) {
-            throw new AppException(ErrorCode.FILE_NULL);
-        }
+    public void createUser(UserCreationRequest request, MultipartFile avtFile) throws IOException {
         User user = userMapper.toUser(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -76,8 +73,11 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         user.setRole(role);
         userRepository.save(user);
-        String avtUrl = cloudinaryService.uploadFile(avtFile, user.getId());
+        
+        // Sử dụng phương thức uploadAvatarSafe để xử lý avatar
+        String avtUrl = cloudinaryService.uploadAvatarSafe(avtFile, user.getId());
         user.setAvtUrl(avtUrl);
+        user.setBalance(0.0);
 
         userRepository.save(user);
     }

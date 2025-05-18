@@ -1,132 +1,254 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getAllDoctorRecommend } from "../../lib/user/assessmentServices";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { requestChatWithDoctor, createChatPayment } from "../../lib/util/chatServices";
+import { toast } from "react-toastify";
+import { getAllDoctorRecommend } from "../../lib/user/assessmentServices";
+import { getCurrentBalance } from "../../lib/user/depositServices";
 
 export default function UserContactDoctor() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
   const [doctor, setDoctor] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [requesting, setRequesting] = useState(false);
+  const [loadingDoctor, setLoadingDoctor] = useState(true);
   const [hours, setHours] = useState(1);
-  const [totalAmount, setTotalAmount] = useState(100000); // 100,000 VND per hour
+  const [userBalance, setUserBalance] = useState(0);
+  const [loadingBalance, setLoadingBalance] = useState(true);
+  const [paymentMode, setPaymentMode] = useState(false);
+  
+  // Check if we're coming from an expired chat
+  useEffect(() => {
+    if (location.state?.expired) {
+      setPaymentMode(true);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
         const res = await getAllDoctorRecommend();
-        const found = res.result.find((d) => d.id === id);
-        setDoctor(found);
+        const foundDoctor = res.result.find(d => d.id === id);
+        if (foundDoctor) {
+          setDoctor(foundDoctor);
+        }
       } catch (err) {
-        console.error("Failed to load doctor details", err);
+        console.error("Error fetching doctor:", err);
       } finally {
-        setLoading(false);
+        setLoadingDoctor(false);
       }
     };
+
+    const fetchBalance = async () => {
+      try {
+        const data = await getCurrentBalance();
+        // Handle the actual response format: {balance: 100000, username: 'demo7@gmail.com'}
+        if (data && typeof data.balance === 'number') {
+          setUserBalance(data.balance);
+        } else if (data && data.result && typeof data.result.balance === 'number') {
+          // Fallback for possible alternative format
+          setUserBalance(data.result.balance);
+        } else {
+          console.warn("Định dạng dữ liệu balance không đúng:", data);
+          setUserBalance(0); // Giá trị mặc định
+        }
+      } catch (err) {
+        console.error("Error fetching balance:", err);
+        setUserBalance(0); // Đặt giá trị mặc định nếu có lỗi
+      } finally {
+        setLoadingBalance(false);
+      }
+    };
+
     fetchDoctor();
+    fetchBalance();
   }, [id]);
 
-  useEffect(() => {
-    setTotalAmount(hours * 100000);
-  }, [hours]);
-
-  const handleRequestChat = async () => {
-    setRequesting(true);
+  const handleStartChat = async () => {
+    setLoading(true);
     try {
-      console.log('Creating payment with:', { doctorId: id, hours });
-      // Create payment first
-      const paymentRes = await createChatPayment(id, hours);
-      
-      // Then create chat request
       await requestChatWithDoctor(id);
+      toast.success("Yêu cầu đã được gửi! Bạn có thể bắt đầu trò chuyện ngay.");
       
-      alert("Đã gửi yêu cầu trò chuyện và thanh toán thành công!");
-      navigate("/home");
+      // Format doctor for chat and navigate to chat page
+      const doctorToChat = {
+        doctorId: id,
+        doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Bác sĩ",
+        doctorAvatar: doctor?.avtUrl
+      };
+      
+      // Navigate to chat page with doctor info
+      navigate("/chatroom", { state: { doctorToChat } });
     } catch (err) {
-      console.error("Failed to request chat or make payment", err);
-      // Check if the error has a specific message
-      const errorMessage = err.response?.data?.message || err.message || "Đã có lỗi xảy ra khi gửi yêu cầu hoặc thanh toán.";
-      alert(errorMessage);
+      console.error("Error requesting chat:", err);
+      
+      // Handle specific error cases
+      if (err.message && err.message.includes("already been processed")) {
+        // If the request already exists, just navigate to the chat
+        toast.info("Bạn đã có thể trò chuyện với bác sĩ này.");
+        
+        const doctorToChat = {
+          doctorId: id,
+          doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Bác sĩ",
+          doctorAvatar: doctor?.avtUrl
+        };
+        
+        navigate("/chatroom", { state: { doctorToChat } });
+      } else {
+        toast.error(err.message || "Không thể gửi yêu cầu trò chuyện");
+      }
     } finally {
-      setRequesting(false);
+      setLoading(false);
+    }
+  };
+  
+  const handlePayment = async () => {
+    setLoading(true);
+    try {
+      const response = await createChatPayment(id, hours);
+      toast.success(`Thanh toán thành công! Bạn có thể trò chuyện với bác sĩ trong ${hours} giờ.`);
+      
+      // Format doctor for chat and navigate to chat page
+      const doctorToChat = {
+        doctorId: id,
+        doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Bác sĩ",
+        doctorAvatar: doctor?.avtUrl
+      };
+      
+      // Navigate to chat page with doctor info
+      navigate("/chatroom", { state: { doctorToChat } });
+    } catch (err) {
+      console.error("Error making payment:", err);
+      
+      if (err.message && err.message.includes("Số dư không đủ")) {
+        toast.error("Số dư không đủ. Vui lòng nạp thêm tiền vào tài khoản.");
+        // Redirect to deposit page
+        if (window.confirm("Bạn có muốn chuyển đến trang nạp tiền không?")) {
+          navigate("/deposit");
+        }
+      } else {
+        toast.error(err.message || "Không thể thanh toán. Vui lòng thử lại sau.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBack = () => navigate("/assessment/recommend");
-
-  if (loading) {
+  if (loadingDoctor || loadingBalance) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-yellow-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-brown-700"></div>
+      <div className="flex justify-center items-center p-10">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
-  if (!doctor) {
-    return <p className="text-center p-8">Không tìm thấy thông tin bác sĩ.</p>;
-  }
-
+  const costPerHour = 100000; // 100,000 VND per hour
+  const totalCost = hours * costPerHour;
+  
   return (
-    <div className="min-h-screen bg-yellow-100 p-6 flex flex-col items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow max-w-md w-full">
-        <div className="flex flex-col items-center">
-          <img
-            src={doctor.avtUrl || "https://via.placeholder.com/100"}
-            alt="Doctor Avatar"
-            className="w-24 h-24 rounded-full object-cover mb-4"
-          />
-          <h2 className="text-xl font-bold mb-2">
-            {doctor.lastName} {doctor.firstName}
-          </h2>
-          <p className="text-gray-600 mb-1">Email: {doctor.username}</p>
-          <p className="text-gray-500 text-sm mb-6">
-            Ngày sinh: {new Date(doctor.birthdayDate).toLocaleDateString()}
-          </p>
-
-          {/* Payment Section */}
-          <div className="w-full mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold mb-3">Chi phí tư vấn</h3>
-            <p className="text-sm text-gray-600 mb-2">Giá: 100,000 VND/giờ</p>
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow-md p-8 text-center">
+        <h2 className="text-2xl font-bold text-blue-800 mb-4">
+          {paymentMode ? "Thanh toán phí tư vấn" : "Kết nối với bác sĩ"}
+        </h2>
+        
+        {doctor && (
+          <div className="mb-6">
+            <img 
+              src={doctor.avtUrl || "/default-avatar.png"} 
+              alt={`${doctor.firstName} ${doctor.lastName}`}
+              className="w-24 h-24 rounded-full object-cover mx-auto mb-3"
+            />
+            <h3 className="text-xl font-semibold">{doctor.firstName} {doctor.lastName}</h3>
+          </div>
+        )}
+        
+        {paymentMode ? (
+          <div className="mb-6">
+            <p className="text-gray-600 mb-4">
+              Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện với bác sĩ.
+            </p>
             
-            <div className="flex items-center gap-3 mb-4">
-              <label className="text-sm font-medium">Số giờ:</label>
-              <select
-                value={hours}
-                onChange={(e) => setHours(parseInt(e.target.value))}
-                className="border rounded px-2 py-1"
-                disabled={requesting}
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
-                  <option key={h} value={h}>
-                    {h} giờ
-                  </option>
-                ))}
-              </select>
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-600">Số dư hiện tại:</span>
+                <span className="font-medium">{(userBalance || 0).toLocaleString()} VND</span>
+              </div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-600">Giá mỗi giờ:</span>
+                <span className="font-medium">{(costPerHour || 0).toLocaleString()} VND</span>
+              </div>
             </div>
             
-            <div className="text-right">
-              <p className="text-sm font-medium">
-                Tổng tiền: {totalAmount.toLocaleString()} VND
-              </p>
+            <div className="mb-6">
+              <label className="block text-gray-700 mb-2">Số giờ tư vấn:</label>
+              <div className="flex items-center justify-center">
+                <button 
+                  onClick={() => hours > 1 && setHours(hours - 1)}
+                  className="px-3 py-1 bg-gray-200 rounded-l-lg hover:bg-gray-300"
+                >
+                  -
+                </button>
+                <span className="px-4 py-1 bg-gray-100 border-t border-b">
+                  {hours || 1}
+                </span>
+                <button 
+                  onClick={() => setHours(hours + 1)}
+                  className="px-3 py-1 bg-gray-200 rounded-r-lg hover:bg-gray-300"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg mb-6">
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-gray-800">Tổng thanh toán:</span>
+                <span className="font-bold text-blue-600">{(totalCost || 0).toLocaleString()} VND</span>
+              </div>
+              
+              {userBalance !== null && userBalance < totalCost && (
+                <div className="mt-2 text-red-500 text-sm">
+                  Số dư không đủ. Vui lòng nạp thêm tiền vào tài khoản.
+                </div>
+              )}
+            </div>
+            
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => navigate("/deposit")}
+                className="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50"
+              >
+                Nạp tiền
+              </button>
+              <button
+                onClick={handlePayment}
+                disabled={loading || userBalance === null || userBalance < totalCost}
+                className={`px-6 py-2 rounded-lg text-white font-medium ${
+                  loading || userBalance === null || userBalance < totalCost ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+                } transition-colors`}
+              >
+                {loading ? "Đang xử lý..." : "Thanh toán"}
+              </button>
             </div>
           </div>
+        ) : (
+          <>
+            <p className="text-gray-600 mb-6">
+              Bạn đang yêu cầu trò chuyện với bác sĩ. Sau khi gửi yêu cầu, bạn có thể bắt đầu trò chuyện ngay lập tức.
+            </p>
 
-          <button
-            onClick={handleRequestChat}
-            disabled={requesting}
-            className="bg-brown-700 hover:bg-brown-800 text-white font-semibold px-6 py-2 rounded-full shadow hover:shadow-md transition-all w-full mb-3 disabled:opacity-50"
-          >
-            {requesting ? "Đang xử lý..." : "Thanh toán và gửi yêu cầu"}
-          </button>
-
-          <button
-            onClick={handleBack}
-            className="text-sm font-medium text-brown-700 hover:underline transition"
-          >
-            ← Chọn bác sĩ khác
-          </button>
-        </div>
+            <button
+              onClick={handleStartChat}
+              disabled={loading}
+              className={`px-6 py-3 rounded-full text-white font-medium ${
+                loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+              } transition-colors`}
+            >
+              {loading ? "Đang xử lý..." : "Bắt đầu trò chuyện"}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

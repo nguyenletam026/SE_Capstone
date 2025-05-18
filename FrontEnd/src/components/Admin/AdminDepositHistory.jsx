@@ -77,20 +77,26 @@ const AdminDepositHistory = () => {
 
   // Format date
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(date);
+    } catch (err) {
+      console.error("Error formatting date:", err);
+      return "";
+    }
   };
 
   // Calculate total amount of completed deposits
   const totalCompletedAmount = history
     .filter((deposit) => deposit.completed)
-    .reduce((sum, deposit) => sum + deposit.amount, 0);
+    .reduce((sum, deposit) => sum + (deposit.amount || 0), 0);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -121,7 +127,7 @@ const AdminDepositHistory = () => {
         />
         <Box>
           <Typography variant="body1" fontWeight="bold">
-            Tổng số tiền đã nạp: {totalCompletedAmount.toLocaleString()} VND
+            Tổng số tiền đã nạp: {(totalCompletedAmount || 0).toLocaleString()} VND
           </Typography>
         </Box>
       </Box>
@@ -155,14 +161,14 @@ const AdminDepositHistory = () => {
                 {filteredHistory
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((deposit) => (
-                    <TableRow key={deposit.id}>
-                      <TableCell>{deposit.username}</TableCell>
-                      <TableCell>{deposit.transactionContent}</TableCell>
+                    <TableRow key={deposit?.id || Math.random()}>
+                      <TableCell>{deposit?.username || ""}</TableCell>
+                      <TableCell>{deposit?.transactionContent || ""}</TableCell>
                       <TableCell align="right">
-                        {deposit.amount.toLocaleString()} VND
+                        {(deposit?.amount || 0).toLocaleString()} VND
                       </TableCell>
                       <TableCell align="center">
-                        {deposit.completed ? (
+                        {deposit?.completed ? (
                           <Chip
                             icon={<Check />}
                             label="Hoàn thành"
@@ -179,7 +185,7 @@ const AdminDepositHistory = () => {
                         )}
                       </TableCell>
                       <TableCell align="right">
-                        {formatDate(deposit.createdAt)}
+                        {formatDate(deposit?.createdAt)}
                       </TableCell>
                     </TableRow>
                   ))}

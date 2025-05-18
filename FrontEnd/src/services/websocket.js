@@ -25,21 +25,51 @@ export const connectWebSocket = (username, onConnected, onMessageReceived, onErr
     },
     onConnect: () => {
       console.log("✅ WebSocket connected!");
+      
+      // Subscribe to messages
       console.log("📩 Subscribing to:", `/user/${username}/queue/messages`);
       stompClient.subscribe(`/user/${username}/queue/messages`, (message) => {
         console.log("📨 Received message:", message);
         try {
           const parsed = JSON.parse(message.body);
-          if (parsed && parsed.content) {
-            onMessageReceived(message);
-          } else {
-            console.warn("⚠️ Received message with invalid format:", parsed);
+          
+          // Ensure message has a unique ID
+          if (parsed) {
+            if (!parsed.id) {
+              parsed.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+              message.body = JSON.stringify(parsed);
+            }
+            
+            if (parsed.content) {
+              onMessageReceived(message);
+            }
           }
         } catch (err) {
           console.error("❌ Failed to parse message:", err);
           onError?.(err);
         }
       });
+      
+      // Subscribe to notifications
+      console.log("🔔 Subscribing to:", `/user/${username}/queue/notifications`);
+      stompClient.subscribe(`/user/${username}/queue/notifications`, (notification) => {
+        console.log("🔔 Received notification:", notification);
+        try {
+          const parsed = JSON.parse(notification.body);
+          
+          // Ensure notification has a unique ID
+          if (parsed && !parsed.id) {
+            parsed.id = `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            notification.body = JSON.stringify(parsed);
+          }
+          
+          onMessageReceived(notification);
+        } catch (err) {
+          console.error("❌ Failed to parse notification:", err);
+          onError?.(err);
+        }
+      });
+      
       onConnected?.();
     },
     onStompError: (frame) => {
@@ -70,6 +100,11 @@ export const disconnectWebSocket = () => {
 export const sendMessage = (message) => {
   if (stompClient && stompClient.connected) {
     try {
+      // Ensure message has an ID before sending
+      if (message && !message.id) {
+        message.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      }
+      
       stompClient.publish({
         destination: "/app/chat.sendMessage",
         body: JSON.stringify(message),

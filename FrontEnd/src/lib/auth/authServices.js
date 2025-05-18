@@ -63,7 +63,7 @@ export const handleSignUp = async (formData) => {
       data.append("avtFile", formData.avtFile);
     }
     const response = await axios.post(
-      `${process.env.REACT_APP_API_URL}/users`,
+      `${process.env.REACT_APP_API_URL}/api/users`,
       data,
       { headers: { "Content-Type": "multipart/form-data" } }
     );

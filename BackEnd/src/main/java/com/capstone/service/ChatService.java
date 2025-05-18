@@ -58,11 +58,24 @@ public class ChatService {
         
         log.info("Found sender: {} and receiver: {}", sender.getUsername(), receiver.getUsername());
 
+        // Check if sender and receiver are the same user
+        if (sender.getId().equals(receiver.getId())) {
+            log.error("User {} attempted to send message to themselves", sender.getUsername());
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Không thể gửi tin nhắn cho chính mình");
+        }
+
         // Determine who is patient and who is doctor
         User patient, doctor;
         if (sender.getRole().getName().equals("DOCTOR")) {
             doctor = sender;
             patient = receiver;
+            
+            // If sender is doctor, verify receiver is a patient
+            if (receiver.getRole().getName().equals("DOCTOR")) {
+                log.error("Doctor {} attempted to send message to another doctor {}", 
+                        sender.getUsername(), receiver.getUsername());
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Bác sĩ không thể gửi tin nhắn cho bác sĩ khác");
+            }
         } else if (receiver.getRole().getName().equals("DOCTOR")) {
             doctor = receiver;
             patient = sender;
@@ -76,60 +89,70 @@ public class ChatService {
         List<ChatRequest> chatRequests = chatRequestRepository
                 .findByPatientAndDoctorAndStatusOrderByCreatedAtDesc(patient, doctor, RequestStatus.APPROVED);
         
+        // If no approved request exists, check if we need to create one automatically
         if (chatRequests.isEmpty()) {
-            log.error("No approved chat request found between patient {} and doctor {}", 
+            log.info("No approved chat request found. Creating one automatically.");
+            
+            // Create and save a new auto-approved chat request
+            ChatRequest newRequest = ChatRequest.builder()
+                    .patient(patient)
+                    .doctor(doctor)
+                    .status(RequestStatus.APPROVED)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            
+            chatRequestRepository.save(newRequest);
+            chatRequests = List.of(newRequest);
+            
+            log.info("Created auto-approved chat request between patient {} and doctor {}", 
                     patient.getUsername(), doctor.getUsername());
-            throw new AppException(ErrorCode.UNAUTHORIZED, 
-                    "Không tìm thấy yêu cầu tư vấn đã được duyệt");
         }
         
-        // Check if any chat request has an active payment
-        boolean hasActivePayment = false;
+        // Check if any chat request has an active payment - but only if sender is a patient
+        // Doctors can always send messages without payment check
+        boolean hasActivePayment = sender.getRole().getName().equals("DOCTOR");
         String doctorName = doctor.getFirstName() + " " + doctor.getLastName();
         
-        for (ChatRequest chatRequest : chatRequests) {
-            if (chatPaymentService.isChatActive(chatRequest)) {
-                hasActivePayment = true;
-                break;
+        if (!hasActivePayment) {
+            // Only check payment if sender is a patient
+            for (ChatRequest chatRequest : chatRequests) {
+                if (chatPaymentService.isChatActive(chatRequest)) {
+                    hasActivePayment = true;
+                    break;
+                }
+            }
+            
+            if (!hasActivePayment) {
+                log.error("No active chat payment found for patient {} and doctor {}", 
+                        patient.getUsername(), doctor.getUsername());
+                throw new AppException(ErrorCode.PAYMENT_REQUIRED, 
+                        String.format("Phiên chat với bác sĩ %s đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.", 
+                                doctorName));
             }
         }
-        
-        if (!hasActivePayment) {
-            log.error("No active chat payment found for patient {} and doctor {}", 
-                    patient.getUsername(), doctor.getUsername());
-            throw new AppException(ErrorCode.PAYMENT_REQUIRED, 
-                    String.format("Phiên chat với bác sĩ %s đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.", 
-                            doctorName));
-        }
 
-        ChatMessage message = ChatMessage.builder()
+        // Save and send the message
+        ChatMessage chatMessage = ChatMessage.builder()
                 .content(content)
                 .sender(sender)
                 .receiver(receiver)
                 .timestamp(LocalDateTime.now())
                 .read(false)
                 .build();
-
-        try {
-            ChatMessage savedMessage = chatMessageRepository.save(message);
-            ChatMessageDTO messageDTO = chatMessageMapper.toDTO(savedMessage);
-
-            // Send message to specific receiver
-            messagingTemplate.convertAndSendToUser(
-                    receiver.getUsername(),
-                    "/queue/messages",
-                    messageDTO);
-
-            log.info("Successfully sent message from {} to {}: {}", 
-                    sender.getUsername(), receiver.getUsername(),
-                    content.length() > 50 ? content.substring(0, 47) + "..." : content);
-
-            return messageDTO;
-        } catch (Exception e) {
-            log.error("Error saving message: ", e);
-            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR, 
-                    "Không thể gửi tin nhắn. Vui lòng thử lại sau.");
-        }
+        
+        chatMessageRepository.save(chatMessage);
+        
+        // Convert to DTO
+        ChatMessageDTO messageDTO = chatMessageMapper.toDTO(chatMessage);
+        
+        // Send via WebSocket
+        messagingTemplate.convertAndSendToUser(
+                receiver.getUsername(),
+                "/queue/messages",
+                messageDTO
+        );
+        
+        return messageDTO;
     }
 
     public ChatMessageDTO saveMessageWithImage(String content, String senderId, String receiverId, MultipartFile image) {
@@ -139,14 +162,51 @@ public class ChatService {
             User receiver = userRepository.findById(receiverId)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+            // Check if sender and receiver are the same user
+            if (sender.getId().equals(receiver.getId())) {
+                log.error("User {} attempted to send message to themselves", sender.getUsername());
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Không thể gửi tin nhắn cho chính mình");
+            }
+
+            // Determine who is patient and who is doctor
+            User patient, doctor;
+            if (sender.getRole().getName().equals("DOCTOR")) {
+                doctor = sender;
+                patient = receiver;
+                
+                // If sender is doctor, verify receiver is a patient
+                if (receiver.getRole().getName().equals("DOCTOR")) {
+                    log.error("Doctor {} attempted to send message to another doctor {}", 
+                            sender.getUsername(), receiver.getUsername());
+                    throw new AppException(ErrorCode.INVALID_REQUEST, "Bác sĩ không thể gửi tin nhắn cho bác sĩ khác");
+                }
+            } else if (receiver.getRole().getName().equals("DOCTOR")) {
+                doctor = receiver;
+                patient = sender;
+            } else {
+                log.error("Neither user is a doctor. Sender role: {}, Receiver role: {}", 
+                        sender.getRole().getName(), receiver.getRole().getName());
+                throw new AppException(ErrorCode.UNAUTHORIZED, "Không thể tìm thấy bác sĩ trong cuộc trò chuyện");
+            }
+
             // Check if there's an approved chat request
-            ChatRequest chatRequest = chatRequestRepository.findByPatientAndDoctorAndStatus(sender, receiver, RequestStatus.APPROVED)
-                    .orElseGet(() -> chatRequestRepository.findByPatientAndDoctorAndStatus(receiver, sender, RequestStatus.APPROVED)
-                            .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED)));
+            ChatRequest chatRequest = chatRequestRepository.findByPatientAndDoctorAndStatus(patient, doctor, RequestStatus.APPROVED)
+                    .orElseGet(() -> {
+                        // Create and save a new auto-approved chat request if none exists
+                        log.info("No approved chat request found. Creating one automatically.");
+                        ChatRequest newRequest = ChatRequest.builder()
+                                .patient(patient)
+                                .doctor(doctor)
+                                .status(RequestStatus.APPROVED)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                        return chatRequestRepository.save(newRequest);
+                    });
             
-            // Check if chat payment is active
-            if (!chatPaymentService.isChatActive(chatRequest)) {
-                throw new AppException(ErrorCode.UNAUTHORIZED, "Chat session has expired. Please make a new payment to continue.");
+            // Check if chat payment is active - but only if sender is a patient
+            // Doctors can always send messages without payment check
+            if (!sender.getRole().getName().equals("DOCTOR") && !chatPaymentService.isChatActive(chatRequest)) {
+                throw new AppException(ErrorCode.PAYMENT_REQUIRED, "Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.");
             }
 
             // Upload hình ảnh lên Cloudinary

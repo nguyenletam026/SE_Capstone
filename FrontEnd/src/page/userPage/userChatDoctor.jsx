@@ -7,6 +7,8 @@ import { useAuth } from "../../context/AuthContext";
 import { ChatProvider, useChat } from "../../context/ChatContext";
 import { fetchUserInfo } from "../../lib/user/info";
 import { getAllDoctorRecommend } from "../../lib/user/assessmentServices";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function UserChatDoctor() {
   return (
@@ -21,6 +23,61 @@ function UserChatLayout() {
   const [doctors, setDoctors] = useState([]);
   const { selectedUser, setSelectedUser, setMessages, setLoading } = useChat();
   const [loadingDoctors, setLoadingDoctors] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Check if we have a doctor to auto-select from navigation state
+  useEffect(() => {
+    if (location.state?.doctorToChat && user?.id) {
+      const doctor = location.state.doctorToChat;
+      
+      // Ensure the doctor object has a unique ID
+      const doctorWithUniqueId = {
+        ...doctor,
+        uniqueId: doctor.uniqueId || `doctor-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      setSelectedUser(doctorWithUniqueId);
+      
+      // Load conversation with this doctor
+      const loadConversation = async () => {
+        setLoading(true);
+        try {
+          const convo = await getConversation(user.id, doctor.doctorId);
+          
+          // Ensure each message has a unique ID
+          const messagesWithIds = Array.isArray(convo) ? convo.map((msg, index) => {
+            if (!msg.id) {
+              return {
+                ...msg,
+                id: `msg-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`
+              };
+            }
+            return msg;
+          }) : [];
+          
+          setMessages(messagesWithIds);
+        } catch (err) {
+          console.error("❌ Lỗi tải cuộc trò chuyện:", err);
+          
+          // Nếu lỗi là "You do not have permission" hoặc "không tìm thấy yêu cầu tư vấn"
+          // thì chuyển hướng người dùng đến trang thanh toán
+          if (err.message && (err.message.includes("permission") || 
+              err.message.includes("không tìm thấy yêu cầu tư vấn") ||
+              err.message.includes("UNAUTHORIZED"))) {
+            toast.error("Bạn cần thanh toán để bắt đầu trò chuyện với bác sĩ này.");
+            navigate(`/contact-doctor/${doctor.doctorId}`, { state: { expired: true } });
+          }
+          
+          setMessages([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      loadConversation();
+    }
+  }, [location.state, user?.id, setSelectedUser, setMessages, setLoading, navigate]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -49,6 +106,10 @@ function UserChatLayout() {
           try {
             const parsed = JSON.parse(msg.body);
             if (parsed && parsed.senderId && parsed.content) {
+              // Add a unique ID to the message if it doesn't have one
+              if (!parsed.id) {
+                parsed.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+              }
               setMessages((prev) => [...prev, parsed]);
             } else {
               console.warn("Received invalid message format:", parsed);
@@ -70,29 +131,26 @@ function UserChatLayout() {
     const fetchDoctors = async () => {
       setLoadingDoctors(true);
       try {
-        const [activeDoctorsRes, recommendRes] = await Promise.all([
-          getActiveChatDoctors(),
-          getAllDoctorRecommend(),
-        ]);
-
-        // Match active chat doctors with full doctor info
-        const activeDoctorIds = activeDoctorsRes.result.map((r) => r.doctorId);
-        const detailed = recommendRes.result.filter((doc) => activeDoctorIds.includes(doc.id));
-
-        setDoctors(
-          detailed.map((d) => ({
-            doctorId: d.id,
-            doctorName: `${d.firstName} ${d.lastName}`,
-            doctorAvatar: d.avtUrl,
-            expiresAt: activeDoctorsRes.result.find(r => r.doctorId === d.id)?.expiresAt,
-          }))
-        );
+        // Get all doctors from recommendations
+        const recommendRes = await getAllDoctorRecommend();
+        const allDoctors = recommendRes.result || [];
+        
+        // Format doctors for display
+        const formattedDoctors = allDoctors.map(d => ({
+          doctorId: d.id,
+          doctorName: `${d.firstName} ${d.lastName}`,
+          doctorAvatar: d.avtUrl,
+          uniqueId: `doctor-${d.id}-${Math.random().toString(36).substr(2, 9)}`
+        }));
+        
+        setDoctors(formattedDoctors);
       } catch (err) {
         console.error("❌ Lỗi lấy danh sách bác sĩ:", err);
       } finally {
         setLoadingDoctors(false);
       }
     };
+    
     fetchDoctors();
   }, []);
 
@@ -106,25 +164,35 @@ function UserChatLayout() {
     setLoading(true);
     try {
       const convo = await getConversation(user.id, doc.doctorId);
-      setMessages(convo.result || []);
+      
+      // Ensure each message has a unique ID
+      const messagesWithIds = Array.isArray(convo) ? convo.map((msg, index) => {
+        if (!msg.id) {
+          return {
+            ...msg,
+            id: `msg-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`
+          };
+        }
+        return msg;
+      }) : [];
+      
+      setMessages(messagesWithIds);
     } catch (err) {
       console.error("❌ Lỗi tải cuộc trò chuyện:", err);
+      
+      // Nếu lỗi là "You do not have permission" hoặc "không tìm thấy yêu cầu tư vấn"
+      // thì chuyển hướng người dùng đến trang thanh toán
+      if (err.message && (err.message.includes("permission") || 
+          err.message.includes("không tìm thấy yêu cầu tư vấn"))) {
+        if (window.confirm("Bạn cần thanh toán để bắt đầu trò chuyện với bác sĩ này. Chuyển đến trang thanh toán?")) {
+          navigate(`/contact-doctor/${doc.doctorId}`, { state: { expired: true } });
+        }
+      }
+      
+      setMessages([]);
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatTimeLeft = (expiresAt) => {
-    if (!expiresAt) return "";
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diff = expiry - now;
-    
-    if (diff <= 0) return "Hết hạn";
-    
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
   };
 
   if (loadingDoctors) {
@@ -138,21 +206,16 @@ function UserChatLayout() {
   return (
     <div className="flex h-[calc(100vh-64px)]">
       <aside className="w-64 bg-white border-r overflow-y-auto">
-        <h3 className="text-lg font-bold text-center py-4 border-b">Bác sĩ có thể chat</h3>
+        <h3 className="text-lg font-bold text-center py-4 border-b">Bác sĩ</h3>
         {doctors.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
-            <p>Bạn chưa có bác sĩ nào để chat.</p>
-            <p className="mt-2">
-              <a href="/assessment/recommend" className="text-green-600 hover:underline">
-                Chọn bác sĩ và thanh toán
-              </a>
-            </p>
+            <p>Không tìm thấy bác sĩ nào.</p>
           </div>
         ) : (
           <ul>
             {doctors.map((doc) => (
               <li
-                key={doc.doctorId}
+                key={doc.uniqueId || doc.doctorId}
                 onClick={() => handleSelect(doc)}
                 className={`px-4 py-3 cursor-pointer hover:bg-green-50 transition ${
                   selectedUser?.doctorId === doc.doctorId ? "bg-green-100 font-semibold" : ""
@@ -166,9 +229,6 @@ function UserChatLayout() {
                   />
                   <div>
                     <p className="text-sm">{doc.doctorName}</p>
-                    <p className="text-xs text-gray-500">
-                      Còn lại: {formatTimeLeft(doc.expiresAt)}
-                    </p>
                   </div>
                 </div>
               </li>

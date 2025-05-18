@@ -4,21 +4,14 @@ import { getConversation } from "../../lib/util/chatServices";
 import { connectWebSocket, disconnectWebSocket } from "../../services/websocket";
 import ChatContainer from "../../components/chat/chatContainer";
 import { useAuth } from "../../context/AuthContext";
-import { ChatProvider, useChat } from "../../context/ChatContext";
+import { useChat } from "../../context/ChatContext";
 import { fetchUserInfo } from "../../lib/user/info";
-
-export default function DoctorChatPage() {
-  return (
-    <ChatProvider>
-      <DoctorChatLayout />
-    </ChatProvider>
-  );
-}
 
 function DoctorChatLayout() {
   const { user, setUser } = useAuth();
   const [patients, setPatients] = useState([]);
   const { selectedUser, setSelectedUser, setMessages, setLoading } = useChat();
+  const [loadingPatients, setLoadingPatients] = useState(true);
 
   useEffect(() => {
     const getDoctor = async () => {
@@ -44,8 +37,16 @@ function DoctorChatLayout() {
         user.username,
         () => console.log("✅ [Doctor] WebSocket connected"),
         (msg) => {
-          const parsed = JSON.parse(msg.body);
-          setMessages((prev) => [...prev, parsed]);
+          try {
+            const parsed = JSON.parse(msg.body);
+            // Add a unique ID to the message if it doesn't have one
+            if (!parsed.id) {
+              parsed.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            }
+            setMessages((prev) => [...prev, parsed]);
+          } catch (err) {
+            console.error("❌ Failed to parse message:", err);
+          }
         },
         (err) => console.error("❌ WebSocket error (doctor):", err)
       );
@@ -55,46 +56,70 @@ function DoctorChatLayout() {
 
   useEffect(() => {
     const fetchPatients = async () => {
+      if (!user?.id) return;
+      
       try {
-        const res = await getAcceptedChatPatients();
-        if (res && res.result) {
-          setPatients(res.result);
-        } else {
-          console.error("No patients found in response");
-          setPatients([]);
+        setLoadingPatients(true);
+        const response = await getAcceptedChatPatients();
+        if (response && response.result) {
+          console.log("Patients data:", response.result);
+          // Ensure each patient has a unique ID
+          const patientsWithUniqueIds = response.result.map(patient => ({
+            ...patient,
+            // Generate a unique ID if patientId is missing
+            uniqueId: patient.patientId || `patient-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+          }));
+          setPatients(patientsWithUniqueIds);
         }
       } catch (err) {
         console.error("❌ Lỗi lấy danh sách bệnh nhân:", err);
-        setPatients([]);
+      } finally {
+        setLoadingPatients(false);
       }
     };
-    fetchPatients();
-  }, []);
 
-  const handleSelect = async (patient) => {
+    fetchPatients();
+  }, [user?.id]);
+
+  const handlePatientSelect = async (patient) => {
     if (!user?.id) return;
-    setSelectedUser(patient);
+    
     setLoading(true);
+    
+    // Create a properly formatted selectedUser object with all necessary fields
+    const formattedPatient = {
+      patientId: patient.patientId,
+      patientName: patient.patientName,
+      patientAvatar: patient.patientAvatar,
+      requestId: patient.requestId,
+      uniqueId: patient.uniqueId || `patient-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    };
+    
+    console.log("Selected patient:", patient);
+    console.log("Formatted patient object:", formattedPatient);
+    
+    setSelectedUser(formattedPatient);
+    
     try {
-      const convo = await getConversation(user.id, patient.patientId);
-      console.log(user.id, patient.patientId);
-      // Map lại để đồng bộ cấu trúc tin nhắn hiển thị
-      if (convo && convo.result) {
-        const formatted = convo.result.map((msg) => ({
-          id: msg.id,
-          content: msg.content,
-          senderId: msg.senderId,
-          senderName: msg.senderName,
-          senderAvatar: msg.senderAvatar,
-          timestamp: msg.timestamp,
-        }));
-        setMessages(formatted);
-      } else {
-        console.log("No conversation data found");
-        setMessages([]);
-      }
+      console.log("Doctor ID:", user.id);
+      console.log("Patient ID:", patient.patientId);
+      
+      const conversation = await getConversation(user.id, patient.patientId);
+      
+      // Ensure each message has a unique ID
+      const messagesWithIds = Array.isArray(conversation) ? conversation.map((msg, index) => {
+        if (!msg.id) {
+          return {
+            ...msg,
+            id: `msg-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`
+          };
+        }
+        return msg;
+      }) : [];
+      
+      setMessages(messagesWithIds);
     } catch (err) {
-      console.error("❌ Lỗi tải cuộc trò chuyện:", err);
+      console.error("❌ Lỗi lấy tin nhắn:", err);
       setMessages([]);
     } finally {
       setLoading(false);
@@ -102,40 +127,67 @@ function DoctorChatLayout() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)]">
-      <aside className="w-64 bg-white border-r overflow-y-auto">
-        <h3 className="text-lg font-bold text-center py-4 border-b">Bệnh nhân</h3>
-        <ul>
-          {patients && patients.length > 0 ? (
-            patients.map((p) => (
-              <li
-                key={p.patientId}
-                onClick={() => handleSelect(p)}
-                className={`px-4 py-3 cursor-pointer hover:bg-blue-100 transition ${
-                  selectedUser?.patientId === p.patientId ? "bg-blue-200 font-semibold" : ""
+    <div className="flex h-screen">
+      {/* Patient List */}
+      <div className="w-1/4 bg-white border-r overflow-y-auto">
+        <div className="p-4 border-b">
+          <h2 className="text-lg font-semibold">Bệnh nhân</h2>
+        </div>
+        
+        {loadingPatients ? (
+          <div className="flex justify-center items-center h-20">
+            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : patients.length === 0 ? (
+          <div className="p-4 text-center text-gray-500">
+            Không có bệnh nhân nào
+          </div>
+        ) : (
+          <div>
+            {patients.map((patient) => (
+              <div
+                key={patient.uniqueId || patient.patientId}
+                className={`flex items-center p-3 border-b cursor-pointer hover:bg-gray-50 ${
+                  selectedUser?.patientId === patient.patientId
+                    ? "bg-blue-50"
+                    : ""
                 }`}
+                onClick={() => handlePatientSelect(patient)}
               >
-                <div className="flex items-center gap-3 text-black">
-                  <img
-                    src={p.patientAvatar || "https://via.placeholder.com/150"}
-                    alt={p.patientName}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="text-sm">{p.patientName}</p>
-                  </div>
+                <img
+                  src={patient.patientAvatar || "https://via.placeholder.com/40"}
+                  alt={patient.patientName}
+                  className="w-10 h-10 rounded-full mr-3"
+                />
+                <div>
+                  <p className="font-medium">{patient.patientName}</p>
+                  <p className="text-xs text-gray-500">
+                    {patient.lastMessage || "Bắt đầu trò chuyện"}
+                  </p>
                 </div>
-              </li>
-            ))
-          ) : (
-            <li className="px-4 py-3 text-gray-500 text-center">Không có bệnh nhân nào</li>
-          )}
-        </ul>
-      </aside>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <div className="flex-1">
-        <ChatContainer />
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {selectedUser ? (
+          <ChatContainer />
+        ) : (
+          <div className="flex-1 flex items-center justify-center bg-gray-50">
+            <div className="text-center">
+              <p className="text-xl text-gray-500 mb-2">Chọn một bệnh nhân để bắt đầu trò chuyện</p>
+              <p className="text-sm text-gray-400">Hoặc chờ thông báo khi có người muốn trò chuyện với bạn</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
+}
+
+export default function DoctorChatPage() {
+  return <DoctorChatLayout />;
 }
