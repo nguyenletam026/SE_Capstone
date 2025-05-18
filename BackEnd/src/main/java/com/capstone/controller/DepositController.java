@@ -9,13 +9,16 @@ import com.capstone.repository.PendingDepositRepository;
 import com.capstone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/deposits")
@@ -85,6 +88,54 @@ public class DepositController {
         result.put("amount", deposit.getAmount());
         result.put("transactionContent", deposit.getTransactionContent());
         result.put("createdAt", deposit.getCreatedAt());
+
+        return ResponseEntity.ok(result);
+    }
+
+    // Endpoint cho người dùng xem lịch sử nạp tiền của họ
+    @GetMapping("/history")
+    public ResponseEntity<?> getUserDepositHistory() {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        List<PendingDeposit> deposits = pendingDepositRepository.findByUserOrderByCreatedAtDesc(user);
+        
+        List<Map<String, Object>> result = deposits.stream()
+                .map(deposit -> {
+                    Map<String, Object> depositInfo = new HashMap<>();
+                    depositInfo.put("id", deposit.getId());
+                    depositInfo.put("amount", deposit.getAmount());
+                    depositInfo.put("transactionContent", deposit.getTransactionContent());
+                    depositInfo.put("createdAt", deposit.getCreatedAt());
+                    depositInfo.put("completed", deposit.isCompleted());
+                    return depositInfo;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
+    }
+
+    // Endpoint cho admin xem tất cả lịch sử nạp tiền
+    @GetMapping("/admin/all-history")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> getAllDepositHistory() {
+        List<PendingDeposit> deposits = pendingDepositRepository.findAll();
+        
+        List<Map<String, Object>> result = deposits.stream()
+                .map(deposit -> {
+                    Map<String, Object> depositInfo = new HashMap<>();
+                    depositInfo.put("id", deposit.getId());
+                    depositInfo.put("amount", deposit.getAmount());
+                    depositInfo.put("transactionContent", deposit.getTransactionContent());
+                    depositInfo.put("createdAt", deposit.getCreatedAt());
+                    depositInfo.put("completed", deposit.isCompleted());
+                    depositInfo.put("username", deposit.getUser().getUsername());
+                    depositInfo.put("userId", deposit.getUser().getId());
+                    return depositInfo;
+                })
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(result);
     }

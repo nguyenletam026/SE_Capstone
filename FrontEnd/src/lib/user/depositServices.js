@@ -48,4 +48,36 @@ export const checkDepositStatus = async (transactionContent) => {
   }
 
   return response.json();
+};
+
+// Get deposit history for current user
+export const getUserDepositHistory = async () => {
+  const token = getToken();
+  const response = await fetch(`${API_BASE}/api/deposits/history`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get deposit history");
+  }
+
+  return response.json();
+};
+
+// Get all deposit history (admin only)
+export const getAllDepositHistory = async () => {
+  const token = getToken();
+  const response = await fetch(`${API_BASE}/api/deposits/admin/all-history`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to get all deposit history");
+  }
+
+  return response.json();
 }; 
