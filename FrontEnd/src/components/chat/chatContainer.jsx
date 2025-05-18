@@ -55,13 +55,7 @@ const ChatContainer = () => {
     
     // Check if chat is expired
     if (messages && messages.length > 0 && messages[0] && messages[0].expired) {
-      alert("Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.");
-      
-      // Tự động chuyển hướng đến trang thanh toán
-      const doctorId = selectedUser.doctorId;
-      if (window.confirm("Bạn có muốn chuyển đến trang thanh toán không?")) {
-        navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
-      }
+      // Don't show alert, the payment button is already visible
       return;
     }
 
@@ -128,14 +122,15 @@ const ChatContainer = () => {
       console.error("Failed to send message:", err);
       const errorMessage = err.message;
       
-      // If payment is required, redirect to payment page
+      // If payment is required, mark the chat as expired
       if (errorMessage.includes("Vui lòng thanh toán") || 
           errorMessage.includes("Payment required") ||
           errorMessage.includes("hết hạn")) {
-        const doctorId = selectedUser.doctorId;
-        if (window.confirm("Phiên chat đã hết hạn hoặc chưa được thanh toán.\n\nBạn có muốn chuyển đến trang thanh toán không?")) {
-          navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
-          return;
+        // Update the first message to show it's expired
+        if (messages && messages.length > 0) {
+          const updatedMessages = [...messages];
+          updatedMessages[0] = { ...updatedMessages[0], expired: true };
+          setMessages(updatedMessages);
         }
       } else {
         alert(errorMessage || "Không thể gửi tin nhắn. Vui lòng thử lại sau.");
@@ -151,13 +146,7 @@ const ChatContainer = () => {
     
     // Check if chat is expired
     if (messages && messages.length > 0 && messages[0] && messages[0].expired) {
-      alert("Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.");
-      
-      // Redirect to payment page
-      const doctorId = selectedUser.doctorId;
-      if (window.confirm("Bạn có muốn chuyển đến trang thanh toán không?")) {
-        navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
-      }
+      // Don't show alert, the payment button is already visible
       return;
     }
 
@@ -209,7 +198,12 @@ const ChatContainer = () => {
     } catch (err) {
       console.error("Failed to send image:", err);
       if (err.message.includes("expired")) {
-        alert("Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.");
+        // Update the first message to show it's expired
+        if (messages && messages.length > 0) {
+          const updatedMessages = [...messages];
+          updatedMessages[0] = { ...updatedMessages[0], expired: true };
+          setMessages(updatedMessages);
+        }
       } else {
         alert("Không thể gửi ảnh. Vui lòng thử lại sau.");
       }
@@ -323,9 +317,28 @@ const ChatContainer = () => {
         </div>
         
         {messages && messages.length > 0 && messages[0] && messages[0].expired && (
-          <p className="text-red-500 text-sm mt-2 text-center">
-            Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.
-          </p>
+          <div className="mt-4 flex flex-col items-center bg-red-50 p-4 rounded-lg border border-red-200">
+            <p className="text-red-600 font-medium mb-3 text-center">
+              Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện.
+            </p>
+            <button
+              onClick={() => {
+                // Make sure we have a doctorId before navigating
+                const doctorId = selectedUser.doctorId;
+                if (doctorId) {
+                  navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
+                } else {
+                  alert("Không thể xác định bác sĩ. Vui lòng thử lại sau.");
+                }
+              }}
+              className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 font-medium shadow-md"
+            >
+              <span>Thanh toán ngay</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
         )}
       </div>
     </div>

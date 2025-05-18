@@ -144,3 +144,101 @@ export const getApprovedDoctors = async () => {
     return [];
   }
 };
+
+// New functions for doctor scheduling
+
+export const getDoctorSchedules = async () => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/schedules`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    if (data.code === 1000 && Array.isArray(data.result)) {
+      return data.result;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching doctor schedules:", error);
+    return [];
+  }
+};
+
+export const createDoctorSchedule = async (scheduleData) => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/schedules`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(scheduleData),
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Error creating doctor schedule:", error);
+    throw error;
+  }
+};
+
+export const updateDoctorSchedule = async (scheduleId, scheduleData) => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/schedules/${scheduleId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(scheduleData),
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating doctor schedule:", error);
+    throw error;
+  }
+};
+
+export const deleteDoctorSchedule = async (scheduleId) => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/schedules/${scheduleId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Error deleting doctor schedule:", error);
+    throw error;
+  }
+};
+
+export const getDoctorScheduleById = async (doctorId) => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/${doctorId}/schedules`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    if (data.code === 1000 && Array.isArray(data.result)) {
+      return data.result;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error(`Error fetching schedules for doctor ${doctorId}:`, error);
+    return [];
+  }
+};

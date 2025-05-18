@@ -61,15 +61,26 @@ function UserChatLayout() {
           console.error("❌ Lỗi tải cuộc trò chuyện:", err);
           
           // Nếu lỗi là "You do not have permission" hoặc "không tìm thấy yêu cầu tư vấn"
-          // thì chuyển hướng người dùng đến trang thanh toán
+          // thì đánh dấu cuộc trò chuyện là đã hết hạn
           if (err.message && (err.message.includes("permission") || 
               err.message.includes("không tìm thấy yêu cầu tư vấn") ||
               err.message.includes("UNAUTHORIZED"))) {
+            // Create a placeholder expired message
+            const expiredMessage = {
+              id: `expired-${Date.now()}`,
+              content: "Phiên chat đã hết hạn hoặc chưa được thanh toán.",
+              senderId: "system",
+              receiverId: user.id,
+              timestamp: new Date().toISOString(),
+              expired: true
+            };
+            setMessages([expiredMessage]);
+            
+            // Show toast notification
             toast.error("Bạn cần thanh toán để bắt đầu trò chuyện với bác sĩ này.");
-            navigate(`/contact-doctor/${doctor.doctorId}`, { state: { expired: true } });
+          } else {
+            setMessages([]);
           }
-          
-          setMessages([]);
         } finally {
           setLoading(false);
         }
@@ -181,15 +192,22 @@ function UserChatLayout() {
       console.error("❌ Lỗi tải cuộc trò chuyện:", err);
       
       // Nếu lỗi là "You do not have permission" hoặc "không tìm thấy yêu cầu tư vấn"
-      // thì chuyển hướng người dùng đến trang thanh toán
+      // thì đánh dấu cuộc trò chuyện là đã hết hạn
       if (err.message && (err.message.includes("permission") || 
           err.message.includes("không tìm thấy yêu cầu tư vấn"))) {
-        if (window.confirm("Bạn cần thanh toán để bắt đầu trò chuyện với bác sĩ này. Chuyển đến trang thanh toán?")) {
-          navigate(`/contact-doctor/${doc.doctorId}`, { state: { expired: true } });
-        }
+        // Create a placeholder expired message
+        const expiredMessage = {
+          id: `expired-${Date.now()}`,
+          content: "Phiên chat đã hết hạn hoặc chưa được thanh toán.",
+          senderId: "system",
+          receiverId: user.id,
+          timestamp: new Date().toISOString(),
+          expired: true
+        };
+        setMessages([expiredMessage]);
+      } else {
+        setMessages([]);
       }
-      
-      setMessages([]);
     } finally {
       setLoading(false);
     }
