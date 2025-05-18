@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { fetchUserInfo } from "../../lib/user/info";
 import defaultImage from "../../assets/3.png";
 import Bot from "../../assets/4.png";
 import { toast, ToastContainer } from "react-toastify";
@@ -31,9 +32,26 @@ export default function Header({ cartItemsCount = 0 }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userProfile, setUserProfile] = useState(null);
   const dropdownRef = useRef();
   const searchRef = useRef();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+
+  // Fetch user profile data
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (user) {
+        try {
+          const data = await fetchUserInfo();
+          setUserProfile(data);
+        } catch (error) {
+          console.error("Failed to load user profile:", error);
+        }
+      }
+    };
+    
+    loadUserProfile();
+  }, [user]);
 
   const handleMenuToggle = () => setMenuOpen(!menuOpen);
   const handleSearchToggle = () => setSearchOpen(!searchOpen);
@@ -77,6 +95,22 @@ export default function Header({ cartItemsCount = 0 }) {
     setMenuOpen(false);
     setSearchOpen(false);
   }, [location]);
+
+  // Format user display name
+  const getUserDisplayName = () => {
+    if (userProfile) {
+      const firstName = userProfile.firstName || '';
+      const lastName = userProfile.lastName || '';
+      if (firstName || lastName) {
+        return `${firstName} ${lastName}`.trim();
+      }
+    }
+    return user?.email?.split('@')[0] || "Người dùng";
+  };
+
+  const getUserEmail = () => {
+    return userProfile?.username || user?.email || "";
+  };
 
   const navItems = [
     { path: "/about", label: "Về chúng tôi", icon: <FaInfoCircle /> },
@@ -207,7 +241,7 @@ export default function Header({ cartItemsCount = 0 }) {
             >
               <div className="relative">
                 <img
-                  src={defaultImage}
+                  src={userProfile?.avtUrl || defaultImage}
                   alt="Profile"
                   className="w-10 h-10 rounded-full object-cover cursor-pointer border-2 border-blue-500"
                 />
@@ -218,13 +252,13 @@ export default function Header({ cartItemsCount = 0 }) {
               <div className={`absolute right-0 mt-2 w-64 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-lg shadow-xl py-2 z-50 border ${darkMode ? 'border-gray-700' : 'border-gray-200'} overflow-hidden transition-all duration-200`}>
                 <div className="px-4 py-3 border-b border-gray-200 flex items-center space-x-3">
                   <img
-                    src={defaultImage}
+                    src={userProfile?.avtUrl || defaultImage}
                     alt="Profile"
                     className="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
                   />
                   <div>
-                    <p className="font-medium">Nguyễn Văn A</p>
-                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>student@example.com</p>
+                    <p className="font-medium">{getUserDisplayName()}</p>
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{getUserEmail()}</p>
                   </div>
                 </div>
                 
@@ -284,13 +318,13 @@ export default function Header({ cartItemsCount = 0 }) {
         <div className="lg:hidden fixed top-16 left-0 w-full bg-white shadow-lg z-40 py-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="px-6 py-3 border-b border-gray-200 flex items-center space-x-3 md:hidden">
             <img
-              src={defaultImage}
+              src={userProfile?.avtUrl || defaultImage}
               alt="Profile"
               className="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
             />
             <div>
-              <p className="font-medium">Nguyễn Văn A</p>
-              <p className="text-xs text-gray-500">student@example.com</p>
+              <p className="font-medium">{getUserDisplayName()}</p>
+              <p className="text-xs text-gray-500">{getUserEmail()}</p>
             </div>
           </div>
           
