@@ -44,6 +44,7 @@ import AdminManageProducts from "../page/adminPage/AdminManageProducts";
 import AdminMusicManage from "../page/adminPage/AdminMusicManage";
 import AdminVideoManage from "../page/adminPage/AdminVideoManage";
 import AdminDepositHistory from "../page/adminPage/AdminDepositHistory";
+import AdminDoctorSchedule from "../page/adminPage/AdminDoctorSchedule";
 
 // Doctor Pages
 import DoctorLayout from "../components/layouts/doctorLayout";
@@ -103,6 +104,7 @@ const AppRoutes = () => {
             <Route path="/admin-role" element={<AdminLayout><AdminManageRole /></AdminLayout>} />
             <Route path="/admin-user" element={<AdminLayout><AdminManageUser /></AdminLayout>} />
             <Route path="/admin-doctor" element={<AdminLayout><AdminManageDoctor /></AdminLayout>} />
+            <Route path="/admin-doctor-schedule" element={<AdminLayout><AdminDoctorSchedule /></AdminLayout>} />
             <Route path="/admin-teacher" element={<AdminLayout><AdminManageTeacher /></AdminLayout>} />
             <Route path="/admin-products" element={<AdminLayout><AdminManageProducts /></AdminLayout>} />
             <Route path="/admin-music" element={<AdminLayout><AdminMusicManage /></AdminLayout>} />

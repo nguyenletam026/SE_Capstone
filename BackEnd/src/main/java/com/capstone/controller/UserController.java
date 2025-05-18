@@ -90,4 +90,11 @@ public class UserController {
                 .result(userService.getAllTeacher())
                 .build();
     }
+    
+    @GetMapping("/doctors")
+    ApiResponse<List<UserResponse>> getAllDoctors() {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getAllDoctor())
+                .build();
+    }
 }

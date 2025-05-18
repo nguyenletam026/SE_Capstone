@@ -19,6 +19,8 @@ export const fetchUserInfo = async () => {
 };
 
 export const requestDoctor = async (formData, certificateUrl, cccdUrl) => {
+  const token = getToken();
+  
   const queryParams = new URLSearchParams({
     specialization: formData.specialization,
     experienceYears: formData.experienceYears,
@@ -32,7 +34,11 @@ export const requestDoctor = async (formData, certificateUrl, cccdUrl) => {
     cccdImage: cccdUrl,
   };
 
-  return axios.post(`${API_BASE}/api/doctors/request-doctor?${queryParams}`, body);
+  return axios.post(`${API_BASE}/api/doctors/request-doctor?${queryParams}`, body, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
 };
 
 export const fetchUserInfo2 = async () => {

@@ -6,7 +6,7 @@ import ChatContainer from "../../components/chat/chatContainer";
 import { useAuth } from "../../context/AuthContext";
 import { ChatProvider, useChat } from "../../context/ChatContext";
 import { fetchUserInfo } from "../../lib/user/info";
-import { getAllDoctorRecommend } from "../../lib/user/assessmentServices";
+import { getAllDoctorRecommend, getDoctorsForToday, getDoctorsByDateTime } from "../../lib/user/assessmentServices";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -142,21 +142,38 @@ function UserChatLayout() {
     const fetchDoctors = async () => {
       setLoadingDoctors(true);
       try {
-        // Get all doctors from recommendations
-        const recommendRes = await getAllDoctorRecommend();
-        const allDoctors = recommendRes.result || [];
+        // Get current time for fetching doctors
+        const now = new Date();
+        const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
         
-        // Format doctors for display
-        const formattedDoctors = allDoctors.map(d => ({
-          doctorId: d.id,
-          doctorName: `${d.firstName} ${d.lastName}`,
-          doctorAvatar: d.avtUrl,
-          uniqueId: `doctor-${d.id}-${Math.random().toString(36).substr(2, 9)}`
-        }));
+        // Use the test date 2025-05-18 for development
+        const testDate = "2025-05-18";
         
-        setDoctors(formattedDoctors);
+        console.log(`Fetching doctors for date ${testDate} and time ${currentTime}`);
+        
+        // Get doctors scheduled for the current date and time
+        const doctorsRes = await getDoctorsByDateTime(testDate, currentTime);
+        const scheduledDoctors = doctorsRes.result || [];
+        
+        if (scheduledDoctors.length > 0) {
+          console.log("Using scheduled doctors:", scheduledDoctors.length);
+          
+          // Format doctors for display
+          const formattedDoctors = scheduledDoctors.map(d => ({
+            doctorId: d.id,
+            doctorName: `${d.firstName} ${d.lastName}`,
+            doctorAvatar: d.avtUrl,
+            uniqueId: `doctor-${d.id}-${Math.random().toString(36).substr(2, 9)}`
+          }));
+          
+          setDoctors(formattedDoctors);
+        } else {
+          console.log("No scheduled doctors found for the current time, showing message");
+          setDoctors([]);
+        }
       } catch (err) {
         console.error("❌ Lỗi lấy danh sách bác sĩ:", err);
+        setDoctors([]);
       } finally {
         setLoadingDoctors(false);
       }

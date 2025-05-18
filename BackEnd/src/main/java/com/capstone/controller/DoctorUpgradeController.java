@@ -85,4 +85,12 @@ public class DoctorUpgradeController {
                 .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
                 .body(imageData);
     }
+
+    @GetMapping("/check-pending-request")
+    public ApiResponse<Boolean> checkPendingRequest() {
+        boolean hasPendingRequest = doctorUpgradeService.currentUserHasPendingRequest();
+        return ApiResponse.<Boolean>builder()
+                .result(hasPendingRequest)
+                .build();
+    }
 }

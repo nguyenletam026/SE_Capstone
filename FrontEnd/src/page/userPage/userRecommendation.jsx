@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyRecommendation, getAllDoctorRecommend } from "../../lib/user/assessmentServices";
+import { getMyRecommendation, getAllDoctorRecommend, getDoctorsForToday, getDoctorsByDateTime } from "../../lib/user/assessmentServices";
 
 export default function Recommendation() {
   const [data, setData] = useState(null);
@@ -12,14 +12,29 @@ export default function Recommendation() {
   useEffect(() => {
     const fetchRecommend = async () => {
       try {
-        // Always fetch all doctors regardless of recommendation type
-        const doctorRes = await getAllDoctorRecommend();
-        setDoctors(doctorRes.result);
-
-        // Still try to get user-specific recommendation if available
+        // Fetch doctors based on today's schedule first
+        let doctorRes;
+        
         try {
+          // Try to get user-specific recommendation
           const recommendRes = await getMyRecommendation();
           setData(recommendRes.result);
+          
+          // If it's doctor advice, get doctors scheduled for today and current time
+          if (recommendRes.result?.recommendationType === "DOCTOR_ADVISE") {
+            console.log("Getting doctors for current time because recommendation type is DOCTOR_ADVISE");
+            
+            // Use test date and current time
+            const testDate = "2025-05-18";
+            const currentTime = new Date().toTimeString().split(' ')[0];
+            
+            doctorRes = await getDoctorsByDateTime(testDate, currentTime);
+            console.log("Received doctors for current time:", doctorRes);
+          } else {
+            // For other recommendation types, get all doctors as fallback
+            console.log("Getting all doctors because recommendation type is not DOCTOR_ADVISE");
+            doctorRes = await getAllDoctorRecommend();
+          }
         } catch (err) {
           console.log("No specific recommendation available, showing all doctors");
           // If no recommendation (user hasn't done assessment), set a default state
@@ -28,7 +43,13 @@ export default function Recommendation() {
             stressLevel: "N/A",
             recommendations: []
           });
+          
+          // Get all doctors since there's no specific recommendation
+          doctorRes = await getAllDoctorRecommend();
         }
+        
+        console.log("Final doctors to display:", doctorRes.result);
+        setDoctors(doctorRes.result || []);
       } catch (err) {
         console.error("Error fetching doctors:", err);
       } finally {
@@ -52,6 +73,25 @@ export default function Recommendation() {
 
   if (!data && doctors.length === 0) return <p className="text-center p-8">Không có dữ liệu.</p>;
 
+  const handleToggleDoctors = async () => {
+    setShowAllDoctors(!showAllDoctors);
+    try {
+      if (!showAllDoctors) {
+        // Fetch all doctors when showing all
+        const res = await getAllDoctorRecommend();
+        setDoctors(res.result || []);
+      } else {
+        // Fetch only doctors available at current time when toggling back
+        const testDate = "2025-05-18";
+        const currentTime = new Date().toTimeString().split(' ')[0];
+        const res = await getDoctorsByDateTime(testDate, currentTime);
+        setDoctors(res.result || []);
+      }
+    } catch (err) {
+      console.error("Error toggling doctor list:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-yellow-100 p-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
@@ -64,33 +104,13 @@ export default function Recommendation() {
         {/* Doctor Recommendation */}
         {(data?.recommendationType === "DOCTOR_ADVISE" || showAllDoctors) && (
           <div>
-            <p className="text-center text-lg font-medium mb-4">Hãy chọn một bác sĩ để bắt đầu trò chuyện:</p>
+            <p className="text-center text-lg font-medium mb-4">
+              {data?.recommendationType === "DOCTOR_ADVISE" && !showAllDoctors 
+                ? "Bác sĩ đang làm việc hôm nay:" 
+                : "Hãy chọn một bác sĩ để bắt đầu trò chuyện:"}
+            </p>
             <div className="grid md:grid-cols-2 gap-4">
-              {data?.recommendationType === "DOCTOR_ADVISE" && !showAllDoctors ? (
-                // Show recommended doctors
-                data.recommendations.map((rec) => {
-                  const full = doctors.find((d) => d.id === rec.recommendName);
-                  if (!full) return null;
-                  return (
-                    <div
-                      key={full.id}
-                      className="border rounded-lg p-4 flex items-center gap-4 shadow bg-white cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSelectDoctor(full.id)}
-                    >
-                      <img
-                        src={full.avtUrl || "https://via.placeholder.com/80"}
-                        alt={full.firstName}
-                        className="w-20 h-20 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="font-bold text-lg">{full.lastName} {full.firstName}</p>
-                        <p className="text-sm text-gray-500">{full.username}</p>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                // Show all doctors
+              {doctors.length > 0 ? (
                 doctors.map((doctor) => (
                   <div
                     key={doctor.id}
@@ -108,22 +128,20 @@ export default function Recommendation() {
                     </div>
                   </div>
                 ))
+              ) : (
+                <p className="text-center text-gray-500 my-4 col-span-2">Không có bác sĩ nào đang làm việc hôm nay.</p>
               )}
             </div>
 
             {data?.recommendationType === "DOCTOR_ADVISE" && (
               <div className="mt-4 text-center">
                 <button
-                  onClick={() => setShowAllDoctors(!showAllDoctors)}
+                  onClick={handleToggleDoctors}
                   className="text-blue-600 hover:underline"
                 >
-                  {showAllDoctors ? "Chỉ hiển thị bác sĩ được gợi ý" : "Hiển thị tất cả bác sĩ"}
+                  {showAllDoctors ? "Chỉ hiển thị bác sĩ đang làm việc hôm nay" : "Hiển thị tất cả bác sĩ"}
                 </button>
               </div>
-            )}
-
-            {data?.recommendationType !== "DOCTOR_ADVISE" && doctors.length === 0 && (
-              <p className="text-center text-gray-500 my-4">Không có bác sĩ nào hiện có.</p>
             )}
           </div>
         )}

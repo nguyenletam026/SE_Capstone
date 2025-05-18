@@ -125,7 +125,7 @@ export const rejectDoctor = async (requestId) => {
 
 export const getApprovedDoctors = async () => {
   try {
-    const response = await fetch(`${API_URL}/doctors/approved-doctors`, {
+    const response = await fetch(`${API_URL}/api/users/doctors`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -145,11 +145,11 @@ export const getApprovedDoctors = async () => {
   }
 };
 
-// New functions for doctor scheduling
+// Doctor scheduling functions
 
 export const getDoctorSchedules = async () => {
   try {
-    const response = await fetch(`${API_URL}/doctors/schedules`, {
+    const response = await fetch(`${API_URL}/api/doctor-schedules`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -171,7 +171,7 @@ export const getDoctorSchedules = async () => {
 
 export const createDoctorSchedule = async (scheduleData) => {
   try {
-    const response = await fetch(`${API_URL}/doctors/schedules`, {
+    const response = await fetch(`${API_URL}/api/doctor-schedules`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -189,7 +189,7 @@ export const createDoctorSchedule = async (scheduleData) => {
 
 export const updateDoctorSchedule = async (scheduleId, scheduleData) => {
   try {
-    const response = await fetch(`${API_URL}/doctors/schedules/${scheduleId}`, {
+    const response = await fetch(`${API_URL}/api/doctor-schedules/${scheduleId}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -207,7 +207,7 @@ export const updateDoctorSchedule = async (scheduleId, scheduleData) => {
 
 export const deleteDoctorSchedule = async (scheduleId) => {
   try {
-    const response = await fetch(`${API_URL}/doctors/schedules/${scheduleId}`, {
+    const response = await fetch(`${API_URL}/api/doctor-schedules/${scheduleId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -223,7 +223,7 @@ export const deleteDoctorSchedule = async (scheduleId) => {
 
 export const getDoctorScheduleById = async (doctorId) => {
   try {
-    const response = await fetch(`${API_URL}/doctors/${doctorId}/schedules`, {
+    const response = await fetch(`${API_URL}/api/doctor-schedules/doctor/${doctorId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -240,5 +240,50 @@ export const getDoctorScheduleById = async (doctorId) => {
   } catch (error) {
     console.error(`Error fetching schedules for doctor ${doctorId}:`, error);
     return [];
+  }
+};
+
+export const getDoctorsByDate = async (date) => {
+  try {
+    const formattedDate = date ? date : new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    
+    const response = await fetch(`${API_URL}/api/doctor-schedules/date/${formattedDate}/doctors`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    if (data.code === 1000 && Array.isArray(data.result)) {
+      return data.result;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error(`Error fetching doctors for date ${date}:`, error);
+    return [];
+  }
+};
+
+export const checkPendingDoctorRequest = async () => {
+  try {
+    const response = await fetch(`${API_URL}/doctors/check-pending-request`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    if (data.code === 1000) {
+      return data.result;
+    }
+    return false;
+  } catch (error) {
+    console.error("Error checking pending doctor request:", error);
+    return false;
   }
 };

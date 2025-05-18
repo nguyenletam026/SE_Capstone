@@ -43,6 +43,11 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(1030, "Order not found", HttpStatus.NOT_FOUND),
     INSUFFICIENT_STOCK(1031, "Insufficient stock", HttpStatus.BAD_REQUEST),
     INSUFFICIENT_BALANCE(1032, "Insufficient balance", HttpStatus.BAD_REQUEST),
+    USER_NOT_FOUND(1033, "User not found", HttpStatus.NOT_FOUND),
+    USER_NOT_DOCTOR(1034, "User is not a doctor", HttpStatus.BAD_REQUEST),
+    INVALID_TIME_RANGE(1035, "Invalid time range", HttpStatus.BAD_REQUEST),
+    SCHEDULE_NOT_FOUND(1036, "Doctor schedule not found", HttpStatus.NOT_FOUND),
+    REQUEST_ALREADY_SENT(1037, "Request already sent, please wait for our response", HttpStatus.BAD_REQUEST),
 
     ;
 

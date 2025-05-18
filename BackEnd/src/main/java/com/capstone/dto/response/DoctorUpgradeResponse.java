@@ -14,4 +14,9 @@ public class DoctorUpgradeResponse {
     String username;
     String certificateUrl;
     RequestStatus status;
+    String specialization;
+    int experienceYears;
+    String description;
+    String phoneNumber;
+    String hospital;
 }
