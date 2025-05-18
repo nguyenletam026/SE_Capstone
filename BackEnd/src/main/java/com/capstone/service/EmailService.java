@@ -49,4 +49,28 @@ public class EmailService {
             log.error("Failed to send verification email to: {}", to, e);
         }
     }
+    
+    @Async
+    public void sendPasswordResetEmail(String to, String token) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("Đặt lại mật khẩu Student Stress Helper");
+            
+            Context context = new Context();
+            context.setVariable("token", token);
+            context.setVariable("resetUrl", frontendUrl + "/reset-password?token=" + token);
+            
+            String htmlContent = templateEngine.process("password-reset", context);
+            helper.setText(htmlContent, true);
+            
+            mailSender.send(message);
+            log.info("Password reset email sent to: {}", to);
+        } catch (MessagingException e) {
+            log.error("Failed to send password reset email to: {}", to, e);
+        }
+    }
 } 

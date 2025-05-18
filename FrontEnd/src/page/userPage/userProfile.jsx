@@ -3,6 +3,7 @@ import { fetchUserInfo2, updateUserProfile } from "../../lib/user/info";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEdit, FaSave, FaCamera } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const UserProfile = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -15,6 +16,7 @@ const UserProfile = () => {
   });
   const fileInputRef = useRef(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -77,6 +79,10 @@ const UserProfile = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChangePassword = () => {
+    navigate("/forgot-password");
   };
 
   if (!userInfo) return <div className="text-center py-10">Loading...</div>;
@@ -242,7 +248,7 @@ const UserProfile = () => {
               <p className="text-gray-500 text-sm">Cập nhật mật khẩu của bạn để bảo mật tài khoản</p>
             </div>
             <button
-              onClick={() => toast.info("Tính năng đổi mật khẩu đang được phát triển")}
+              onClick={handleChangePassword}
               className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm"
             >
               Đổi mật khẩu

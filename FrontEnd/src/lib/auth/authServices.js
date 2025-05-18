@@ -37,14 +37,47 @@ export const handleContinueWithGoogle = () => {
 };
 
 export async function sendResetPasswordEmail(email) {
-  // Giả lập gửi mail với delay 1.5s
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log(`📩 Reset link sent to ${email}`);
-      resolve({ success: true });
-    }, 1500);
-  });
+  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+  try {
+    const response = await axios.post(`${API_BASE}/api/password/reset-request`, { email });
+    return { success: true, message: response.data.result };
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return { 
+      success: false, 
+      message: error.response?.data?.message || "Failed to send reset email" 
+    };
+  }
 }
+
+export async function verifyResetToken(token) {
+  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+  try {
+    const response = await axios.get(`${API_BASE}/api/password/verify-token/${token}`);
+    return { success: true, isValid: response.data.result };
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return { success: false, isValid: false };
+  }
+}
+
+export async function resetPassword(token, newPassword) {
+  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
+  try {
+    const response = await axios.post(`${API_BASE}/api/password/reset-confirm`, {
+      token,
+      newPassword
+    });
+    return { success: true, message: response.data.result };
+  } catch (error) {
+    console.error("Password reset error:", error);
+    return { 
+      success: false, 
+      message: error.response?.data?.message || "Failed to reset password" 
+    };
+  }
+}
+
 export const handleSignUp = async (formData) => {
   try {
     const data = new FormData();

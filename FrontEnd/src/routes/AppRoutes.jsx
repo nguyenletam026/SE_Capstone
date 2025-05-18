@@ -10,7 +10,7 @@ import Authenticate from "../page/authPage/Authenticate";
 import ForgotPassword from "../page/authPage/forgotPasswordPage";
 import SignUp from "../page/authPage/SignUp";
 import VerifyEmail from "../page/authPage/VerifyEmail";
-
+import ResetPassword from "../page/authPage/ResetPassword";
 
 // User Pages
 import UserLayout from "../components/layouts/userLayout";
@@ -72,6 +72,7 @@ const AppRoutes = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
           {/* Redirect nếu truy cập "/" mà chưa đăng nhập */}
