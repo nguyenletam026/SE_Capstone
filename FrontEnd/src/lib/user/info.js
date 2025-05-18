@@ -43,17 +43,58 @@ export const requestDoctor = async (formData, certificateUrl, cccdUrl) => {
 
 export const fetchUserInfo2 = async () => {
   const token = getToken();
-  const response = await fetch(`${API_BASE}/api/users/myInfo`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch user info");
+  try {
+    const response = await axios.get(`${API_BASE}/api/users/myInfo`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.result;
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    throw error;
   }
+};
 
-  const data = await response.json();
+export const updateUserProfile = async (userId, userData) => {
+  const token = getToken();
+  try {
+    const response = await axios.put(
+      `${API_BASE}/api/users/${userId}`,
+      userData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw error;
+  }
+};
 
-  return data.result; // ✅ Chỉ trả về phần result
+export const updateUserAvatar = async (userId, avatarFile) => {
+  const token = getToken();
+  try {
+    const formData = new FormData();
+    formData.append("avtFile", avatarFile);
+    
+    const response = await axios.put(
+      `${API_BASE}/api/users/${userId}/avatar`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating avatar:", error);
+    throw error;
+  }
 };

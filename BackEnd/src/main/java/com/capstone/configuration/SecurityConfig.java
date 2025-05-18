@@ -37,6 +37,7 @@ public class SecurityConfig {
             "/api/users",
             "/auth-face",
             "/ws/**",
+            "/api/verify/**",
     };
     @Value("${jwt.signerKey}")
     private String signerKey;

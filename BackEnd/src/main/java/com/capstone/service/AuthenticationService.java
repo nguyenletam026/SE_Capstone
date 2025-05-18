@@ -81,6 +81,12 @@ public class AuthenticationService {
         if (!authenticated){
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
+        
+        // Check if email is verified
+        if (!user.getEmailVerified()) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+        
         var token = generateToken(user);
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }

@@ -48,6 +48,10 @@ public enum ErrorCode {
     INVALID_TIME_RANGE(1035, "Invalid time range", HttpStatus.BAD_REQUEST),
     SCHEDULE_NOT_FOUND(1036, "Doctor schedule not found", HttpStatus.NOT_FOUND),
     REQUEST_ALREADY_SENT(1037, "Request already sent, please wait for our response", HttpStatus.BAD_REQUEST),
+    INVALID_VERIFICATION_TOKEN(1038, "Invalid verification token", HttpStatus.BAD_REQUEST),
+    EXPIRED_VERIFICATION_TOKEN(1039, "Verification token has expired", HttpStatus.BAD_REQUEST),
+    EMAIL_ALREADY_VERIFIED(1040, "Email is already verified", HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_VERIFIED(1041, "Email is not verified", HttpStatus.FORBIDDEN),
 
     ;
 

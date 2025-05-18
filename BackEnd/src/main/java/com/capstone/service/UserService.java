@@ -21,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -31,6 +33,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final CloudinaryService cloudinaryService;
+    private final EmailService emailService;
     
     @PostConstruct
     public void initRoles() {
@@ -72,6 +75,20 @@ public class UserService {
         com.capstone.entity.Role role = roleRepository.findByName(Role.USER.name())
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
         user.setRole(role);
+        
+        // Generate verification token (6 digits)
+        String verificationToken = generateVerificationToken();
+        
+        // Set token expiry to 24 hours from now
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR, 24);
+        Date tokenExpiry = calendar.getTime();
+        
+        // Set verification fields
+        user.setVerificationToken(verificationToken);
+        user.setVerificationTokenExpiry(tokenExpiry);
+        user.setEmailVerified(false);
+        
         userRepository.save(user);
         
         // Sử dụng phương thức uploadAvatarSafe để xử lý avatar
@@ -80,7 +97,60 @@ public class UserService {
         user.setBalance(0.0);
 
         userRepository.save(user);
+        
+        // Send verification email
+        emailService.sendVerificationEmail(user.getUsername(), verificationToken);
     }
+    
+    private String generateVerificationToken() {
+        // Generate a 6-digit verification code
+        return String.format("%06d", new java.util.Random().nextInt(1000000));
+    }
+    
+    public boolean verifyEmail(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_VERIFICATION_TOKEN));
+        
+        // Check if token is expired
+        if (user.getVerificationTokenExpiry().before(new Date())) {
+            throw new AppException(ErrorCode.EXPIRED_VERIFICATION_TOKEN);
+        }
+        
+        // Mark email as verified
+        user.setEmailVerified(true);
+        user.setVerificationToken(null);
+        user.setVerificationTokenExpiry(null);
+        userRepository.save(user);
+        
+        return true;
+    }
+    
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByUsername(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        
+        // Check if email is already verified
+        if (user.getEmailVerified()) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_VERIFIED);
+        }
+        
+        // Generate new verification token
+        String verificationToken = generateVerificationToken();
+        
+        // Set token expiry to 24 hours from now
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR, 24);
+        Date tokenExpiry = calendar.getTime();
+        
+        // Update verification fields
+        user.setVerificationToken(verificationToken);
+        user.setVerificationTokenExpiry(tokenExpiry);
+        userRepository.save(user);
+        
+        // Send verification email
+        emailService.sendVerificationEmail(user.getUsername(), verificationToken);
+    }
+
     public UserResponse getMyInfo(){
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();

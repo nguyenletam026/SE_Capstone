@@ -67,10 +67,13 @@ export const handleSignUp = async (formData) => {
       data,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
+    
+    // Store email for verification purposes
+    localStorage.setItem("pendingVerificationEmail", formData.username);
+    
     return response.data;
   } catch (error) {
     console.error("Sign up error:", error);
-    alert("Sign up failed. Please try again.");
     throw error;
   }
 };

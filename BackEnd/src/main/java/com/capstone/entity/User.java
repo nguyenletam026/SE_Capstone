@@ -28,5 +28,9 @@ public class User {
     String avtUrl;
     @Column(nullable = false)
     Double balance = 0.0;
-
+    
+    // Email verification fields
+    String verificationToken;
+    Date verificationTokenExpiry;
+    Boolean emailVerified = false;
 }
