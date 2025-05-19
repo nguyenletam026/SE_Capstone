@@ -28,9 +28,7 @@ public class ChatPaymentService {
     private final ChatPaymentRepository chatPaymentRepository;
     private final ChatRequestRepository chatRequestRepository;
     private final UserRepository userRepository;
-    
-    // Cost per hour in VND
-    private static final double COST_PER_HOUR = 100000.0;
+    private final SystemConfigService systemConfigService;
     
     @Transactional
     public ChatPaymentResponse createChatPayment(ChatPaymentRequest request) {
@@ -77,8 +75,12 @@ public class ChatPaymentService {
             log.info("Created new chat request: {}", chatRequest.getId());
         }
         
+        // Get the current cost per hour from system config
+        double costPerHour = systemConfigService.getChatCostPerHour();
+        log.info("Current chat cost per hour: {} VND", costPerHour);
+        
         // Calculate payment amount
-        double amount = request.getHours() * COST_PER_HOUR;
+        double amount = request.getHours() * costPerHour;
         
         // Check user's balance
         if (patient.getBalance() < amount) {
