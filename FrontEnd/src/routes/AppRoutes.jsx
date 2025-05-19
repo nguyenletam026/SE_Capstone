@@ -47,6 +47,7 @@ import AdminVideoManage from "../page/adminPage/AdminVideoManage";
 import AdminDepositHistory from "../page/adminPage/AdminDepositHistory";
 import AdminDoctorSchedule from "../page/adminPage/AdminDoctorSchedule";
 import AdminQuestionManage from "../page/adminPage/AdminQuestionManage";
+import AdminSetting from "../page/adminPage/adminSetting";
 
 // Doctor Pages
 import DoctorLayout from "../components/layouts/doctorLayout";
@@ -115,6 +116,7 @@ const AppRoutes = () => {
             <Route path="/admin-video" element={<AdminLayout><AdminVideoManage /></AdminLayout>} />
             <Route path="/admin-deposits" element={<AdminDepositHistory />} />
             <Route path="/admin-questions" element={<AdminLayout><AdminQuestionManage /></AdminLayout>} />
+            <Route path="/admin-settings" element={<AdminLayout><AdminSetting /></AdminLayout>} />
           </Route>
 
           {/* Route Doctor */}

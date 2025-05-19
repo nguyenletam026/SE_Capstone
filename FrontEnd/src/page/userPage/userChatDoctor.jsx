@@ -142,17 +142,15 @@ function UserChatLayout() {
     const fetchDoctors = async () => {
       setLoadingDoctors(true);
       try {
-        // Get current time for fetching doctors
+        // Get current date and time
         const now = new Date();
+        const currentDate = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
         const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
         
-        // Use the test date 2025-05-18 for development
-        const testDate = "2025-05-18";
-        
-        console.log(`Fetching doctors for date ${testDate} and time ${currentTime}`);
+        console.log(`Fetching doctors for date ${currentDate} and time ${currentTime}`);
         
         // Get doctors scheduled for the current date and time
-        const doctorsRes = await getDoctorsByDateTime(testDate, currentTime);
+        const doctorsRes = await getDoctorsByDateTime(currentDate, currentTime);
         const scheduledDoctors = doctorsRes.result || [];
         
         if (scheduledDoctors.length > 0) {

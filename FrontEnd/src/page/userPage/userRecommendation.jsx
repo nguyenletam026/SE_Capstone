@@ -24,11 +24,12 @@ export default function Recommendation() {
           if (recommendRes.result?.recommendationType === "DOCTOR_ADVISE") {
             console.log("Getting doctors for current time because recommendation type is DOCTOR_ADVISE");
             
-            // Use test date and current time
-            const testDate = "2025-05-18";
-            const currentTime = new Date().toTimeString().split(' ')[0];
+            // Get current date and time
+            const now = new Date();
+            const currentDate = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
             
-            doctorRes = await getDoctorsByDateTime(testDate, currentTime);
+            doctorRes = await getDoctorsByDateTime(currentDate, currentTime);
             console.log("Received doctors for current time:", doctorRes);
           } else {
             // For other recommendation types, get all doctors as fallback
@@ -82,9 +83,11 @@ export default function Recommendation() {
         setDoctors(res.result || []);
       } else {
         // Fetch only doctors available at current time when toggling back
-        const testDate = "2025-05-18";
-        const currentTime = new Date().toTimeString().split(' ')[0];
-        const res = await getDoctorsByDateTime(testDate, currentTime);
+        const now = new Date();
+        const currentDate = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
+        
+        const res = await getDoctorsByDateTime(currentDate, currentTime);
         setDoctors(res.result || []);
       }
     } catch (err) {

@@ -287,3 +287,70 @@ export const checkPendingDoctorRequest = async () => {
     return false;
   }
 };
+
+// System Config API calls
+export const getChatCost = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/chat-cost`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to fetch chat cost");
+    }
+    
+    const data = await response.json();
+    return data.result;
+  } catch (error) {
+    console.error("Error fetching chat cost:", error);
+    throw error;
+  }
+};
+
+export const updateChatCost = async (newCost) => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/chat-cost`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ costPerHour: newCost }),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to update chat cost");
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating chat cost:", error);
+    throw error;
+  }
+};
+
+export const getAllSystemConfigs = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/system-configs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to fetch system configurations");
+    }
+    
+    const data = await response.json();
+    return data.result;
+  } catch (error) {
+    console.error("Error fetching system configurations:", error);
+    throw error;
+  }
+};

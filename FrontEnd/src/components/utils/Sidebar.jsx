@@ -7,6 +7,7 @@ import { FaShoppingBag } from "react-icons/fa";
 import { FaMoneyBillWave } from "react-icons/fa";
 import { FaCalendarAlt } from "react-icons/fa";
 import { FaQuestionCircle } from "react-icons/fa";
+import { FaCog } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
@@ -33,6 +34,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         <SidebarItem to="/admin-music" icon={<FaMusic />} label="Music" isOpen={isOpen} />
         <SidebarItem to="/admin-video" icon={<FaPhotoVideo />} label="Video" isOpen={isOpen} />
         <SidebarItem to="/admin-deposits" icon={<FaMoneyBillWave />} label="Deposits" isOpen={isOpen} />
+        <SidebarItem to="/admin-settings" icon={<FaCog />} label="Cài đặt" isOpen={isOpen} />
       </nav>
     </div>
   );

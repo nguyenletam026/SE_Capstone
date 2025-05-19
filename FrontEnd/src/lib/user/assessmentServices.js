@@ -75,14 +75,16 @@ export const getMyAnswers = async () => {
   export const getDoctorsForToday = async () => {
     const token = getToken();
     
-    // Thay đổi để test với ngày cụ thể (ví dụ: 2025-05-18)
-    // const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    const today = "2025-05-18"; // Sử dụng ngày đã được lên lịch trong DB
+    // Get current date and time
+    const now = new Date();
+    const today = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
     
-    console.log("Fetching doctors for date:", today);
+    console.log("Fetching doctors for date:", today, "and time:", currentTime);
     
     try {
-      const apiUrl = `${process.env.REACT_APP_API_URL}/api/doctor-schedules/date/${today}/doctors`;
+      // Use the endpoint that filters by both date and time
+      const apiUrl = `${process.env.REACT_APP_API_URL}/api/doctor-schedules/date/${today}/time/${currentTime}/doctors`;
       console.log("API URL:", apiUrl);
       
       const res = await fetch(apiUrl, {
@@ -95,7 +97,6 @@ export const getMyAnswers = async () => {
       
       if (!res.ok) {
         console.error("API error:", res.status, res.statusText);
-        // Return empty array instead of falling back
         return { result: [] };
       }
       
@@ -110,7 +111,6 @@ export const getMyAnswers = async () => {
       return data;
     } catch (error) {
       console.error("Error fetching doctors for today:", error);
-      // Return empty array instead of falling back
       return { result: [] };
     }
   };
