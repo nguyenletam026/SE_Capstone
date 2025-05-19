@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -125,6 +126,30 @@ public class DoctorScheduleController {
         doctorScheduleService.deleteSchedule(scheduleId);
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .result("Schedule deleted successfully")
+                .build());
+    }
+
+    @GetMapping("/current/doctors")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getCurrentAvailableDoctors() {
+        System.out.println("Controller: Getting doctors for current server time");
+        
+        // Use server's current date and time
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = LocalTime.now();
+        
+        System.out.println("Server current date: " + currentDate + ", current time: " + currentTime);
+        
+        // Get doctors available at the current server time
+        List<User> doctors = doctorScheduleService.getDoctorsByDateTime(currentDate, currentTime);
+        
+        System.out.println("Controller: Found " + doctors.size() + " doctors available now");
+        
+        List<UserResponse> doctorResponses = doctors.stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(ApiResponse.<List<UserResponse>>builder()
+                .result(doctorResponses)
                 .build());
     }
 } 

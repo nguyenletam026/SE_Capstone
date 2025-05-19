@@ -6,7 +6,7 @@ import ChatContainer from "../../components/chat/chatContainer";
 import { useAuth } from "../../context/AuthContext";
 import { ChatProvider, useChat } from "../../context/ChatContext";
 import { fetchUserInfo } from "../../lib/user/info";
-import { getAllDoctorRecommend, getDoctorsForToday, getDoctorsByDateTime } from "../../lib/user/assessmentServices";
+import { getAllDoctorRecommend, getDoctorsForToday, getDoctorsByDateTime, getCurrentAvailableDoctors } from "../../lib/user/assessmentServices";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -142,19 +142,14 @@ function UserChatLayout() {
     const fetchDoctors = async () => {
       setLoadingDoctors(true);
       try {
-        // Get current date and time
-        const now = new Date();
-        const currentDate = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-        const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
+        console.log("Fetching currently available doctors using server time");
         
-        console.log(`Fetching doctors for date ${currentDate} and time ${currentTime}`);
-        
-        // Get doctors scheduled for the current date and time
-        const doctorsRes = await getDoctorsByDateTime(currentDate, currentTime);
+        // Get doctors scheduled for the current server time
+        const doctorsRes = await getCurrentAvailableDoctors();
         const scheduledDoctors = doctorsRes.result || [];
         
         if (scheduledDoctors.length > 0) {
-          console.log("Using scheduled doctors:", scheduledDoctors.length);
+          console.log("Found available doctors:", scheduledDoctors.length);
           
           // Format doctors for display
           const formattedDoctors = scheduledDoctors.map(d => ({
@@ -166,7 +161,7 @@ function UserChatLayout() {
           
           setDoctors(formattedDoctors);
         } else {
-          console.log("No scheduled doctors found for the current time, showing message");
+          console.log("No available doctors found at current server time");
           setDoctors([]);
         }
       } catch (err) {

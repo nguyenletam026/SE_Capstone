@@ -37,7 +37,6 @@ public class AdminController {
     }
     
     @GetMapping("/chat-cost")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> getChatCost() {
         double chatCost = systemConfigService.getChatCostPerHour();
         return ResponseEntity.ok(ApiResponse.success(chatCost));

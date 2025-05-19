@@ -157,3 +157,67 @@ export const getMyAnswers = async () => {
       return { result: [] };
     }
   };
+
+  export const getCurrentAvailableDoctors = async () => {
+    const token = getToken();
+    
+    console.log("Fetching doctors available at current server time");
+    
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/api/doctor-schedules/current/doctors`;
+      console.log("API URL:", apiUrl);
+      
+      const res = await fetch(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      console.log("API response status:", res.status, res.statusText);
+      
+      if (!res.ok) {
+        console.error("API error:", res.status, res.statusText);
+        return { result: [] };
+      }
+      
+      const data = await res.json();
+      console.log("API response data:", JSON.stringify(data));
+      console.log("Currently available doctors:", data.result ? data.result.length : 0, "doctors found");
+      
+      if (data.result && data.result.length > 0) {
+        console.log("Doctor IDs:", data.result.map(doc => doc.id).join(", "));
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Error fetching currently available doctors:", error);
+      return { result: [] };
+    }
+  };
+
+  export const getChatCostPerHour = async () => {
+    const token = getToken();
+    
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/api/admin/chat-cost`;
+      
+      const res = await fetch(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!res.ok) {
+        console.error("Error fetching chat cost:", res.status, res.statusText);
+        // Return default cost if API fails
+        return 100000; 
+      }
+      
+      const data = await res.json();
+      return data.result;
+    } catch (error) {
+      console.error("Error fetching chat cost:", error);
+      // Return default cost on error
+      return 100000;
+    }
+  };

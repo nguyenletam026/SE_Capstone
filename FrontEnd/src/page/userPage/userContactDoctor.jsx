@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { requestChatWithDoctor, createChatPayment } from "../../lib/util/chatServices";
 import { toast } from "react-toastify";
-import { getAllDoctorRecommend, getDoctorsByDateTime } from "../../lib/user/assessmentServices";
+import { getAllDoctorRecommend, getDoctorsByDateTime, getChatCostPerHour } from "../../lib/user/assessmentServices";
 import { getCurrentBalance } from "../../lib/user/depositServices";
 
 export default function UserContactDoctor() {
@@ -16,6 +16,8 @@ export default function UserContactDoctor() {
   const [userBalance, setUserBalance] = useState(0);
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [paymentMode, setPaymentMode] = useState(false);
+  const [costPerHour, setCostPerHour] = useState(100000); // Default value
+  const [loadingCost, setLoadingCost] = useState(true);
   
   // Check if we're coming from an expired chat
   useEffect(() => {
@@ -59,9 +61,23 @@ export default function UserContactDoctor() {
         setLoadingBalance(false);
       }
     };
+    
+    const fetchChatCost = async () => {
+      try {
+        const cost = await getChatCostPerHour();
+        setCostPerHour(cost);
+        console.log("Chat cost per hour:", cost);
+      } catch (err) {
+        console.error("Error fetching chat cost:", err);
+        // Keep the default cost
+      } finally {
+        setLoadingCost(false);
+      }
+    };
 
     fetchDoctor();
     fetchBalance();
+    fetchChatCost();
   }, [id]);
 
   const handleStartChat = async () => {
@@ -134,7 +150,7 @@ export default function UserContactDoctor() {
     }
   };
 
-  if (loadingDoctor || loadingBalance) {
+  if (loadingDoctor || loadingBalance || loadingCost) {
     return (
       <div className="flex justify-center items-center p-10">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
@@ -142,7 +158,6 @@ export default function UserContactDoctor() {
     );
   }
 
-  const costPerHour = 100000; // 100,000 VND per hour
   const totalCost = hours * costPerHour;
   
   return (

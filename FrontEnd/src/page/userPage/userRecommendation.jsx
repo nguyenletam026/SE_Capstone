@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyRecommendation, getAllDoctorRecommend, getDoctorsForToday, getDoctorsByDateTime } from "../../lib/user/assessmentServices";
+import { getMyRecommendation, getAllDoctorRecommend, getDoctorsForToday, getDoctorsByDateTime, getCurrentAvailableDoctors } from "../../lib/user/assessmentServices";
 
 export default function Recommendation() {
   const [data, setData] = useState(null);
@@ -24,13 +24,9 @@ export default function Recommendation() {
           if (recommendRes.result?.recommendationType === "DOCTOR_ADVISE") {
             console.log("Getting doctors for current time because recommendation type is DOCTOR_ADVISE");
             
-            // Get current date and time
-            const now = new Date();
-            const currentDate = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-            const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
-            
-            doctorRes = await getDoctorsByDateTime(currentDate, currentTime);
-            console.log("Received doctors for current time:", doctorRes);
+            // Use server time for getting currently available doctors
+            doctorRes = await getCurrentAvailableDoctors();
+            console.log("Received doctors using server time:", doctorRes);
           } else {
             // For other recommendation types, get all doctors as fallback
             console.log("Getting all doctors because recommendation type is not DOCTOR_ADVISE");
@@ -83,11 +79,7 @@ export default function Recommendation() {
         setDoctors(res.result || []);
       } else {
         // Fetch only doctors available at current time when toggling back
-        const now = new Date();
-        const currentDate = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-        const currentTime = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
-        
-        const res = await getDoctorsByDateTime(currentDate, currentTime);
+        const res = await getCurrentAvailableDoctors();
         setDoctors(res.result || []);
       }
     } catch (err) {
