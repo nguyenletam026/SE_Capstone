@@ -5,6 +5,58 @@ import { requestDoctor } from "../../lib/user/info";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { checkPendingDoctorRequest } from "../../lib/admin/adminServices";
+const icons = {
+  specialization: (
+    <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path d="M12 6.5v11M18.5 12h-11" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  experience: (
+    <svg className="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <circle cx="12" cy="12" r="10" strokeWidth={2}/>
+      <path d="M12 8v4l3 3" strokeWidth={2} strokeLinecap="round"/>
+    </svg>
+  ),
+  description: (
+    <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeWidth={2}/>
+    </svg>
+  ),
+  phone: (
+    <svg className="w-6 h-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path d="M3 5a2 2 0 012-2h3.28a2 2 0 011.7 1.06l1.1 2.22a2 2 0 01-.45 2.37l-1.27 1.27a16 16 0 006.36 6.36l1.27-1.27a2 2 0 012.37-.45l2.22 1.1a2 2 0 011.06 1.7V19a2 2 0 01-2 2h-1C7.38 21 3 16.62 3 11V5z" strokeWidth={2}/>
+    </svg>
+  ),
+  hospital: (
+    <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth={2}/>
+      <path d="M12 8v8M8 12h8" strokeWidth={2}/>
+    </svg>
+  ),
+  cert: (
+    <svg className="w-6 h-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path d="M8 12l2 2 4-4M12 19a7 7 0 100-14 7 7 0 000 14z" strokeWidth={2}/>
+    </svg>
+  ),
+  cccd: (
+    <svg className="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <rect width="20" height="14" x="2" y="5" rx="2" strokeWidth={2}/>
+      <circle cx="8" cy="12" r="2" strokeWidth={2}/>
+      <path d="M14 12h4" strokeWidth={2}/>
+    </svg>
+  ),
+  upload: (
+    <svg className="w-5 h-5 text-blue-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9l5-5 5 5M12 4v12" strokeWidth={2}/>
+    </svg>
+  ),
+  loading: (
+    <svg className="animate-spin w-6 h-6 text-blue-500 mx-auto" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+    </svg>
+  )
+};
 
 export default function ApplyDoctor() {
   const navigate = useNavigate();
@@ -21,40 +73,28 @@ export default function ApplyDoctor() {
   const [errors, setErrors] = useState({});
   const [previewCert, setPreviewCert] = useState(null);
   const [previewCccd, setPreviewCccd] = useState(null);
-  
+
   useEffect(() => {
-    // Check if user already has a pending request
     const checkExistingRequest = async () => {
       try {
         const hasPendingRequest = await checkPendingDoctorRequest();
         if (hasPendingRequest) {
           toast.info("Request already sent, please wait for our response.");
-          setTimeout(() => {
-            navigate("/home");
-          }, 2000);
+          setTimeout(() => navigate("/home"), 2000);
         }
       } catch (error) {
         console.error("Error checking pending request:", error);
       }
     };
-    
     checkExistingRequest();
   }, [navigate]);
 
-  // Kiểm tra định dạng file
+  // Validate file
   const validateFile = (file) => {
-    // Kiểm tra kích thước file (tối đa 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return "Kích thước file quá lớn (tối đa 5MB)";
-    }
-    
-    // Kiểm tra định dạng file (chỉ chấp nhận JPG/PNG)
+    if (file.size > 5 * 1024 * 1024) return "Kích thước file quá lớn (tối đa 5MB)";
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!validTypes.includes(file.type)) {
-      return "Định dạng file không hợp lệ (chỉ chấp nhận JPG/PNG)";
-    }
-    
-    return null; // Không có lỗi
+    if (!validTypes.includes(file.type)) return "Định dạng file không hợp lệ (chỉ chấp nhận JPG/PNG)";
+    return null;
   };
 
   const handleChange = (e) => {
@@ -62,18 +102,14 @@ export default function ApplyDoctor() {
     if (name === "certificateImage" || name === "cccdImage") {
       const file = files[0];
       if (file) {
-        // Kiểm tra file trước khi cập nhật state
         const fileError = validateFile(file);
         if (fileError) {
-          setErrors({...errors, [name]: fileError});
-          // Reset file input
+          setErrors({ ...errors, [name]: fileError });
           e.target.value = '';
           return;
         } else {
-          // Xóa lỗi nếu file hợp lệ
-          setErrors({...errors, [name]: null});
+          setErrors({ ...errors, [name]: null });
         }
-        
         setFormData({ ...formData, [name]: file });
         if (name === "certificateImage") setPreviewCert(URL.createObjectURL(file));
         if (name === "cccdImage") setPreviewCccd(URL.createObjectURL(file));
@@ -85,83 +121,49 @@ export default function ApplyDoctor() {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    // Kiểm tra các trường bắt buộc
     if (!formData.specialization) newErrors.specialization = "Vui lòng nhập chuyên môn";
     if (!formData.experienceYears) newErrors.experienceYears = "Vui lòng nhập số năm kinh nghiệm";
     if (!formData.description) newErrors.description = "Vui lòng nhập mô tả";
     if (!formData.phoneNumber) newErrors.phoneNumber = "Vui lòng nhập số điện thoại";
     if (!formData.hospital) newErrors.hospital = "Vui lòng nhập bệnh viện";
-    
-    // Kiểm tra định dạng số điện thoại
     if (formData.phoneNumber && !/^[0-9]{10}$/.test(formData.phoneNumber)) {
       newErrors.phoneNumber = "Số điện thoại không hợp lệ (cần 10 chữ số)";
     }
-    
-    // Kiểm tra file
     if (!formData.certificateImage) newErrors.certificateImage = "Vui lòng tải lên ảnh bằng cấp";
     if (!formData.cccdImage) newErrors.cccdImage = "Vui lòng tải lên ảnh CCCD";
-    
-    // Kiểm tra định dạng file nếu đã chọn
     if (formData.certificateImage) {
       const certError = validateFile(formData.certificateImage);
       if (certError) newErrors.certificateImage = certError;
     }
-    
     if (formData.cccdImage) {
       const cccdError = validateFile(formData.cccdImage);
       if (cccdError) newErrors.cccdImage = cccdError;
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Kiểm tra form trước khi gửi
     if (!validateForm()) {
       toast.error("Vui lòng điền đầy đủ thông tin và sửa các lỗi");
       return;
     }
-    
     setLoading(true);
-    console.log("Starting form submission...");
-    
     try {
-      // Tạo FormData để gửi dữ liệu form và file
       const formDataToSend = new FormData();
       formDataToSend.append('specialization', formData.specialization);
       formDataToSend.append('experienceYears', formData.experienceYears);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('phoneNumber', formData.phoneNumber);
       formDataToSend.append('hospital', formData.hospital);
-      
-      // Đảm bảo file hình ảnh được thêm vào form data
-      if (formData.certificateImage) {
-        console.log("Certificate image added:", formData.certificateImage.name, "Size:", formData.certificateImage.size, "Type:", formData.certificateImage.type);
-        formDataToSend.append('certificateImage', formData.certificateImage);
-      } else {
-        console.log("Certificate image is null or undefined");
-      }
-      
-      if (formData.cccdImage) {
-        console.log("CCCD image added:", formData.cccdImage.name, "Size:", formData.cccdImage.size, "Type:", formData.cccdImage.type);
-        formDataToSend.append('cccdImage', formData.cccdImage);
-      } else {
-        console.log("CCCD image is null or undefined");
-      }
-      
-      // Sử dụng axios để gửi FormData
+      if (formData.certificateImage) formDataToSend.append('certificateImage', formData.certificateImage);
+      if (formData.cccdImage) formDataToSend.append('cccdImage', formData.cccdImage);
+
       const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
       const token = localStorage.getItem("accessToken");
-      
-      console.log("Sending request to:", `${API_BASE}/doctors/request-doctor`);
-      console.log("With token:", token ? "Token exists" : "No token found");
-      
       const response = await axios.post(
-        `${API_BASE}/doctors/request-doctor`, 
+        `${API_BASE}/doctors/request-doctor`,
         formDataToSend,
         {
           headers: {
@@ -170,60 +172,42 @@ export default function ApplyDoctor() {
           }
         }
       );
-      
-      console.log("Request successful:", response.data);
-      toast.success("Your Request Sent Successfully. Please Wait For My Contact");
 
-        setTimeout(() => {
-          navigate("/home");
-        }, 1500); // chờ 1.5 giây
+      toast.success("Yêu cầu gửi thành công! Vui lòng chờ phản hồi.");
+      setTimeout(() => navigate("/home"), 1500);
 
     } catch (error) {
-      console.error("Lỗi khi gửi yêu cầu:", error);
-      
       if (error.response) {
-        // Xử lý các mã lỗi cụ thể
         const errorCode = error.response.data?.code;
         const errorMessage = error.response.data?.message || "Lỗi không xác định";
-        
-        console.error("Error response data:", error.response.data);
-        console.error("Error status:", error.response.status);
-        console.error("Error code:", errorCode);
-        console.error("Error message:", errorMessage);
-        
         switch (errorCode) {
-          case 1013: // Invalid doctor certificate
-            toast.error("Ảnh bằng cấp không hợp lệ. Vui lòng tải lên ảnh rõ ràng, định dạng JPG/PNG.");
-            setErrors({...errors, certificateImage: "Ảnh bằng cấp không hợp lệ"});
+          case 1013:
+            toast.error("Ảnh bằng cấp không hợp lệ.");
+            setErrors({ ...errors, certificateImage: "Ảnh bằng cấp không hợp lệ" });
             break;
-          case 1025: // CCCD name mismatch
-            toast.error("Tên trong CCCD không khớp với tên tài khoản của bạn.");
-            setErrors({...errors, cccdImage: "Tên trong CCCD không khớp"});
+          case 1025:
+            toast.error("Tên trong CCCD không khớp với tên tài khoản.");
+            setErrors({ ...errors, cccdImage: "Tên trong CCCD không khớp" });
             break;
-          case 1015: // File is null
-            toast.error("File ảnh trống hoặc bị lỗi. Vui lòng tải lên lại.");
+          case 1015:
+            toast.error("File ảnh trống hoặc bị lỗi.");
             break;
-          case 1010: // Already doctor
+          case 1010:
             toast.error("Tài khoản của bạn đã là bác sĩ.");
             navigate("/home");
             break;
-          case 1037: // Request already sent
+          case 1037:
             toast.error("Request already sent, please wait for our response.");
-            setTimeout(() => {
-              navigate("/home");
-            }, 2000);
+            setTimeout(() => navigate("/home"), 2000);
             break;
-          case 401: // Unauthorized
+          case 401:
             toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
             navigate("/login");
             break;
-          case 9999: // Uncategorized error
-            // Check if it's related to duplicate requests
+          case 9999:
             if (errorMessage.includes("Query did not return a unique result")) {
-              toast.error("Your Request Already Sent. Please Wait For Our Response");
-              setTimeout(() => {
-                navigate("/home");
-              }, 2000);
+              toast.error("Yêu cầu đã gửi. Vui lòng chờ phản hồi.");
+              setTimeout(() => navigate("/home"), 2000);
             } else {
               toast.error(`Gửi yêu cầu thất bại: ${errorMessage}`);
             }
@@ -232,12 +216,8 @@ export default function ApplyDoctor() {
             toast.error(`Gửi yêu cầu thất bại: ${errorMessage}`);
         }
       } else if (error.request) {
-        // Không nhận được phản hồi từ server
-        console.error("No response received:", error.request);
-        toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối của bạn.");
+        toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối.");
       } else {
-        // Lỗi khác
-        console.error("Error message:", error.message);
         toast.error("Gửi yêu cầu thất bại. Vui lòng thử lại.");
       }
     } finally {
@@ -245,118 +225,151 @@ export default function ApplyDoctor() {
     }
   };
 
+  // Modern Field Component
+  function Field({ icon, children, error }) {
+    return (
+      <div>
+        <div className={`flex items-center bg-blue-50/50 rounded-xl border px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400 transition ${error ? "border-red-400" : "border-blue-100"}`}>
+          <span className="mr-3">{icon}</span>
+          {children}
+        </div>
+        {error && <p className="text-red-500 text-xs mt-1 ml-2">{error}</p>}
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 px-4 py-12 flex flex-col md:flex-row items-center justify-center gap-10">
-      {/* Left: Banner */}
-      <div className="w-full md:w-1/2 flex justify-center">
-        <img
-          src={doctorBanner}
-          alt="Doctor Banner"
-          className="rounded-3xl shadow-xl w-full max-w-md object-cover"
-        />
+    <div className="min-h-screen bg-gradient-to-br from-[#f4fbff] via-[#e8f0fe] to-[#e3e7ff] px-4 py-12 flex flex-col md:flex-row items-center justify-center gap-12">
+      {/* Left: Banner with shadow and float icon */}
+      <div className="w-full md:w-1/2 flex flex-col items-center">
+        <div className="relative w-full max-w-md">
+          <img
+            src={doctorBanner}
+            alt="Doctor Banner"
+            className="rounded-3xl shadow-2xl w-full object-cover border-4 border-white"
+          />
+          <div className="absolute -top-7 -left-7 bg-blue-100 rounded-full p-4 shadow-lg animate-bounce">
+            {/* Doctor SVG "avatar" */}
+            <svg className="w-10 h-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="7" r="4" strokeWidth={2} />
+              <path d="M21 20c0-3.866-3.582-7-8-7s-8 3.134-8 7" strokeWidth={2}/>
+            </svg>
+          </div>
+        </div>
+        <p className="mt-6 text-center text-blue-600 font-bold text-lg flex items-center justify-center gap-2">
+          <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7" strokeWidth={2} strokeLinecap="round"/></svg>
+          Đáng tin cậy - An toàn - Hỗ trợ 24/7
+        </p>
       </div>
 
       {/* Right: Form */}
-      <div className="w-full md:w-1/2 bg-white shadow-xl rounded-3xl p-10 max-w-xl">
-        <h2 className="text-3xl font-extrabold text-center text-blue-700 mb-6">
-          Đăng ký trở thành bác sĩ tư vấn
+      <div className="w-full md:w-1/2 bg-white shadow-2xl rounded-3xl p-10 max-w-xl border-[1.5px] border-blue-100">
+        <h2 className="text-3xl font-extrabold text-center text-blue-700 mb-8 flex items-center justify-center gap-3">
+          <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M20 7V6a2 2 0 00-2-2h-1.5a1.5 1.5 0 010-3h-9a1.5 1.5 0 010 3H6a2 2 0 00-2 2v1" strokeWidth={2}/><circle cx="12" cy="13" r="7" strokeWidth={2}/></svg>
+          Đăng ký bác sĩ tư vấn
         </h2>
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
+          <Field icon={icons.specialization} error={errors.specialization}>
             <input
               type="text"
               name="specialization"
               placeholder="Chuyên môn (VD: General Psychology)"
-              className={`w-full border ${errors.specialization ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none`}
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
               onChange={handleChange}
               value={formData.specialization}
             />
-            {errors.specialization && <p className="text-red-500 text-xs mt-1">{errors.specialization}</p>}
-          </div>
-          
-          <div>
+          </Field>
+          <Field icon={icons.experience} error={errors.experienceYears}>
             <input
               type="number"
               name="experienceYears"
               placeholder="Số năm kinh nghiệm"
-              className={`w-full border ${errors.experienceYears ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none`}
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
               onChange={handleChange}
               value={formData.experienceYears}
             />
-            {errors.experienceYears && <p className="text-red-500 text-xs mt-1">{errors.experienceYears}</p>}
-          </div>
-          
-          <div>
+          </Field>
+          <Field icon={icons.description} error={errors.description}>
             <input
               type="text"
               name="description"
               placeholder="Mô tả bản thân (VD: Tốt nghiệp tại...)"
-              className={`w-full border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none`}
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
               onChange={handleChange}
               value={formData.description}
             />
-            {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-          </div>
-          
-          <div>
+          </Field>
+          <Field icon={icons.phone} error={errors.phoneNumber}>
             <input
               type="text"
               name="phoneNumber"
               placeholder="Số điện thoại"
-              className={`w-full border ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none`}
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
               onChange={handleChange}
               value={formData.phoneNumber}
             />
-            {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
-          </div>
-          
-          <div>
+          </Field>
+          <Field icon={icons.hospital} error={errors.hospital}>
             <input
               type="text"
               name="hospital"
               placeholder="Bệnh viện đang công tác"
-              className={`w-full border ${errors.hospital ? 'border-red-500' : 'border-gray-300'} rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none`}
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
               onChange={handleChange}
               value={formData.hospital}
             />
-            {errors.hospital && <p className="text-red-500 text-xs mt-1">{errors.hospital}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Ảnh bằng cấp</label>
-            <input
-              type="file"
-              name="certificateImage"
-              accept="image/jpeg,image/png"
-              onChange={handleChange}
-              className={`text-sm ${errors.certificateImage ? 'border border-red-500 rounded p-1' : ''}`}
-            />
+          </Field>
+          <div>
+            <label className="block text-sm font-semibold text-blue-600 mb-1 flex items-center gap-2">
+              {icons.cert} Ảnh bằng cấp
+            </label>
+            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg border border-blue-200 w-fit">
+              {icons.upload}
+              <span className="text-xs font-medium text-blue-500">Chọn file</span>
+              <input
+                type="file"
+                name="certificateImage"
+                accept="image/jpeg,image/png"
+                onChange={handleChange}
+                className="hidden"
+              />
+            </label>
             {errors.certificateImage && <p className="text-red-500 text-xs mt-1">{errors.certificateImage}</p>}
-            {previewCert && <img src={previewCert} alt="Preview Certificate" className="w-32 rounded-lg mt-2" />}
-            <p className="text-xs text-gray-500">Chỉ chấp nhận định dạng JPG/PNG</p>
+            {previewCert && <img src={previewCert} alt="Preview Certificate" className="w-32 rounded-lg mt-2 border border-blue-100 shadow" />}
+            <p className="text-xs text-gray-400 mt-2">Chỉ chấp nhận JPG/PNG, tối đa 5MB</p>
           </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Ảnh CCCD</label>
-            <input
-              type="file"
-              name="cccdImage"
-              accept="image/jpeg,image/png"
-              onChange={handleChange}
-              className={`text-sm ${errors.cccdImage ? 'border border-red-500 rounded p-1' : ''}`}
-            />
+          <div>
+            <label className="block text-sm font-semibold text-blue-600 mb-1 flex items-center gap-2">
+              {icons.cccd} Ảnh CCCD
+            </label>
+            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg border border-blue-200 w-fit">
+              {icons.upload}
+              <span className="text-xs font-medium text-blue-500">Chọn file</span>
+              <input
+                type="file"
+                name="cccdImage"
+                accept="image/jpeg,image/png"
+                onChange={handleChange}
+                className="hidden"
+              />
+            </label>
             {errors.cccdImage && <p className="text-red-500 text-xs mt-1">{errors.cccdImage}</p>}
-            {previewCccd && <img src={previewCccd} alt="Preview CCCD" className="w-32 rounded-lg mt-2" />}
-            <p className="text-xs text-gray-500">Chỉ chấp nhận định dạng JPG/PNG</p>
-            <p className="text-xs text-gray-500 font-medium">Lưu ý: Tên trong CCCD phải khớp với tên tài khoản của bạn</p>
+            {previewCccd && <img src={previewCccd} alt="Preview CCCD" className="w-32 rounded-lg mt-2 border border-blue-100 shadow" />}
+            <p className="text-xs text-gray-400">Chỉ chấp nhận JPG/PNG, tối đa 5MB</p>
+            <p className="text-xs text-gray-500 font-medium">Tên trong CCCD phải khớp với tên tài khoản của bạn</p>
           </div>
-
           <button
             type="submit"
-            className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`w-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-bold py-3 rounded-xl shadow-xl flex items-center justify-center gap-2 text-lg transition-all duration-150 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             disabled={loading}
           >
-            {loading ? 'Đang xử lý...' : 'Gửi Yêu Cầu'}
+            {loading ? <>
+              {icons.loading}
+              Đang xử lý...
+            </> : <>
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7" strokeWidth={2} strokeLinecap="round"/></svg>
+              Gửi Yêu Cầu
+            </>}
           </button>
         </form>
       </div>
