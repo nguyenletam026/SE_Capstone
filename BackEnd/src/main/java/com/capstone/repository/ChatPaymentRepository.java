@@ -24,6 +24,13 @@ public interface ChatPaymentRepository extends JpaRepository<ChatPayment, String
            "AND cr.status = com.capstone.enums.RequestStatus.APPROVED")
     List<ChatPayment> findByPatientAndExpiresAtGreaterThan(@Param("patient") User patient, @Param("now") LocalDateTime now);
     
+    @Query("SELECT cp FROM ChatPayment cp " +
+           "JOIN cp.chatRequest cr " +
+           "WHERE cr.doctor = :doctor " +
+           "AND cp.expiresAt > :now " +
+           "AND cr.status = com.capstone.enums.RequestStatus.APPROVED")
+    List<ChatPayment> findByDoctorAndExpiresAtGreaterThan(@Param("doctor") User doctor, @Param("now") LocalDateTime now);
+    
     @Query("SELECT CASE WHEN COUNT(cp) > 0 THEN true ELSE false END FROM ChatPayment cp " +
            "WHERE cp.chatRequest = :chatRequest " +
            "AND cp.expiresAt > :now")

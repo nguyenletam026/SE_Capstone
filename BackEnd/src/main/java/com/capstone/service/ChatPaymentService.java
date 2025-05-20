@@ -2,23 +2,29 @@ package com.capstone.service;
 
 import com.capstone.dto.request.ChatPaymentRequest;
 import com.capstone.dto.response.ChatPaymentResponse;
+import com.capstone.dto.response.PatientChatResponse;
 import com.capstone.entity.ChatPayment;
 import com.capstone.entity.ChatRequest;
 import com.capstone.entity.User;
 import com.capstone.enums.RequestStatus;
 import com.capstone.exception.AppException;
 import com.capstone.exception.ErrorCode;
+import com.capstone.repository.ChatMessageRepository;
 import com.capstone.repository.ChatPaymentRepository;
 import com.capstone.repository.ChatRequestRepository;
 import com.capstone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,6 +35,8 @@ public class ChatPaymentService {
     private final ChatRequestRepository chatRequestRepository;
     private final UserRepository userRepository;
     private final SystemConfigService systemConfigService;
+    private final ChatMessageRepository chatMessageRepository;
+    private final SimpMessagingTemplate messagingTemplate;
     
     @Transactional
     public ChatPaymentResponse createChatPayment(ChatPaymentRequest request) {
@@ -114,6 +122,29 @@ public class ChatPaymentService {
             
             payment = chatPaymentRepository.save(payment);
             log.info("Successfully created chat payment: {}", payment.getId());
+            
+            // Send notification to doctor
+            try {
+                Map<String, Object> notification = new HashMap<>();
+                notification.put("type", "NEW_CHAT_PAYMENT");
+                notification.put("requestId", chatRequest.getId());
+                notification.put("patientId", patient.getId());
+                notification.put("patientName", patient.getUsername());
+                notification.put("patientAvatar", patient.getAvtUrl());
+                notification.put("timestamp", LocalDateTime.now().toString());
+                notification.put("message", patient.getUsername() + " đã thanh toán phí tư vấn");
+                
+                log.info("Sending payment notification to doctor: {}", doctor.getUsername());
+                messagingTemplate.convertAndSendToUser(
+                    doctor.getUsername(),
+                    "/queue/notifications",
+                    notification
+                );
+            } catch (Exception e) {
+                log.error("Failed to send payment notification: ", e);
+                // Don't throw exception here, as payment is already processed
+            }
+            
             return ChatPaymentResponse.fromEntity(payment);
         } catch (Exception e) {
             log.error("Error processing chat payment: ", e);
@@ -155,20 +186,75 @@ public class ChatPaymentService {
         
         // Get current authenticated user
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User patient = userRepository.findByUsername(username)
+        User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         
-        log.info("Found patient: {}", patient.getUsername());
+        log.info("Found user: {}", currentUser.getUsername());
         
         // Get current time
         LocalDateTime now = LocalDateTime.now();
         
-        // Find all active chat payments for the user
-        List<ChatPayment> activePayments = chatPaymentRepository.findByPatientAndExpiresAtGreaterThan(patient, now);
-        log.info("Found {} active chat payments", activePayments.size());
+        List<ChatPayment> activePayments;
+        
+        // Check if user is a doctor or a patient
+        if (currentUser.getRole().getName().equals("DOCTOR")) {
+            // For doctors, get payments where they are the doctor
+            activePayments = chatPaymentRepository.findByDoctorAndExpiresAtGreaterThan(currentUser, now);
+            log.info("Found {} active chat payments for doctor", activePayments.size());
+        } else {
+            // For patients, get payments where they are the patient (original behavior)
+            activePayments = chatPaymentRepository.findByPatientAndExpiresAtGreaterThan(currentUser, now);
+            log.info("Found {} active chat payments for patient", activePayments.size());
+        }
         
         return activePayments.stream()
                 .map(ChatPaymentResponse::fromEntity)
                 .toList();
+    }
+
+    /**
+     * Gets all patients with paid and active chat sessions for the current doctor
+     * @return List of PatientChatResponse with patient details and chat status
+     */
+    public List<PatientChatResponse> getPaidChatPatients() {
+        log.info("Getting paid chat patients for current doctor");
+        
+        // Get current authenticated user
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User doctor = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        
+        log.info("Found doctor: {}", doctor.getUsername());
+        
+        // Check if user is a doctor
+        if (!doctor.getRole().getName().equals("DOCTOR")) {
+            log.error("User {} is not a doctor. Role: {}", doctor.getUsername(), doctor.getRole().getName());
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        
+        // Get current time
+        LocalDateTime now = LocalDateTime.now();
+        
+        // Find all active payments where current user is the doctor
+        List<ChatPayment> activePayments = chatPaymentRepository.findByDoctorAndExpiresAtGreaterThan(doctor, now);
+        log.info("Found {} active paid chat sessions for doctor", activePayments.size());
+        
+        List<PatientChatResponse> patientResponses = new ArrayList<>();
+        
+        for (ChatPayment payment : activePayments) {
+            User patient = payment.getChatRequest().getPatient();
+            
+            // Get last message between doctor and patient (if any)
+            String lastMessage = chatMessageRepository.findLastMessageBetweenUsers(doctor.getId(), patient.getId())
+                    .map(message -> message.getContent())
+                    .orElse(null);
+            
+            // Get count of unread messages from this patient
+            int unreadCount = chatMessageRepository.countUnreadMessagesFromUser(doctor.getId(), patient.getId());
+            
+            patientResponses.add(PatientChatResponse.fromChatPayment(payment, lastMessage, unreadCount));
+        }
+        
+        return patientResponses;
     }
 } 

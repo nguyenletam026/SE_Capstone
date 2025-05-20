@@ -3,6 +3,7 @@ package com.capstone.controller;
 import com.capstone.dto.request.ChatPaymentRequest;
 import com.capstone.dto.response.ApiResponse;
 import com.capstone.dto.response.ChatPaymentResponse;
+import com.capstone.dto.response.PatientChatResponse;
 import com.capstone.service.ChatPaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,14 @@ public class ChatPaymentController {
         log.info("Fetching active chat payments for current user");
         return ApiResponse.<List<ChatPaymentResponse>>builder()
                 .result(chatPaymentService.getActiveChatPayments())
+                .build();
+    }
+    
+    @GetMapping("/paid-chats")
+    public ApiResponse<List<PatientChatResponse>> getPaidChatPatients() {
+        log.info("Fetching paid chat patients for current doctor");
+        return ApiResponse.<List<PatientChatResponse>>builder()
+                .result(chatPaymentService.getPaidChatPatients())
                 .build();
     }
 } 

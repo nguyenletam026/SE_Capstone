@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, String> {
@@ -27,4 +28,13 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, String
 
     @Query("SELECT DISTINCT m.sender FROM ChatMessage m WHERE m.receiver = :user")
     List<User> findDistinctSenders(@Param("user") User user);
+    
+    @Query("SELECT m FROM ChatMessage m WHERE " +
+            "((m.sender.id = :userId1 AND m.receiver.id = :userId2) OR " +
+            "(m.sender.id = :userId2 AND m.receiver.id = :userId1)) " +
+            "ORDER BY m.timestamp DESC LIMIT 1")
+    Optional<ChatMessage> findLastMessageBetweenUsers(@Param("userId1") String userId1, @Param("userId2") String userId2);
+    
+    @Query("SELECT COUNT(m) FROM ChatMessage m WHERE m.receiver.id = :receiverId AND m.sender.id = :senderId AND m.read = false")
+    int countUnreadMessagesFromUser(@Param("receiverId") String receiverId, @Param("senderId") String senderId);
 }
