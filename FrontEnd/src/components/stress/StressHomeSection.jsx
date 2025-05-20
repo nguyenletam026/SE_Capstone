@@ -3,12 +3,26 @@ import { getDailyStress } from "../../lib/user/stressServices";
 import WebcamCapture from "../utils/WebcamCapture";
 import Bot from "../../assets/4.png";
 import Modal from "react-modal";
+import { 
+  FaCamera, 
+  FaUserCircle, 
+  FaSmile, 
+  FaMeh, 
+  FaFrown, 
+  FaTimesCircle, 
+  FaChartLine,
+  FaLaptopCode,
+  FaQuestion
+} from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 
 export default function StressHomeSection({ onRefreshCharts }) {
-  const [bgColor, setBgColor] = useState("#9BB168");
+  const [bgColor, setBgColor] = useState("from-green-500 to-green-600");
+  const [textColor, setTextColor] = useState("text-green-50");
   const [showWebcam, setShowWebcam] = useState(false);
   const [stressLevel, setStressLevel] = useState(null);
   const [stressScore, setStressScore] = useState(100);
+  const { user } = useAuth();
 
   const refreshDailyStress = async () => {
     const data = await getDailyStress();
@@ -46,79 +60,139 @@ export default function StressHomeSection({ onRefreshCharts }) {
         setStressLevel(closestEntry.stressLevel ?? "Unknown");
 
         if (score > 70) {
-          setBgColor("#ef4444"); //red
+          setBgColor("from-red-500 to-red-600");
+          setTextColor("text-red-50");
         } else if (score > 40) {
-          setBgColor("#eab308"); //yellow
+          setBgColor("from-yellow-400 to-yellow-500");
+          setTextColor("text-yellow-50");
         } else {
-          setBgColor("#9BB168");  //green
+          setBgColor("from-green-500 to-green-600");
+          setTextColor("text-green-50");
         }
       }
     }
   };
 
+  useEffect(() => {
+    refreshDailyStress();
+  }, []);
+
   const getStressIcon = () => {
-    if (stressScore > 70) return <span className="text-6xl">😟</span>;
-    if (stressScore > 40) return <span className="text-6xl">😐</span>;
-    return <span className="text-6xl">😊</span>;
+    if (stressScore === null) return <FaQuestion className="text-6xl" />;
+    if (stressScore > 70) return <FaFrown className="text-6xl" />;
+    if (stressScore > 40) return <FaMeh className="text-6xl" />;
+    return <FaSmile className="text-6xl" />;
   };
 
-  <div className="flex justify-center">
-    <div className="max-w-[100%] w-full h-[320px] overflow-hidden rounded-lg shadow">
-      <WebcamCapture
-        onResult={() => {
-          refreshDailyStress();
-          setShowWebcam(false);
-          onRefreshCharts();
-        }}
-      />
-    </div>
-  </div>
+  const getTimeOfDay = () => {
+    const hours = new Date().getHours();
+    if (hours < 12) return "Buổi Sáng";
+    if (hours < 18) return "Buổi Chiều";
+    return "Buổi Tối";
+  };
+
+  const getUserName = () => {
+    return user?.email?.split('@')[0] || "bạn";
+  };
 
   return (
-    <div
-      className="relative text-white text-center pb-24 overflow-hidden"
-      style={{ backgroundColor: bgColor }}
-    >
-      <div className="pt-6">
-        <p className="text-sm font-semibold uppercase">Xin Chào Người Dùng</p>
-        <p className="text-xs underline mb-4 cursor-pointer">Thiết Lập Profile</p>
-        <p className="text-6xl font-bold">{stressScore}</p>
-        <div className="flex justify-center">{getStressIcon()}</div>
-        <p className="mt-2 font-bold text-lg">
-          {stressLevel ? `Bạn Đang Có Tâm Trạng: ${stressLevel}` : "Đang tải..."}
-        </p>
+    <div className={`relative text-white pb-20 overflow-hidden bg-gradient-to-r ${bgColor}`}>
+      {/* Decorative elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
+        <div className="absolute -left-10 -top-10 w-40 h-40 rounded-full bg-white"></div>
+        <div className="absolute right-10 top-20 w-20 h-20 rounded-full bg-white"></div>
+        <div className="absolute -right-10 bottom-20 w-40 h-40 rounded-full bg-white"></div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="pt-8 md:py-12 flex flex-col md:flex-row items-center justify-between">
+          <div className="text-center md:text-left mb-6 md:mb-0">
+            <div className="flex items-center mb-3">
+              <FaUserCircle className="text-2xl mr-2" />
+              <p className={`text-sm font-semibold`}>Xin Chào, <span className="font-bold">{getUserName()}</span>!</p>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Chúc {getUserName()} Một {getTimeOfDay()} Tốt Lành</h1>
+            <p className={`text-sm opacity-80 mb-6 ${textColor}`}>
+              {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+            
+            <div className="flex flex-col items-center md:items-start">
+              <div className="flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-xl px-6 py-4 shadow-lg mb-4">
+                <div className="text-center mr-6">
+                  <h2 className="text-6xl font-bold">{stressScore !== null ? stressScore : "No Data"}</h2>
+                  <p className="text-xs uppercase tracking-wider mt-1 opacity-80">Điểm Số</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  {getStressIcon()}
+                  <p className="mt-2 text-sm font-medium text-center">
+                    {stressLevel ? stressLevel : "No Data"}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowWebcam(true)}
+                className="flex items-center bg-white text-gray-800 px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-opacity-90 transition duration-300 transform hover:scale-105"
+              >
+                <FaCamera className="mr-2" />
+                Phân Tích Stress Qua Camera
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-6 md:mt-0">
+            <div className="relative">
+              <div className="absolute -top-4 -right-4 bg-white/20 backdrop-blur-sm rounded-full p-3 animate-pulse">
+                <FaLaptopCode className="text-xl" />
+              </div>
+              <div className="absolute -bottom-2 -left-2 bg-white/20 backdrop-blur-sm rounded-full p-2">
+                <FaChartLine className="text-lg" />
+              </div>
+              <img
+                src={Bot}
+                alt="Bot"
+                className="w-48 h-48 md:w-56 md:h-56 relative z-0 drop-shadow-2xl filter-none"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-6 flex justify-center">
-        <img
-          src={Bot}
-          alt="Bot"
-          className="w-40 h-40 relative z-0"
-          style={{ pointerEvents: "none" }}
+      {/* Wave SVG */}
+      <svg
+        className="absolute bottom-0 left-0 w-full"
+        viewBox="0 0 1440 160"
+        preserveAspectRatio="none"
+      >
+        <path
+          fill="#ffffff"
+          d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,80C672,64,768,64,864,96C960,128,1056,192,1152,186.7C1248,181,1344,107,1392,69.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
         />
-      </div>
+      </svg>
 
-      <div className="mt-6">
-        <button
-          onClick={() => setShowWebcam(true)}
-          className="bg-black text-white px-6 py-2 rounded-lg font-semibold shadow hover:scale-105 transition"
-        >
-          Bắt Đầu Phân Tích Bằng Camera 📸
-        </button>
-
-        <Modal
-          isOpen={showWebcam}
-          onRequestClose={() => setShowWebcam(false)}
-          contentLabel="Phân tích stress qua camera"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-          className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xl mt-6"
-        >
-          <div className="bg-white rounded-xl p-6 shadow-lg w-full max-w-3xl relative">
-
-            <h2 className="text-xl font-bold mb-2 text-center">
+      {/* Modal for WebcamCapture */}
+      <Modal
+        isOpen={showWebcam}
+        onRequestClose={() => setShowWebcam(false)}
+        contentLabel="Phân tích stress qua camera"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
+        className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xl mx-4 animate-fadeIn"
+      >
+        <div className="relative">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center">
+              <FaCamera className="mr-2 text-blue-500" />
               Phân tích stress qua camera
             </h2>
+            <button
+              onClick={() => setShowWebcam(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FaTimesCircle className="text-xl" />
+            </button>
+          </div>
 
+          <div className="relative rounded-lg overflow-hidden shadow-inner bg-gray-100">
             <WebcamCapture
               onResult={() => {
                 refreshDailyStress();
@@ -126,29 +200,23 @@ export default function StressHomeSection({ onRefreshCharts }) {
                 onRefreshCharts();
               }}
             />
-
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={() => setShowWebcam(false)}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-              >
-                Thoát Chế Độ Camera ❌
-              </button>
-            </div>
           </div>
-        </Modal>
-      </div>
 
-      <svg
-        className="absolute bottom-0 left-0 w-full h-[100px]"
-        viewBox="0 0 1440 320"
-        preserveAspectRatio="none"
-      >
-        <path
-          fill="#ffffff"
-          d="M0,192L48,186.7C96,181,192,171,288,176C384,181,480,203,576,197.3C672,192,768,160,864,138.7C960,117,1056,107,1152,128C1248,149,1344,203,1392,229.3L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-        />
-      </svg>
+          <p className="text-sm text-gray-500 mt-4 mb-6">
+            Hãy đảm bảo khuôn mặt của bạn được nhận diện rõ ràng trong khung hình để đạt kết quả chính xác.
+          </p>
+
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={() => setShowWebcam(false)}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-300"
+            >
+              <FaTimesCircle className="mr-2" />
+              Đóng Camera
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

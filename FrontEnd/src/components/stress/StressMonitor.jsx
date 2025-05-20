@@ -293,6 +293,49 @@ export default function StressMonitor() {
           )}
         </div>
       )}
+      
+      {/* Recent Readings */}
+      {isMonitoring && recentStressLevels.length > 0 ? (
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">Kết quả gần đây</h3>
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 max-h-48 overflow-y-auto">
+            {recentStressLevels.map((analysis) => (
+              <div
+                key={analysis.id}
+                className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0"
+              >
+                <div>
+                  <span className="font-medium">{analysis.displayLevel}</span>
+                  <span className="text-sm text-gray-500 ml-2">
+                    {new Date(analysis.createdAt).toLocaleTimeString()}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span
+                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                      analysis.stressScore > 70
+                        ? "bg-red-100 text-red-800"
+                        : analysis.stressScore > 40
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {analysis.stressScore}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : isMonitoring && recentStressLevels.length === 0 ? (
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">Kết quả gần đây</h3>
+          <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 text-center">
+            <p className="text-lg font-medium text-gray-500">No Data</p>
+            <p className="text-sm text-gray-400 mt-1">Chưa có kết quả phân tích nào</p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 } 
