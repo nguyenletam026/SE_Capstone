@@ -153,6 +153,44 @@ export const getUnreadMessages = async (userId) => {
     };
   };
 
+export const getUnreadMessageCount = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  
+  const token = getToken();
+  if (!token) {
+    throw new Error("Authentication token is missing");
+  }
+  
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/chat/unread/count?userId=${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('Failed to fetch unread message count:', {
+        status: res.status,
+        statusText: res.statusText,
+        errorData
+      });
+      throw new Error(errorData.message || "Failed to fetch unread messages count");
+    }
+    
+    const count = await res.json();
+    return { result: count };
+  } catch (error) {
+    console.error('Error fetching unread message count:', error);
+    return { result: 0 }; // Return 0 if there's an error
+  }
+};
+
 export const sendMessage = async (content, senderId, receiverId) => {
   if (!content) {
     throw new Error("Message content is required");
@@ -274,6 +312,44 @@ export const getActiveChatDoctors = async () => {
     return res.json();
   } catch (error) {
     console.error('Error fetching active chat doctors:', error);
+    throw error;
+  }
+};
+
+export const markMessagesAsRead = async (userId, senderId) => {
+  if (!userId || !senderId) {
+    throw new Error("Both user IDs are required");
+  }
+  
+  const token = getToken();
+  if (!token) {
+    throw new Error("Authentication token is missing");
+  }
+  
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/chat/read?userId=${userId}&senderId=${senderId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('Mark messages as read failed:', {
+        status: res.status,
+        statusText: res.statusText,
+        errorData
+      });
+      throw new Error(errorData.message || "Failed to mark messages as read");
+    }
+    
+    return res.json();
+  } catch (error) {
+    console.error('Mark messages as read error:', error);
     throw error;
   }
 };

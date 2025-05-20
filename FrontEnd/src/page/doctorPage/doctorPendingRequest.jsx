@@ -61,9 +61,7 @@ export default function PendingRequests() {
 
   return (
     <div className="px-6 md:px-20 py-10">
-      <h2 className="text-3xl font-bold text-center text-blue-800 mb-10">
-        📝 Yêu cầu đang chờ
-      </h2>
+      
       {requests.length === 0 ? (
         <p className="text-center text-gray-500">Hiện chưa có yêu cầu nào.</p>
       ) : (

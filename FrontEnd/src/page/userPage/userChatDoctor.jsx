@@ -108,32 +108,37 @@ function UserChatLayout() {
     getUser();
   }, [user, setUser]);
 
+  // Kết nối WebSocket khi component mount
   useEffect(() => {
     if (user?.username) {
       connectWebSocket(
         user.username,
-        () => console.log("✅ WebSocket connected"),
+        () => {
+          console.log("✅ [Patient] WebSocket connected");
+        },
         (msg) => {
           try {
-            const parsed = JSON.parse(msg.body);
-            if (parsed && parsed.senderId && parsed.content) {
-              // Add a unique ID to the message if it doesn't have one
-              if (!parsed.id) {
-                parsed.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-              }
-              setMessages((prev) => [...prev, parsed]);
-            } else {
-              console.warn("Received invalid message format:", parsed);
+            // Sử dụng parsedBody nếu có, nếu không thì parse từ body
+            const parsed = msg.parsedBody || JSON.parse(msg.body);
+            
+            // Ensure message has a unique ID
+            if (!parsed.id) {
+              parsed.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             }
+            
+            setMessages((prev) => [...prev, parsed]);
           } catch (err) {
-            console.error("Failed to parse WebSocket message:", err);
+            console.error("❌ Failed to parse message:", err);
           }
         },
-        (err) => console.error("❌ WebSocket error:", err)
+        (err) => {
+          console.error("❌ WebSocket error (patient):", err);
+        }
       );
     }
-
+    
     return () => {
+      console.log("💤 Disconnecting WebSocket when user chat component unmounts");
       disconnectWebSocket();
     };
   }, [user?.username, setMessages]);

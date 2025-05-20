@@ -72,6 +72,36 @@ export const getAcceptedChatPatients = async () => {
   }
 };
 
+// Lấy danh sách bệnh nhân đã thanh toán phí tư vấn
+export const getPaidChatPatients = async () => {
+  const token = getToken();
+  
+  try {
+    const res = await fetch(`${API_BASE}/api/chat-payments/paid-chats`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error("API Error:", {
+        status: res.status,
+        statusText: res.statusText,
+        errorData
+      });
+      throw new Error("Failed to fetch paid chat patients");
+    }
+    
+    const data = await res.json();
+    console.log("Paid chats API Response:", data); 
+    return data;
+  } catch (error) {
+    console.error("Error getting paid chats:", error);
+    throw error;
+  }
+};
+
 export const getAcceptedChatDoctor = async () => {
   const token = getToken();
   const res = await fetch(`${API_BASE}/api/chat-requests/user/accepted`, {

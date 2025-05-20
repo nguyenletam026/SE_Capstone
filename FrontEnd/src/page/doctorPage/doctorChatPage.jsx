@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getAcceptedChatPatients } from "../../lib/doctor/doctorServices";
+import { getAcceptedChatPatients, getPaidChatPatients } from "../../lib/doctor/doctorServices";
 import { getConversation } from "../../lib/util/chatServices";
-import { connectWebSocket, disconnectWebSocket } from "../../services/websocket";
+import { connectWebSocket, disconnectWebSocket, registerMessageHandler } from "../../services/websocket";
 import ChatContainer from "../../components/chat/chatContainer";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
@@ -12,6 +12,7 @@ function DoctorChatLayout() {
   const [patients, setPatients] = useState([]);
   const { selectedUser, setSelectedUser, setMessages, setLoading } = useChat();
   const [loadingPatients, setLoadingPatients] = useState(true);
+  const [hasNewChatRequests, setHasNewChatRequests] = useState(false);
 
   useEffect(() => {
     const getDoctor = async () => {
@@ -31,28 +32,47 @@ function DoctorChatLayout() {
     getDoctor();
   }, [user, setUser]);
 
+  // Xử lý tin nhắn WebSocket
+  const handleMessage = (msg) => {
+    try {
+      // Sử dụng parsedBody thay vì phân tích lại body
+      const parsed = msg.parsedBody || JSON.parse(msg.body);
+      
+      console.log("📨 Doctor chat received message:", parsed);
+      
+      // Check if this is a chat notification
+      if (parsed.type === "NEW_CHAT_REQUEST" || parsed.type === "NEW_CHAT_PAYMENT") {
+        setHasNewChatRequests(true);
+        return;
+      }
+      
+      // Add a unique ID to the message if it doesn't have one
+      if (!parsed.id) {
+        parsed.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      }
+      
+      setMessages((prev) => [...prev, parsed]);
+    } catch (err) {
+      console.error("❌ Failed to parse message:", err);
+    }
+  };
+
   useEffect(() => {
     if (user?.username) {
+      // Kết nối WebSocket
       connectWebSocket(
         user.username,
         () => console.log("✅ [Doctor] WebSocket connected"),
-        (msg) => {
-          try {
-            const parsed = JSON.parse(msg.body);
-            // Add a unique ID to the message if it doesn't have one
-            if (!parsed.id) {
-              parsed.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            }
-            setMessages((prev) => [...prev, parsed]);
-          } catch (err) {
-            console.error("❌ Failed to parse message:", err);
-          }
-        },
+        null, // Không đăng ký handler cho tin nhắn tại đây
         (err) => console.error("❌ WebSocket error (doctor):", err)
       );
+      
+      // Đăng ký handler cho tin nhắn riêng biệt
+      console.log("🔌 Đăng ký message handler trong DoctorChatPage");
+      registerMessageHandler(handleMessage);
     }
     return () => disconnectWebSocket();
-  }, [user?.username, setMessages]);
+  }, [user?.username]);
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -60,9 +80,10 @@ function DoctorChatLayout() {
       
       try {
         setLoadingPatients(true);
-        const response = await getAcceptedChatPatients();
+        // Use getPaidChatPatients instead of getAcceptedChatPatients
+        const response = await getPaidChatPatients();
         if (response && response.result) {
-          console.log("Patients data:", response.result);
+          console.log("Paid patients data:", response.result);
           // Ensure each patient has a unique ID
           const patientsWithUniqueIds = response.result.map(patient => ({
             ...patient,
@@ -79,6 +100,23 @@ function DoctorChatLayout() {
     };
 
     fetchPatients();
+    
+    // Refresh the patients list every 30 seconds
+    const intervalId = setInterval(fetchPatients, 30000);
+    
+    // Listen for custom refreshPaidPatients event
+    const handleRefreshEvent = () => {
+      console.log("🔄 Refreshing paid patients list due to new payment");
+      fetchPatients();
+      setHasNewChatRequests(true);
+    };
+    
+    window.addEventListener('refreshPaidPatients', handleRefreshEvent);
+    
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('refreshPaidPatients', handleRefreshEvent);
+    };
   }, [user?.id]);
 
   const handlePatientSelect = async (patient) => {
@@ -131,8 +169,20 @@ function DoctorChatLayout() {
       {/* Patient List */}
       <div className="w-1/4 bg-white border-r overflow-y-auto">
         <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold">Bệnh nhân</h2>
+          <h2 className="text-lg font-semibold">Bệnh nhân đã thanh toán</h2>
         </div>
+        
+        {hasNewChatRequests && (
+          <div className="p-3 bg-yellow-50 border-b border-yellow-200">
+            <div className="flex items-center text-yellow-800">
+              <span className="relative flex h-3 w-3 mr-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+              </span>
+              <p className="text-sm">Bạn có yêu cầu tư vấn mới. Kiểm tra thông báo.</p>
+            </div>
+          </div>
+        )}
         
         {loadingPatients ? (
           <div className="flex justify-center items-center h-20">
@@ -140,7 +190,7 @@ function DoctorChatLayout() {
           </div>
         ) : patients.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
-            Không có bệnh nhân nào
+            Không có bệnh nhân nào đã thanh toán
           </div>
         ) : (
           <div>
@@ -159,12 +209,17 @@ function DoctorChatLayout() {
                   alt={patient.patientName}
                   className="w-10 h-10 rounded-full mr-3"
                 />
-                <div>
+                <div className="flex-1">
                   <p className="font-medium">{patient.patientName}</p>
                   <p className="text-xs text-gray-500">
                     {patient.lastMessage || "Bắt đầu trò chuyện"}
                   </p>
                 </div>
+                {patient.unreadCount > 0 && (
+                  <div className="ml-2 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {patient.unreadCount}
+                  </div>
+                )}
               </div>
             ))}
           </div>
