@@ -54,6 +54,7 @@ import DoctorLayout from "../components/layouts/doctorLayout";
 import DoctorHome from "../page/doctorPage/doctorHome";
 import DoctorChatPage from "../page/doctorPage/doctorChatPage";
 import PendingRequests from "../page/doctorPage/doctorPendingRequest";
+import DoctorSchedule from "../page/doctorPage/doctorSchedule";
 
 // Teacher Pages
 import TeacherLayout from "../components/layouts/TeacherLayout";
@@ -124,6 +125,7 @@ const AppRoutes = () => {
             <Route path="/doctor-home" element={<DoctorLayout><DoctorHome /></DoctorLayout>} />
             <Route path="/doctor-chat" element={<DoctorLayout><DoctorChatPage /></DoctorLayout>} />
             <Route path="/doctor-pending-requests" element={<DoctorLayout><PendingRequests /></DoctorLayout>} />
+            <Route path="/doctor-schedule" element={<DoctorLayout><DoctorSchedule /></DoctorLayout>} />
           </Route>
 
           {/* Route Teacher */}
