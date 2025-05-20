@@ -53,7 +53,8 @@ export const connectWebSocket = (username, onConnected, onMessageReceived, onErr
               // Không cố gắng sửa đổi thuộc tính body của message
             }
             
-            if (parsed.content) {
+            // Process ALL messages including those with imageUrl (not just content)
+            if (parsed.content || parsed.imageUrl) {
               // Thông báo cho tất cả các handlers đã đăng ký với đối tượng parsed
               notifyHandlers(messageHandlers, { ...message, parsedBody: parsed });
             }

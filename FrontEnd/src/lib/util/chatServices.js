@@ -256,34 +256,98 @@ export const sendMessageWithImage = async (formData, senderId, receiverId) => {
   if (!token) {
     throw new Error("Authentication token is missing");
   }
+
+  // Make sure the form data has the required fields
+  if (!formData.has("image")) {
+    throw new Error("Image file is missing");
+  }
+
+  // Get the file to validate it
+  const imageFile = formData.get("image");
   
-  formData.append("senderId", senderId);
-  formData.append("receiverId", receiverId);
+  // Validate file size (limit to 5MB)
+  if (imageFile.size > 5 * 1024 * 1024) {
+    throw new Error("Image size must be less than 5MB");
+  }
+  
+  // Validate file type
+  const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  if (!validTypes.includes(imageFile.type)) {
+    throw new Error("Only JPEG, PNG, GIF and WebP images are supported");
+  }
+  
+  // Create a new FormData instance to ensure clean data
+  const cleanFormData = new FormData();
+  
+  // Add the image file with a clean filename and type
+  const cleanFileName = `image_${Date.now()}.jpg`;
+  
+  // Create a clean Blob to ensure proper formatting
+  const imageBlob = imageFile.slice(0, imageFile.size, 'image/jpeg');
+  const cleanFile = new File([imageBlob], cleanFileName, { type: 'image/jpeg' });
+  
+  cleanFormData.append("image", cleanFile);
+  cleanFormData.append("content", formData.get("content") || "");
+  cleanFormData.append("senderId", senderId);
+  cleanFormData.append("receiverId", receiverId);
 
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/api/chat/send-with-image`, {
+    const apiUrl = `${process.env.REACT_APP_API_URL}/api/chat/message-with-image`;
+    console.log('Sending image to URL:', apiUrl);
+    
+    // Log file details for debugging
+    console.log('Image details:', {
+      name: cleanFile.name,
+      size: `${(cleanFile.size / 1024).toFixed(2)}KB`,
+      type: cleanFile.type
+    });
+    
+    // Log full request details for debugging
+    console.log('Form data contents:');
+    for (const pair of cleanFormData.entries()) {
+      console.log(pair[0], pair[1] instanceof File ? 
+        `[File: ${pair[1].name}, ${pair[1].size} bytes, ${pair[1].type}]` : 
+        pair[1]);
+    }
+    
+    const res = await fetch(apiUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: formData,
+      body: cleanFormData,
+      // Add timeout to prevent hanging requests
+      signal: AbortSignal.timeout(30000) // 30 second timeout
     });
 
     if (!res.ok) {
-      const errorText = await res.text();
-      let errorMessage = "Không thể gửi tin nhắn với ảnh";
+      console.error('Image upload failed with status:', res.status, res.statusText);
       
+      let responseBody;
       try {
-        // Try to parse as JSON if possible
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.message || errorMessage;
+        // Try to get JSON response first
+        responseBody = await res.json();
+        console.error('Response body:', responseBody);
       } catch (e) {
-        // If not JSON, use the text directly
-        errorMessage = errorText || errorMessage;
+        // If not JSON, get text
+        responseBody = await res.text();
+        console.error('Response body:', responseBody);
       }
       
-      throw new Error(errorMessage);
+      // Handle specific error codes
+      if (res.status === 413) {
+        throw new Error("Image size too large for server");
+      } else if (res.status === 415) {
+        throw new Error("Unsupported image format");
+      } else if (res.status === 500) {
+        throw new Error("Server error processing image. Try a different image or format.");
+      } else if (responseBody && responseBody.message) {
+        throw new Error(responseBody.message);
+      } else {
+        throw new Error("Không thể gửi tin nhắn với ảnh");
+      }
     }
+    
     return res.json();
   } catch (error) {
     console.error('Image message send error:', error);
