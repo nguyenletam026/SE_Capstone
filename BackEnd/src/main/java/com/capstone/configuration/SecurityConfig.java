@@ -34,6 +34,8 @@ public class SecurityConfig {
             "/swagger-ui/**", "/v3/api-docs/**",
             "/auth/outbound/**",
             "users","https://deploy-se.onrender.com/**",
+            "https://65d3-2402-800-63e9-f9f5-2846-e458-16a-4cfb.ngrok-free.app",
+            "https://stresshelper.store/**",
             "/api/users",
             "/auth-face",
             "/ws/**",

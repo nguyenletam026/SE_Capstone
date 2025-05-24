@@ -3,68 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xác thực tài khoản Student Stress Helper</title>
+    <title>Verify Your Student Stress Helper Account</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #2D3748;
+            background-color: #F7FAFC;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
             max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 40px auto;
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
         .header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 20px;
+            background: linear-gradient(135deg, #3182CE 0%, #2B6CB0 100%);
+            color: #FFFFFF;
+            padding: 30px;
             text-align: center;
-            border-radius: 5px 5px 0 0;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin: 10px 0 0;
+            font-weight: 600;
+        }
+        .header-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
         }
         .content {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-top: none;
-            border-radius: 0 0 5px 5px;
+            padding: 30px;
+            text-align: left;
+        }
+        .content h2 {
+            font-size: 22px;
+            color: #1A202C;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .content h2 i {
+            margin-right: 10px;
+            color: #3182CE;
+            font-size: 24px;
+        }
+        .content p {
+            font-size: 16px;
+            color: #4A5568;
+            margin: 10px 0;
+        }
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
         }
         .button {
-            display: inline-block;
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #3182CE 0%, #2B6CB0 100%);
+            color: #FFFFFF;
+            padding: 14px 28px;
             text-decoration: none;
-            border-radius: 4px;
-            margin: 20px 0;
-            font-weight: bold;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .button i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .footer {
-            margin-top: 20px;
+            background-color: #EDF2F7;
+            padding: 20px;
             text-align: center;
-            font-size: 12px;
-            color: #777;
+            font-size: 14px;
+            color: #718096;
+        }
+        .footer p {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .footer i {
+            margin-right: 8px;
+            color: #3182CE;
+            font-size: 16px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+            .header-icon {
+                font-size: 32px;
+            }
+            .content h2 {
+                font-size: 20px;
+            }
+            .content h2 i {
+                font-size: 20px;
+            }
+            .button {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+            .button i {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
+<div class="container">
     <div class="header">
+        <i class="fas fa-graduation-cap header-icon"></i>
         <h1>Student Stress Helper</h1>
     </div>
     <div class="content">
-        <h2>Xác thực tài khoản của bạn</h2>
-        <p>Xin chào,</p>
-        <p>Cảm ơn bạn đã đăng ký tài khoản trên Student Stress Helper. Để hoàn tất quá trình đăng ký, vui lòng xác thực email của bạn bằng cách nhấp vào nút bên dưới:</p>
-        
-        <div style="text-align: center; background-color : #4CAF50;">
-            <a th:href="${verifyUrl}" class="button">Xác thực tài khoản</a>
+        <h2><i class="fas fa-check-circle"></i> Verify Your Account</h2>
+        <p>Hello,</p>
+        <p>Thank you for registering with Student Stress Helper. To complete your registration, please verify your email address by clicking the button below:</p>
+        <div class="button-container">
+            <a th:href="${verifyUrl}" class="button"><i class="fas fa-lock-open"></i> Verify Account</a>
         </div>
-
-        
-        <p>Liên kết xác thực này sẽ hết hạn sau 24 giờ.</p>
-        <p>Nếu bạn không đăng ký tài khoản, vui lòng bỏ qua email này.</p>
+        <p><i class="fas fa-clock" style="margin-right: 8px; color: #3182CE;"></i> This verification link will expire in 24 hours.</p>
+        <p>If you did not create an account, please ignore this email.</p>
     </div>
     <div class="footer">
-        <p>&copy; 2024 Student Stress Helper. Tất cả các quyền được bảo lưu.</p>
-        <p>Đây là email tự động, vui lòng không trả lời.</p>
+        <p><i class="fas fa-copyright"></i> © 2025 Student Stress Helper. All rights reserved.</p>
+        <p><i class="fas fa-envelope"></i> This is an automated email, please do not reply.</p>
     </div>
+</div>
 </body>
-</html> 
+</html>
