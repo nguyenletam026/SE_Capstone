@@ -117,7 +117,6 @@ export default function Login() {
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="relative">
                 <input
-                  type="email"
                   placeholder="Enter your email"
                   className="w-full p-3.5 pl-12 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none shadow-sm transition-all"
                   value={username}
