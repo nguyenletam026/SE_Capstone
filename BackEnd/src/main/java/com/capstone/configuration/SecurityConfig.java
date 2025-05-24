@@ -34,7 +34,7 @@ public class SecurityConfig {
             "/swagger-ui/**", "/v3/api-docs/**",
             "/auth/outbound/**",
             "users","https://deploy-se.onrender.com/**",
-            "https://65d3-2402-800-63e9-f9f5-2846-e458-16a-4cfb.ngrok-free.app",
+            "https://65d3-2402-800-63e9-f9f5-2846-e458-16a-4cfb.ngrok-free.app/**",
             "https://stresshelper.store/**",
             "/api/users",
             "/auth-face",
@@ -67,7 +67,11 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://65d3-2402-800-63e9-f9f5-2846-e458-16a-4cfb.ngrok-free.app",
+                "https://stresshelper.store"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
