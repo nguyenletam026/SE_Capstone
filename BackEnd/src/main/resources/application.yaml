@@ -3,19 +3,19 @@ server:
 
 spring:
   datasource:
-    url: "jdbc:postgresql://metro.proxy.rlwy.net:44416/railway"
+    url: "jdbc:postgresql://metro.proxy.rlwy.net:36210/railway"
     username: "postgres"
-    password: "edrDRqwWXGRQktsLQyoirbfDcpxhXcfI"
+    password: "VDBLyEwXPpnjNQCelXUNxFPREqQdWUKw"
     driver-class-name: org.postgresql.Driver
   servlet:
     multipart:
-      max-file-size: 10MB   # Giới hạn file tối đa 10MB
-      max-request-size: 10MB  # Giới hạn tổng request tối đa 10MB
+      max-file-size: 100MB
+      max-request-size: 100MB
   mail:
     host: smtp.gmail.com
     port: 465
-    username: "nguyenletam026@gmail.com"  # Replace with your actual email
-    password: "yfpx stun msoi binq"     # Replace with your app password (16-character app password)
+    username: "nguyenletam026@gmail.com"
+    password: "yfpx stun msoi binq"
     properties:
       mail:
         smtp:
