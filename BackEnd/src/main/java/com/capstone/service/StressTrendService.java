@@ -142,13 +142,12 @@ public class StressTrendService {
         // Build response
         return StressTrendResponse.builder()
                 .current_average_stress(currentPeriod.getAverage_stress_score())
-                .previous_average_stress(previousPeriod.getAverage_stress_score())
-                .stress_change_percentage(changePercentage)
+                .previous_average_stress(previousPeriod.getAverage_stress_score())                .stress_change_percentage(changePercentage)
                 .trend_direction(trendDirection)
                 .is_concerning(isConcerning)
                 .trend_data(trendData)
-                .start_date(trendData.getLast().getDate()) // Oldest date
-                .end_date(trendData.getFirst().getDate()) // Most recent date
+                .start_date(trendData.get(trendData.size() - 1).getDate()) // Oldest date
+                .end_date(trendData.get(0).getDate()) // Most recent date
                 .build();
     }
 

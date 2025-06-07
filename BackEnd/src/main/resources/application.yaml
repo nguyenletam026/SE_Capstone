@@ -25,9 +25,10 @@ spring:
           socketFactory:
             port: 465
             class: javax.net.ssl.SSLSocketFactory
-          connectiontimeout: 5000
+            connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -38,7 +39,7 @@ spring:
 
 # Frontend URL for email verification links
 app:
-  frontend-url: "http://localhost:3000"
+  frontend-url: "https://stresshelper.store"
 
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
@@ -48,15 +49,38 @@ fptai:
     key: QKIh1IJzqbTmOmt4xaw120eP8c6M0TfN
     url: https://api.fpt.ai/vision/idr/vnm
 
+# Refund System Configuration
+refund:
+  enabled: true
+  doctor-response-timeout-minutes: 30
+  auto-process-enabled: true
+  scheduler:
+    enabled: true
+    interval-minutes: 15
+  percentages:
+    no-response: 100
+    delayed-response: 50
+    technical-issue: 100
+    quality-issue: 75
+    other: 50
+  notifications:
+    patient-enabled: true
+    doctor-enabled: true
+    admin-enabled: true
+  doctor-warning-thresholds:
+    mild: 3
+    moderate: 5
+    severe: 8
+
 
 springdoc:
   api-docs:
     enabled: true
   swagger-ui:
     enabled: true
-    path: /swagger-ui.htmlfs fdsfsdf
+    path: /swagger-ui.html
 
-aws:
+aws:  
   region: us-east-1
   access-key: "AKIAZAI4GVIKCJPKKLVU"
   secret-key: "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"

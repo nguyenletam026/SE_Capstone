@@ -5,7 +5,7 @@ module.exports = function (app) {
   app.use(
     "/ws",
     createProxyMiddleware({
-      target: "http://localhost:8080",
+      target: "https://stressbackend.shop",
       ws: true,
       changeOrigin: true,
     })

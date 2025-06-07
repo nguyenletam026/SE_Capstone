@@ -3,6 +3,7 @@ import { useChat } from "../../context/ChatContext";
 import { sendMessage, sendMessageWithImage } from "../../lib/util/chatServices";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { 
   FiSend, 
   FiPaperclip, 
@@ -11,7 +12,16 @@ import {
   FiArrowRight,
   FiArrowDown,
   FiCheck,
-  FiCheckCircle
+  FiCheckCircle,
+  FiMoreVertical,
+  FiPhone,
+  FiVideo,
+  FiSmile,
+  FiImage,
+  FiMic,
+  FiHeart,
+  FiStar,
+  FiShield
 } from "react-icons/fi";
 import { sendMessage as sendWebSocketMessage } from "../../services/websocket";
 
@@ -117,6 +127,32 @@ const ChatContainer = () => {
     }
   }, [messages]);
 
+  // Chat session expiration notification and page reload
+  const [hasShownExpirationNotification, setHasShownExpirationNotification] = useState(false);
+  
+  useEffect(() => {
+    if (timeLeft === "Hết hạn" && messages && messages.length > 0 && !hasShownExpirationNotification) {
+      // Show notification when chat session expires (only once)
+      toast.error("Phiên chat đã kết thúc.", {
+        duration: 4000,
+        position: "top-center"
+      });
+      
+      // Mark that we've shown the notification
+      setHasShownExpirationNotification(true);
+      
+      // Update the first message to mark as expired
+      const updatedMessages = [...messages];
+      if (updatedMessages[0]) {
+        updatedMessages[0] = { ...updatedMessages[0], expired: true };
+        setMessages(updatedMessages);
+      }
+    } else if (timeLeft !== "Hết hạn" && hasShownExpirationNotification) {
+      // Reset the flag if chat session becomes valid again
+      setHasShownExpirationNotification(false);
+    }
+  }, [timeLeft, messages, setMessages, hasShownExpirationNotification]);
+
   const handleSend = async () => {
     if (!input.trim() || !selectedUser || !user?.id) return;
     
@@ -129,10 +165,12 @@ const ChatContainer = () => {
     const content = input.trim();
     setInput("");
     setSending(true);
+    
+    // Declare receiverId in the outer scope so it's accessible in the catch block
+    let receiverId;
 
     try {
       // Determine the correct recipient ID based on the selected user structure
-      let receiverId;
       
       // For doctors: selectedUser contains patientId
       // For patients: selectedUser contains doctorId
@@ -178,23 +216,82 @@ const ChatContainer = () => {
       setTimeout(() => scrollToBottom(true), 100);
     } catch (err) {
       console.error("Failed to send message:", err);
-      const errorMessage = err.message;
+      const errorMessage = err.message || "";
       
       // If payment is required, mark the chat as expired
       if (errorMessage.includes("Vui lòng thanh toán") || 
           errorMessage.includes("Payment required") ||
           errorMessage.includes("hết hạn")) {
-        // Update the first message to show it's expired
-        if (messages && messages.length > 0) {
-          const updatedMessages = [...messages];
-          updatedMessages[0] = { ...updatedMessages[0], expired: true };
-          setMessages(updatedMessages);
+          
+        // Check if we just came from a payment flow
+        const locationState = window.history.state?.usr?.state;
+        if (locationState?.fromPayment) {
+          toast.info("Đang xác minh trạng thái thanh toán...");
+          
+          // Capture receiverId in closure to ensure it's available in setTimeout
+          const capturedReceiverId = receiverId;
+          
+          // Retry sending the message after a short delay to allow backend to process payment
+          setTimeout(async () => {
+            try {
+              setSending(true);
+              console.log("🔄 Retrying message send after payment", { senderId: user.id, receiverId: capturedReceiverId });
+              const retryResponse = await sendMessage(content, user.id, capturedReceiverId);
+              
+              if (retryResponse) {
+                // Success! Payment is now recognized
+                console.log("✅ Payment verification successful - message sent successfully", retryResponse);
+                
+                const retryMessage = {
+                  id: retryResponse.id,
+                  content: content,
+                  senderId: user.id,
+                  senderName: user.username,
+                  receiverId: capturedReceiverId,
+                  timestamp: new Date().toISOString(),
+                  read: false
+                };
+                
+                // Add the message to the conversation
+                setMessages(prev => [...prev, retryMessage]);
+                toast.success("Tin nhắn đã được gửi thành công!");
+                
+                // Force scroll to bottom
+                setTimeout(() => scrollToBottom(true), 100);
+                return;
+              }
+            } catch (retryErr) {
+              console.error("❌ Retry send error:", retryErr);
+              console.warn("⚠️ Payment verification failed - message still couldn't be sent", retryErr.message);
+              
+              // Now update the message as expired since retry failed too
+              if (messages && messages.length > 0) {
+                const updatedMessages = [...messages];
+                updatedMessages[0] = { ...updatedMessages[0], expired: true };
+                setMessages(updatedMessages);
+              }
+            } finally {
+              setSending(false);
+            }
+          }, 2000); // 2 second delay
+        } else {
+          // Regular expired payment case - update UI immediately
+          if (messages && messages.length > 0) {
+            const updatedMessages = [...messages];
+            updatedMessages[0] = { ...updatedMessages[0], expired: true };
+            setMessages(updatedMessages);
+          }
         }
       } else {
-        alert(errorMessage || "Không thể gửi tin nhắn. Vui lòng thử lại sau.");
+        // For other types of errors
+        toast.error(errorMessage || "Không thể gửi tin nhắn. Vui lòng thử lại sau.");
       }
     } finally {
-      setSending(false);
+      // Only set sending to false if we're not in a retry situation
+      const locationState = window.history.state?.usr?.state;
+      if (!locationState?.fromPayment) {
+        setSending(false);
+      }
     }
   };
 
@@ -444,52 +541,112 @@ const ChatContainer = () => {
   const messageGroups = groupMessagesByDate(messages || []);
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
-      {/* Chat Header */}
-      <div className="bg-white border-b shadow-sm py-3 px-4 sticky top-0 z-10">
-        <div className="flex items-center">
-          <div className="relative">
-            <img 
-              src={selectedUser.patientAvatar || selectedUser.avatar || "https://via.placeholder.com/40"} 
-              alt={selectedUser.patientName || selectedUser.name || "Avatar"} 
-              className="w-10 h-10 rounded-full object-cover border-2 border-blue-100"
-            />
-            <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-              selectedUser.isOnline ? "bg-green-400" : "bg-gray-400"
-            }`}></div>
-          </div>
-          
-          <div className="ml-3 flex-1">
-            <p className="font-medium text-gray-800">{selectedUser.patientName || selectedUser.name || "Người dùng"}</p>
-            <p className="text-xs text-gray-500">
-              {selectedUser.isOnline ? "Đang hoạt động" : "Không hoạt động"}
-            </p>
+    <div className="flex flex-col h-full relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-100/30">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-purple-400/10 to-pink-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
+      {/* Enhanced Chat Header */}
+      <div className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-lg">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-2xl overflow-hidden border-3 border-gradient-to-r from-indigo-500 to-purple-500 shadow-lg">
+                  <img 
+                    src={selectedUser.doctorAvatar || selectedUser.patientAvatar || selectedUser.avatar || "https://via.placeholder.com/48"} 
+                    alt={(selectedUser.doctorName || selectedUser.patientName || selectedUser.name || "Avatar") + " avatar"} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {/* Enhanced online indicator */}
+                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-3 border-white shadow-md ${
+                  selectedUser.isOnline ? "bg-green-500" : "bg-gray-400"
+                }`}>
+                  {selectedUser.isOnline && (
+                    <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-40"></div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex-1">
+                <h3 className="font-bold text-gray-900 text-lg">
+                  {selectedUser.doctorName || selectedUser.patientName || selectedUser.name || "Người dùng"}
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <div className={`flex items-center space-x-1 text-sm ${
+                    selectedUser.isOnline ? "text-green-600" : "text-gray-500"
+                  }`}>
+                    <div className={`w-2 h-2 rounded-full ${
+                      selectedUser.isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                    }`}></div>
+                    <span className="font-medium">
+                      {selectedUser.isOnline ? "Đang hoạt động" : "Không hoạt động"}
+                    </span>
+                  </div>
+                  {selectedUser.doctorSpecialty && (
+                    <div className="text-gray-400">•</div>
+                  )}
+                  {selectedUser.doctorSpecialty && (
+                    <span className="text-sm text-indigo-600 font-medium">
+                      {selectedUser.doctorSpecialty}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center space-x-2">
+              <button className="p-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all duration-200 hover:scale-105">
+                <FiPhone size={18} />
+              </button>
+              <button className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-all duration-200 hover:scale-105">
+                <FiVideo size={18} />
+              </button>
+              <button className="p-2 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-all duration-200 hover:scale-105">
+                <FiMoreVertical size={18} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
       
-      {/* Time Left Display */}
+      {/* Enhanced Time Left Display */}
       {timeLeft && (
-        <div className={`px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 sticky top-16 z-10 ${
+        <div className={`relative z-10 px-6 py-3 text-sm font-semibold flex items-center justify-center gap-3 backdrop-blur-sm ${
           timeLeft === "Hết hạn" 
-            ? "bg-red-50 text-red-600 border-b border-red-100" 
-            : "bg-blue-50 text-blue-600 border-b border-blue-100"
+            ? "bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border-b border-red-200/50" 
+            : "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-b border-blue-200/50"
         }`}>
-          <FiClock className="text-base" />
+          <div className={`p-2 rounded-xl ${
+            timeLeft === "Hết hạn" ? "bg-red-100" : "bg-blue-100"
+          }`}>
+            <FiClock className="text-base" />
+          </div>
           <span>Thời gian còn lại: {timeLeft}</span>
+          {timeLeft !== "Hết hạn" && (
+            <div className="ml-2 flex items-center space-x-1">
+              <FiShield className="text-green-500" size={14} />
+              <span className="text-xs text-green-600 font-medium">Được bảo vệ</span>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Messages */}
+      {/* Enhanced Messages */}
       <div 
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-6 bg-gradient-to-br from-gray-50 to-blue-50"
+        className="relative z-10 flex-1 overflow-y-auto p-6 space-y-8"
         onScroll={handleScroll}
       >
         {Object.keys(messageGroups).map(dateStr => (
-          <div key={dateStr} className="space-y-4">
+          <div key={dateStr} className="space-y-6">
+            {/* Enhanced date separator */}
             <div className="flex justify-center">
-              <div className="bg-white text-xs text-gray-500 px-3 py-1 rounded-full shadow-sm">
+              <div className="bg-white/80 backdrop-blur-sm text-xs text-gray-600 px-4 py-2 rounded-full shadow-sm border border-gray-200/50 font-medium">
                 {formatMessageDate(dateStr)}
               </div>
             </div>
@@ -509,55 +666,92 @@ const ChatContainer = () => {
               return (
                 <div
                   key={messageKey}
-                  className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
+                  className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} group`}
                 >
+                  {/* Avatar for received messages */}
                   {!isCurrentUser && showAvatar && (
-                    <div className="flex-shrink-0 mr-2">
-                      <img 
-                        src={selectedUser.patientAvatar || selectedUser.avatar || "https://via.placeholder.com/30"} 
-                        alt="avatar" 
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
+                    <div className="flex-shrink-0 mr-3">
+                      <div className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-white shadow-md bg-gradient-to-br from-gray-100 to-gray-200">
+                        <img 
+                          src={selectedUser.doctorAvatar || selectedUser.patientAvatar || selectedUser.avatar || "https://via.placeholder.com/40"} 
+                          alt={(selectedUser.doctorName || selectedUser.patientName || selectedUser.name || "Người dùng") + " avatar"} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     </div>
                   )}
                   
-                  {!isCurrentUser && !showAvatar && <div className="w-8 mr-2"></div>}
+                  {!isCurrentUser && !showAvatar && <div className="w-10 mr-3"></div>}
                   
-                  <div
-                    className={`max-w-[75%] rounded-2xl p-3 shadow-sm ${
-                      isCurrentUser
-                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                        : "bg-white text-gray-800"
-                    } ${
-                      // Add different border radius based on message sequence
-                      index > 0 && messageGroups[dateStr][index - 1]?.senderId === msg.senderId
-                        ? isCurrentUser 
-                          ? "rounded-tr-lg" 
-                          : "rounded-tl-lg"
-                        : ""
-                    }`}
-                  >
-                    {msg.imageUrl && (
-                      <div className="mb-2 rounded-lg overflow-hidden">
-                        <img
-                          src={msg.imageUrl}
-                          alt="Sent"
-                          className="max-w-full"
-                          loading="lazy" 
-                        />
+                  {/* Enhanced message bubble */}
+                  <div className="flex flex-col max-w-[75%]">
+                    <div
+                      className={`relative px-5 py-3 rounded-2xl shadow-lg transition-all duration-300 group-hover:shadow-xl ${
+                        isCurrentUser
+                          ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white ml-auto"
+                          : "bg-white/90 backdrop-blur-sm text-gray-800 border border-gray-200/50"
+                      } ${
+                        // Add different border radius based on message sequence
+                        index > 0 && messageGroups[dateStr][index - 1]?.senderId === msg.senderId
+                          ? isCurrentUser 
+                            ? "rounded-tr-lg" 
+                            : "rounded-tl-lg"
+                          : ""
+                      }`}
+                    >
+                      {/* Message glow effect for sent messages */}
+                      {isCurrentUser && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 rounded-2xl blur opacity-20 group-hover:opacity-30 transition-opacity duration-300 -z-10"></div>
+                      )}
+                      
+                      {/* Image message */}
+                      {msg.imageUrl && (
+                        <div className="mb-3 rounded-xl overflow-hidden shadow-md">
+                          <img
+                            src={msg.imageUrl}
+                            alt="Sent"
+                            className="max-w-full rounded-xl hover:scale-105 transition-transform duration-300"
+                            loading="lazy" 
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Text content */}
+                      {msg.content && (
+                        <p className="leading-relaxed whitespace-pre-wrap text-sm lg:text-base">
+                          {msg.content}
+                        </p>
+                      )}
+                      
+                      {/* Message metadata */}
+                      <div className={`flex items-center justify-end gap-2 mt-2 text-xs ${
+                        isCurrentUser ? "text-white/80" : "text-gray-500"
+                      }`}>
+                        <span className="font-medium">{formatMessageTime(msg.timestamp)}</span>
+                        {isCurrentUser && (
+                          <div className="flex items-center">
+                            {msg.read 
+                              ? <FiCheckCircle className="text-white/90" size={14} /> 
+                              : <FiCheck className="text-white/70" size={14} />
+                            }
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Message reactions placeholder */}
+                    {(isCurrentUser || !isCurrentUser) && (
+                      <div className={`flex items-center mt-1 space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+                        isCurrentUser ? "justify-end" : "justify-start"
+                      }`}>
+                        <button className="p-1 rounded-full bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white shadow-sm hover:scale-110 transition-all duration-200">
+                          <FiHeart size={12} />
+                        </button>
+                        <button className="p-1 rounded-full bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white shadow-sm hover:scale-110 transition-all duration-200">
+                          <FiStar size={12} />
+                        </button>
                       </div>
                     )}
-                    {msg.content && <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>}
-                    <div className={`text-xs mt-1 flex items-center justify-end gap-1 ${
-                      isCurrentUser ? "text-blue-100" : "text-gray-400"
-                    }`}>
-                      <span>{formatMessageTime(msg.timestamp)}</span>
-                      {isCurrentUser && (
-                        msg.read 
-                          ? <FiCheckCircle className="text-blue-100" /> 
-                          : <FiCheck className="text-blue-100" />
-                      )}
-                    </div>
                   </div>
                 </div>
               );
@@ -567,92 +761,137 @@ const ChatContainer = () => {
         <div ref={messagesEndRef} className="h-1" />
       </div>
       
-      {/* Scroll to bottom button */}
+      {/* Enhanced Scroll to bottom button */}
       {showScrollButton && (
-        <div className="absolute bottom-24 right-4">
+        <div className="absolute bottom-32 right-6 z-20">
           <button 
             onClick={() => scrollToBottom(true)}
-            className="bg-blue-500 text-white rounded-full p-3 shadow-lg flex items-center justify-center"
+            className="group relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl p-4 shadow-2xl flex items-center justify-center hover:shadow-3xl transform hover:scale-110 transition-all duration-300 animate-bounce"
             aria-label="Cuộn xuống tin nhắn mới nhất"
           >
-            <FiArrowDown className="text-lg" />
+            {/* Button glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-2xl blur opacity-40 group-hover:opacity-60 transition-all duration-300"></div>
+            
+            <FiArrowDown className="relative z-10 text-xl transform group-hover:translate-y-1 transition-transform duration-300" />
+            
             {newMessageCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {newMessageCount}
-              </span>
+              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm rounded-full h-7 w-7 flex items-center justify-center shadow-lg border-2 border-white animate-pulse">
+                <span className="font-bold">{newMessageCount}</span>
+              </div>
             )}
+            
+            {/* Ripple effect */}
+            <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"></div>
           </button>
         </div>
       )}
 
-      {/* Input Area */}
-      <div className="bg-white border-t p-3 sticky bottom-0 z-10">
-        {messages && messages.length > 0 && messages[0] && messages[0].expired ? (
-          <div className="p-4 rounded-lg bg-red-50 border border-red-100 mb-1">
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 text-red-600 font-medium mb-2">
-                <FiInfo className="text-lg" />
-                <p>Phiên chat đã hết hạn</p>
+      {/* Enhanced Input Area */}
+      <div className="relative z-10 bg-white/95 backdrop-blur-xl border-t border-gray-200/50 shadow-2xl sticky bottom-0">
+        <div className="p-6">
+          {messages && messages.length > 0 && messages[0] && messages[0].expired ? (
+            <div className="relative p-6 rounded-2xl bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 border border-red-200/50 shadow-lg overflow-hidden">
+              {/* Animated background elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-200/20 to-pink-300/20 rounded-full blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-rose-200/20 to-red-300/20 rounded-full blur-xl"></div>
+              
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="flex items-center gap-3 text-red-600 font-bold mb-3">
+                  <div className="p-3 rounded-2xl bg-red-100/80 backdrop-blur-sm">
+                    <FiInfo className="text-xl" />
+                  </div>
+                  <p className="text-lg">Phiên chat đã hết hạn</p>
+                </div>
+                <p className="text-gray-700 text-sm text-center mb-4 leading-relaxed">
+                  Để tiếp tục trò chuyện với bác sĩ, vui lòng thực hiện thanh toán
+                </p>
+                <button
+                  onClick={() => {
+                    const doctorId = selectedUser.doctorId;
+                    if (doctorId) {
+                      navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
+                    } else {
+                      alert("Không thể xác định bác sĩ. Vui lòng thử lại sau.");
+                    }
+                  }}
+                  className="group relative flex items-center gap-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-semibold"
+                >
+                  {/* Button glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-2xl blur opacity-40 group-hover:opacity-60 transition-all duration-300"></div>
+                  
+                  <span className="relative z-10">Thanh toán ngay</span>
+                  <FiArrowRight className="relative z-10 transform group-hover:translate-x-1 transition-transform duration-300" />
+                </button>
               </div>
-              <p className="text-gray-600 text-sm text-center mb-3">
-                Vui lòng thanh toán để tiếp tục trò chuyện với bác sĩ
-              </p>
-              <button
-                onClick={() => {
-                  const doctorId = selectedUser.doctorId;
-                  if (doctorId) {
-                    navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
-                  } else {
-                    alert("Không thể xác định bác sĩ. Vui lòng thử lại sau.");
-                  }
-                }}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all"
-              >
-                <span>Thanh toán ngay</span>
-                <FiArrowRight />
-              </button>
             </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-full">
-            <label className="cursor-pointer flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-                disabled={sending}
-              />
-              <FiPaperclip className="text-gray-600 text-xl" />
-            </label>
-            
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Nhập tin nhắn..."
-              className="flex-1 bg-transparent py-2 px-3 focus:outline-none"
-              disabled={sending}
-            />
-            
-            <button
-              onClick={handleSend}
-              disabled={sending || !input.trim()}
-              className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                input.trim() 
-                  ? "bg-blue-500 text-white hover:bg-blue-600" 
-                  : "bg-gray-200 text-gray-400"
-              }`}
-            >
-              {sending ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <FiSend />
-              )}
-            </button>
-          </div>
-        )}
+          ) : (
+            <div className="relative bg-gray-50/80 backdrop-blur-sm p-4 rounded-3xl shadow-lg border border-gray-200/50 overflow-hidden">
+              {/* Input background animation */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/20 via-purple-50/20 to-pink-50/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative z-10 flex items-center gap-3">
+                {/* Enhanced attachment button */}
+                <label className="group cursor-pointer flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 hover:from-indigo-100 hover:to-purple-100 transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={sending}
+                  />
+                  <FiImage className="text-gray-600 group-hover:text-indigo-600 text-xl transition-colors duration-300" />
+                </label>
+
+                {/* Enhanced emoji button */}
+                <button className="group flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-yellow-100 to-orange-100 hover:from-yellow-200 hover:to-orange-200 transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg">
+                  <FiSmile className="text-orange-600 text-xl group-hover:rotate-12 transition-transform duration-300" />
+                </button>
+                
+                {/* Enhanced input field */}
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                    placeholder="Nhập tin nhắn của bạn..."
+                    className="w-full bg-white/80 backdrop-blur-sm py-3 px-5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:bg-white shadow-sm border border-gray-200/50 text-gray-800 placeholder-gray-500 transition-all duration-300"
+                    disabled={sending}
+                  />
+                  {/* Input focus glow */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 opacity-0 focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                </div>
+
+                {/* Enhanced voice message button */}
+                <button className="group flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100 hover:from-green-200 hover:to-emerald-200 transition-all duration-300 transform hover:scale-110 shadow-md hover:shadow-lg">
+                  <FiMic className="text-green-600 text-xl group-hover:scale-110 transition-transform duration-300" />
+                </button>
+                
+                {/* Enhanced send button */}
+                <button
+                  onClick={handleSend}
+                  disabled={sending || !input.trim()}
+                  className={`group relative flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-lg hover:shadow-2xl ${
+                    input.trim() 
+                      ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600" 
+                      : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  {/* Send button glow effect */}
+                  {input.trim() && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 rounded-2xl blur opacity-40 group-hover:opacity-60 transition-all duration-300"></div>
+                  )}
+                  
+                  {sending ? (
+                    <div className="relative z-10 w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <FiSend className="relative z-10 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

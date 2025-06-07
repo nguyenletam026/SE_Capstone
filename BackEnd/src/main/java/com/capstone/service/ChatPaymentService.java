@@ -35,10 +35,10 @@ public class ChatPaymentService {
     private final ChatPaymentRepository chatPaymentRepository;
     private final ChatRequestRepository chatRequestRepository;
     private final UserRepository userRepository;
-    private final SystemConfigService systemConfigService;
-    private final ChatMessageRepository chatMessageRepository;
+    private final SystemConfigService systemConfigService;    private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final DoctorScheduleService doctorScheduleService;
+    private final DoctorEarningService doctorEarningService;
       @Transactional
     public ChatPaymentResponse createChatPayment(ChatPaymentRequest request) {
         log.info("Starting chat payment creation with request: {}", request);
@@ -105,30 +105,50 @@ public class ChatPaymentService {
             chatRequest = chatRequestRepository.save(chatRequest);
             log.info("Created new chat request: {} with schedule: {}", chatRequest.getId(), schedule.getId());
         }
-        
-        // Get the current cost per hour from system config
+          // Get the current cost per hour from system config
         double costPerHour = systemConfigService.getChatCostPerHour();
+        double costPerMinute = systemConfigService.getChatCostPerMinute();
         log.info("Current chat cost per hour: {} VND", costPerHour);
+        log.info("Current chat cost per minute: {} VND", costPerMinute);
         
-        // Calculate payment amount
-        double amount = request.getHours() * costPerHour;
+        // Calculate payment amount based on whether minutes or hours are provided
+        double amount;
+        LocalDateTime expiresAt;
+        
+        if (request.getMinutes() != null && request.getMinutes() > 0) {
+            // Minute-based payment
+            amount = request.getMinutes() * costPerMinute;
+            expiresAt = LocalDateTime.now().plusMinutes(request.getMinutes());
+            log.info("Calculating minute-based payment: {} minutes * {} VND = {} VND", 
+                    request.getMinutes(), costPerMinute, amount);
+        } else {
+            // Hour-based payment (default)
+            amount = request.getHours() * costPerHour;
+            expiresAt = LocalDateTime.now().plusHours(request.getHours());
+            log.info("Calculating hour-based payment: {} hours * {} VND = {} VND", 
+                    request.getHours(), costPerHour, amount);
+        }
         
         // Check user's balance
         if (patient.getBalance() < amount) {
             log.error("Insufficient balance for user {}: has {} VND, needs {} VND", 
                     patient.getUsername(), patient.getBalance(), amount);
-            throw new AppException(ErrorCode.PAYMENT_REQUIRED, 
-                    String.format("Số dư không đủ. Cần %,.0f VND để tư vấn %d giờ.", amount, request.getHours()));
+            
+            String errorMessage;
+            if (request.getMinutes() != null && request.getMinutes() > 0) {
+                errorMessage = String.format("Số dư không đủ. Cần %,.0f VND để tư vấn %d phút.", amount, request.getMinutes());
+            } else {
+                errorMessage = String.format("Số dư không đủ. Cần %,.0f VND để tư vấn %d giờ.", amount, request.getHours());
+            }
+            
+            throw new AppException(ErrorCode.PAYMENT_REQUIRED, errorMessage);
         }
-        
-        // Calculate expiration time
-        LocalDateTime expiresAt = LocalDateTime.now().plusHours(request.getHours());
-        
-        // Create payment record
+          // Create payment record
         ChatPayment payment = ChatPayment.builder()
                 .chatRequest(chatRequest)
                 .amount(amount)
                 .hours(request.getHours())
+                .minutes(request.getMinutes())
                 .expiresAt(expiresAt)
                 .build();
           try {
@@ -141,9 +161,17 @@ public class ChatPaymentService {
             chatRequest.setStatus(RequestStatus.APPROVED);
             chatRequestRepository.save(chatRequest);
             log.info("Updated chat request status to APPROVED: {}", chatRequest.getId());
-            
-            payment = chatPaymentRepository.save(payment);
+              payment = chatPaymentRepository.save(payment);
             log.info("Successfully created chat payment: {}", payment.getId());
+            
+            // Create doctor earning record
+            try {
+                doctorEarningService.createEarningFromPayment(payment);
+                log.info("Successfully created doctor earning for payment: {}", payment.getId());
+            } catch (Exception e) {
+                log.error("Failed to create doctor earning for payment {}: ", payment.getId(), e);
+                // Don't fail the payment creation, just log the error
+            }
             
             // Send notification to doctor
             try {
@@ -299,4 +327,100 @@ public class ChatPaymentService {
         
         return patientResponses;
     }
-} 
+
+    /**
+     * Gets refund history for the current user (patient or doctor)
+     * @return List of ChatPaymentResponse with refund information
+     */
+    public List<ChatPaymentResponse> getRefundHistory() {
+        log.info("Getting refund history for current user");
+        
+        // Get current authenticated user
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        
+        log.info("Found user: {} with role: {}", currentUser.getUsername(), currentUser.getRole().getName());
+        
+        List<ChatPayment> refundedPayments;
+        
+        // Check if user is a doctor or a patient
+        if (currentUser.getRole().getName().equals("DOCTOR")) {
+            // For doctors, get refunded payments where they are the doctor
+            refundedPayments = chatPaymentRepository.findRefundHistoryByDoctor(currentUser);
+            log.info("Found {} refunded payments for doctor", refundedPayments.size());
+        } else {
+            // For patients, get refunded payments where they are the patient
+            refundedPayments = chatPaymentRepository.findRefundHistoryByPatient(currentUser);
+            log.info("Found {} refunded payments for patient", refundedPayments.size());
+        }
+        
+        return refundedPayments.stream()
+                .map(payment -> {
+                    ChatPaymentResponse response = ChatPaymentResponse.fromEntity(payment);
+                    // Add refund-specific information
+                    response.setRefunded(payment.isRefunded());
+                    response.setRefundAmount(payment.getRefundAmount());
+                    response.setRefundReason(payment.getRefundReason());
+                    response.setRefundedAt(payment.getRefundedAt());
+                    return response;
+                })
+                .toList();
+    }
+
+    /**
+     * Gets all refund history for admin (all users)
+     * @return List of ChatPaymentResponse with refund information
+     */
+    public List<ChatPaymentResponse> getAllRefundHistory() {
+        log.info("Getting all refund history for admin");
+        
+        // Get all refunded payments
+        List<ChatPayment> allRefundedPayments = chatPaymentRepository.findAll()
+                .stream()
+                .filter(ChatPayment::isRefunded)
+                .sorted((p1, p2) -> p2.getRefundedAt().compareTo(p1.getRefundedAt()))
+                .toList();
+        
+        log.info("Found {} total refunded payments", allRefundedPayments.size());
+        
+        return allRefundedPayments.stream()
+                .map(payment -> {
+                    ChatPaymentResponse response = ChatPaymentResponse.fromEntity(payment);
+                    // Add refund-specific information
+                    response.setRefunded(payment.isRefunded());
+                    response.setRefundAmount(payment.getRefundAmount());
+                    response.setRefundReason(payment.getRefundReason());
+                    response.setRefundedAt(payment.getRefundedAt());
+                    return response;                })
+                .toList();
+    }
+
+    /**
+     * Gets all consultations (chat payments) for admin users
+     * @return List of ChatPaymentResponse with all consultation information
+     */
+    public List<ChatPaymentResponse> getAllConsultations() {
+        log.info("Getting all consultations for admin");
+        
+        // Get all chat payments ordered by creation date (newest first)
+        List<ChatPayment> allConsultations = chatPaymentRepository.findAll()
+                .stream()
+                .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+                .toList();
+        
+        log.info("Found {} total consultations", allConsultations.size());
+        
+        return allConsultations.stream()
+                .map(payment -> {
+                    ChatPaymentResponse response = ChatPaymentResponse.fromEntity(payment);
+                    // Add refund information if applicable
+                    response.setRefunded(payment.isRefunded());
+                    response.setRefundAmount(payment.getRefundAmount());
+                    response.setRefundReason(payment.getRefundReason());
+                    response.setRefundedAt(payment.getRefundedAt());
+                    return response;
+                })
+                .toList();
+    }
+}

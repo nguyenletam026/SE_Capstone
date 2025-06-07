@@ -556,14 +556,6 @@ export default function DoctorSchedule() {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={showDebugInfo}
-              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
-              title="Debug User Info"
-            >
-              <FaBug />
-              <span className="hidden md:inline font-medium">User Info</span>
-            </button>
-            <button
               onClick={handleRefresh}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
               disabled={refreshing}

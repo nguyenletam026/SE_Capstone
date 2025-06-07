@@ -3,11 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Sidebar from '../../components/utils/Sidebar';
 import AdminHeader from '../../components/header/adminHeader';
-import { getChatCost, updateChatCost, getAllSystemConfigs } from '../../lib/admin/adminServices';
+import { getChatCost, updateChatCost, getAllSystemConfigs, getDoctorCommissionRate, updateDoctorCommissionRate, getChatCostPerMinute, updateChatCostPerMinute } from '../../lib/admin/adminServices';
 import { toast } from 'react-toastify';
 import { 
   FiSettings, 
-  FiDollarSign, 
   FiSave, 
   FiList, 
   FiClock, 
@@ -24,24 +23,28 @@ import {
 export default function AdminSetting() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [chatCost, setChatCost] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);  const [chatCost, setChatCost] = useState('');
   const [newChatCost, setNewChatCost] = useState('');
+  const [chatCostPerMinute, setChatCostPerMinute] = useState('');
+  const [newChatCostPerMinute, setNewChatCostPerMinute] = useState('');
+  const [commissionRate, setCommissionRate] = useState('');
+  const [newCommissionRate, setNewCommissionRate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [systemConfigs, setSystemConfigs] = useState([]);
   const [loadingConfigs, setLoadingConfigs] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [editModeMinute, setEditModeMinute] = useState(false);
+  const [editModeCommission, setEditModeCommission] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('2025-05-24 11:27:24');
-
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/login', { replace: true });
-    } else if (user) {
+      navigate('/login', { replace: true });    } else if (user) {
       fetchChatCost();
+      fetchChatCostPerMinute();
+      fetchCommissionRate();
       fetchSystemConfigs();
     }
   }, [loading, user, navigate]);
-
   const fetchChatCost = async () => {
     try {
       const cost = await getChatCost();
@@ -50,6 +53,28 @@ export default function AdminSetting() {
     } catch (error) {
       console.error('Error fetching chat cost:', error);
       toast.error('Unable to load chat cost. Please try again later.');
+    }
+  };
+
+  const fetchChatCostPerMinute = async () => {
+    try {
+      const cost = await getChatCostPerMinute();
+      setChatCostPerMinute(cost);
+      setNewChatCostPerMinute(cost);
+    } catch (error) {
+      console.error('Error fetching chat cost per minute:', error);
+      toast.error('Unable to load chat cost per minute. Please try again later.');
+    }
+  };
+
+  const fetchCommissionRate = async () => {
+    try {
+      const rate = await getDoctorCommissionRate();
+      setCommissionRate(rate);
+      setNewCommissionRate(rate);
+    } catch (error) {
+      console.error('Error fetching commission rate:', error);
+      toast.error('Unable to load commission rate. Please try again later.');
     }
   };
 
@@ -66,7 +91,6 @@ export default function AdminSetting() {
       setLoadingConfigs(false);
     }
   };
-
   const handleSaveChatCost = async () => {
     if (!newChatCost || isNaN(newChatCost) || parseFloat(newChatCost) <= 0) {
       toast.error('Please enter a valid value greater than 0');
@@ -83,6 +107,48 @@ export default function AdminSetting() {
     } catch (error) {
       console.error('Error updating chat cost:', error);
       toast.error('Unable to update chat cost. Please try again later.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveChatCostPerMinute = async () => {
+    if (!newChatCostPerMinute || isNaN(newChatCostPerMinute) || parseFloat(newChatCostPerMinute) <= 0) {
+      toast.error('Please enter a valid value greater than 0');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateChatCostPerMinute(parseFloat(newChatCostPerMinute));
+      setChatCostPerMinute(parseFloat(newChatCostPerMinute));
+      toast.success('Chat cost per minute updated successfully!');
+      fetchSystemConfigs(); // Refresh all configs
+      setEditModeMinute(false);
+    } catch (error) {
+      console.error('Error updating chat cost per minute:', error);
+      toast.error('Unable to update chat cost per minute. Please try again later.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveCommissionRate = async () => {
+    if (!newCommissionRate || isNaN(newCommissionRate) || parseFloat(newCommissionRate) <= 0 || parseFloat(newCommissionRate) > 100) {
+      toast.error('Please enter a valid percentage between 0 and 100');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateDoctorCommissionRate(parseFloat(newCommissionRate));
+      setCommissionRate(parseFloat(newCommissionRate));
+      toast.success('Commission rate updated successfully!');
+      fetchSystemConfigs(); // Refresh all configs
+      setEditModeCommission(false);
+    } catch (error) {
+      console.error('Error updating commission rate:', error);
+      toast.error('Unable to update commission rate. Please try again later.');
     } finally {
       setIsSaving(false);
     }
@@ -139,7 +205,7 @@ export default function AdminSetting() {
           <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 mb-8">
             <div className="flex items-center mb-6">
               <div className="p-3 rounded-xl bg-emerald-50 text-emerald-500 mr-4">
-                <FiDollarSign className="h-6 w-6" />
+                <span className="text-lg font-semibold">₫</span>
               </div>
               <h2 className="text-xl font-semibold text-gray-800">Doctor Chat Pricing</h2>
             </div>
@@ -156,7 +222,7 @@ export default function AdminSetting() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Current Rate:</label>
                 <div className="flex items-center rounded-xl bg-gray-50 p-4 border border-gray-200">
                   <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-gray-100 text-gray-500 mr-3">
-                    <FiDollarSign className="h-5 w-5" />
+                    <span className="text-lg font-semibold">₫</span>
                   </div>
                   <div className="flex flex-col">
                     <div className="text-lg font-semibold text-gray-800">
@@ -172,12 +238,12 @@ export default function AdminSetting() {
               <div className="flex-1">
                 {editMode ? (
                   <>
-                    <label htmlFor="newChatCost" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="newChatCost" className="block text-sm font-medium text19:47:42, 7/6/2025-gray-700 mb-2">
                       New Rate (VND/hour):
                     </label>
                     <div className="flex rounded-xl overflow-hidden shadow-sm">
                       <span className="inline-flex items-center px-4 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                        <FiDollarSign className="h-4 w-4" />
+                        <span className="text-lg font-semibold">₫</span>
                       </span>
                       <input
                         type="number"
@@ -234,6 +300,225 @@ export default function AdminSetting() {
                     onClick={() => {
                       setEditMode(false);
                       setNewChatCost(chatCost);
+                    }}
+                    disabled={isSaving}
+                  >
+                    <FiX className="h-4 w-4 mr-2" />
+                    Cancel
+                  </button>
+                </div>              )}            </div>
+          </div>
+
+          {/* Chat Cost Per Minute Setting Section */}
+          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 mb-8">
+            <div className="flex items-center mb-6">
+              <div className="p-3 rounded-xl bg-purple-50 text-purple-500 mr-4">
+                <span className="text-lg font-semibold">₫</span>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800">Doctor Chat Pricing (Per Minute)</h2>
+            </div>
+            
+            <div className="bg-purple-50 rounded-xl p-4 mb-6 border-l-4 border-purple-400">
+              <div className="flex items-start text-purple-800">
+                <FiInfo className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
+                <p className="text-sm">This price will be applied to minute-based chat sessions with doctors. Users can choose between hourly or minute-based pricing options.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Current Rate:</label>
+                <div className="flex items-center rounded-xl bg-gray-50 p-4 border border-gray-200">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-gray-100 text-gray-500 mr-3">
+                    <span className="text-lg font-semibold">₫</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="text-lg font-semibold text-gray-800">
+                      {chatCostPerMinute ? `${chatCostPerMinute.toLocaleString('en-US')} VND/minute` : 'Loading...'}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Last updated: {lastUpdated}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex-1">
+                {editModeMinute ? (
+                  <>
+                    <label htmlFor="newChatCostPerMinute" className="block text-sm font-medium text-gray-700 mb-2">
+                      New Rate (VND/minute):
+                    </label>
+                    <div className="flex rounded-xl overflow-hidden shadow-sm">
+                      <span className="inline-flex items-center px-4 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="text-lg font-semibold">₫</span>
+                      </span>
+                      <input
+                        type="number"
+                        id="newChatCostPerMinute"
+                        className="focus:ring-purple-500 focus:border-purple-500 flex-1 block w-full px-4 py-3 sm:text-sm border-gray-300"
+                        value={newChatCostPerMinute}
+                        onChange={(e) => setNewChatCostPerMinute(e.target.value)}
+                        min="0"
+                        step="100"
+                        placeholder="Enter new rate"
+                      />
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2 flex items-center">
+                      <FiInfo className="h-3 w-3 mr-1" />
+                      Enter value in VND (e.g., 2000)
+                    </div>
+                  </>
+                ) : (
+                  <div className="h-full flex items-end">
+                    <button
+                      onClick={() => setEditModeMinute(true)}
+                      className="inline-flex items-center px-5 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                    >
+                      <FiEdit className="mr-2 h-4 w-4" />
+                      Change Price
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {editModeMinute && (
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="inline-flex justify-center items-center py-2.5 px-5 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
+                    onClick={handleSaveChatCostPerMinute}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <FiSave className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex justify-center items-center py-2.5 px-5 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
+                    onClick={() => {
+                      setEditModeMinute(false);
+                      setNewChatCostPerMinute(chatCostPerMinute);
+                    }}
+                    disabled={isSaving}
+                  >
+                    <FiX className="h-4 w-4 mr-2" />
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Doctor Commission Rate Setting Section */}
+          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 mb-8">
+            <div className="flex items-center mb-6">
+              <div className="p-3 rounded-xl bg-orange-50 text-orange-500 mr-4">
+                <span className="text-lg font-semibold">%</span>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800">Doctor Commission Rate</h2>
+            </div>
+            
+            <div className="bg-amber-50 rounded-xl p-4 mb-6 border-l-4 border-amber-400">
+              <div className="flex items-start text-amber-800">
+                <FiInfo className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
+                <p className="text-sm">This percentage determines how much doctors earn from each consultation. The remaining amount goes to the platform. Changes will affect future earnings calculations.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Current Commission Rate:</label>
+                <div className="flex items-center rounded-xl bg-gray-50 p-4 border border-gray-200">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-gray-100 text-gray-500 mr-3">
+                    <span className="text-lg font-semibold">%</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="text-lg font-semibold text-gray-800">
+                      {commissionRate ? `${commissionRate}%` : 'Loading...'}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Platform receives: {commissionRate ? `${(100 - commissionRate).toFixed(1)}%` : 'Loading...'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex-1">
+                {editModeCommission ? (
+                  <>
+                    <label htmlFor="newCommissionRate" className="block text-sm font-medium text-gray-700 mb-2">
+                      New Commission Rate (%):
+                    </label>
+                    <div className="flex rounded-xl overflow-hidden shadow-sm">
+                      <input
+                        type="number"
+                        id="newCommissionRate"
+                        className="focus:ring-orange-500 focus:border-orange-500 flex-1 block w-full px-4 py-3 sm:text-sm border-gray-300"
+                        value={newCommissionRate}
+                        onChange={(e) => setNewCommissionRate(e.target.value)}
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        placeholder="Enter percentage (0-100)"
+                      />
+                      <span className="inline-flex items-center px-4 border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        <span className="text-lg font-semibold">%</span>
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2 flex items-center">
+                      <FiInfo className="h-3 w-3 mr-1" />
+                      Platform will receive: {newCommissionRate ? `${(100 - parseFloat(newCommissionRate)).toFixed(1)}%` : '0%'}
+                    </div>
+                  </>
+                ) : (
+                  <div className="h-full flex items-end">
+                    <button
+                      onClick={() => setEditModeCommission(true)}
+                      className="inline-flex items-center px-5 py-2.5 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
+                    >
+                      <FiEdit className="mr-2 h-4 w-4" />
+                      Change Rate
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {editModeCommission && (
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="inline-flex justify-center items-center py-2.5 px-5 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all"
+                    onClick={handleSaveCommissionRate}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <FiSave className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex justify-center items-center py-2.5 px-5 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all"
+                    onClick={() => {
+                      setEditModeCommission(false);
+                      setNewCommissionRate(commissionRate);
                     }}
                     disabled={isSaving}
                   >
@@ -307,12 +592,19 @@ export default function AdminSetting() {
                         </tr>
                       ) : (
                         systemConfigs.map((config) => (
-                          <tr key={config.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap">
+                          <tr key={config.id} className="hover:bg-gray-50 transition-colors">                            <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 {config.configKey === 'CHAT_COST_PER_HOUR' ? (
                                   <div className="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center mr-3">
-                                    <FiDollarSign className="h-4 w-4 text-emerald-600" />
+                                    <span className="text-sm font-semibold text-emerald-600">₫</span>
+                                  </div>
+                                ) : config.configKey === 'CHAT_COST_PER_MINUTE' ? (
+                                  <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center mr-3">
+                                    <span className="text-sm font-semibold text-purple-600">₫</span>
+                                  </div>
+                                ) : config.configKey === 'DOCTOR_COMMISSION_RATE' ? (
+                                  <div className="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center mr-3">
+                                    <span className="text-sm font-semibold text-orange-600">%</span>
                                   </div>
                                 ) : (
                                   <div className="h-8 w-8 rounded-lg bg-indigo-100 flex items-center justify-center mr-3">
@@ -320,7 +612,10 @@ export default function AdminSetting() {
                                   </div>
                                 )}
                                 <span className="text-sm font-medium text-gray-900">
-                                  {config.configKey === 'CHAT_COST_PER_HOUR' ? 'Doctor Chat Cost' : config.configKey}
+                                  {config.configKey === 'CHAT_COST_PER_HOUR' ? 'Doctor Chat Cost (Hourly)' : 
+                                   config.configKey === 'CHAT_COST_PER_MINUTE' ? 'Doctor Chat Cost (Per Minute)' :
+                                   config.configKey === 'DOCTOR_COMMISSION_RATE' ? 'Doctor Commission Rate' : 
+                                   config.configKey}
                                 </span>
                               </div>
                             </td>
@@ -352,8 +647,6 @@ export default function AdminSetting() {
               </div>
             )}
           </div>
-          
-          {/* User Info Card */}
         </div>
       </div>
     </div>

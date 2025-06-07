@@ -21,12 +21,10 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final ClassRoomService classRoomService;
-    private final SystemConfigService systemConfigService;
-
-    @PostMapping("/create-teacher")
+    private final SystemConfigService systemConfigService;    @PostMapping("/create-teacher")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> createTeacherAccount(@RequestBody TeacherCreationRequest request) {
-        User teacher = classRoomService.createTeacherAccount(
+        classRoomService.createTeacherAccount(
             request.getFirstName(), 
             request.getLastName(), 
             request.getUsername(), 
@@ -42,11 +40,35 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(chatCost));
     }
     
-    @PutMapping("/chat-cost")
+    @GetMapping("/chat-cost-minute")
+    public ResponseEntity<ApiResponse> getChatCostPerMinute() {
+        double chatCostPerMinute = systemConfigService.getChatCostPerMinute();
+        return ResponseEntity.ok(ApiResponse.success(chatCostPerMinute));
+    }    @PutMapping("/chat-cost")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse> updateChatCost(@RequestBody ChatCostUpdateRequest request) {
-        SystemConfig config = systemConfigService.updateChatCostPerHour(request.getCostPerHour());
-        return ResponseEntity.ok(ApiResponse.success("Đã cập nhật giá chat thành công"));
+        systemConfigService.updateChatCostPerHour(request.getCostPerHour());
+        return ResponseEntity.ok(ApiResponse.success("Đã cập nhật giá chat theo giờ thành công"));
+    }
+    
+    @PutMapping("/chat-cost-minute")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> updateChatCostPerMinute(@RequestBody ChatCostPerMinuteUpdateRequest request) {
+        systemConfigService.updateChatCostPerMinute(request.getCostPerMinute());
+        return ResponseEntity.ok(ApiResponse.success("Đã cập nhật giá chat theo phút thành công"));
+    }
+    
+    @GetMapping("/doctor-commission-rate")
+    public ResponseEntity<ApiResponse> getDoctorCommissionRate() {
+        double commissionRate = systemConfigService.getDoctorCommissionRate();
+        return ResponseEntity.ok(ApiResponse.success(commissionRate));
+    }
+    
+    @PutMapping("/doctor-commission-rate")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse> updateDoctorCommissionRate(@RequestBody CommissionRateUpdateRequest request) {
+        systemConfigService.updateDoctorCommissionRate(request.getCommissionRate());
+        return ResponseEntity.ok(ApiResponse.success("Đã cập nhật tỷ lệ hoa hồng thành công"));
     }
     
     @GetMapping("/system-configs")
@@ -66,9 +88,18 @@ public class AdminController {
         private String username;
         private String password;
     }
-    
-    @Data
+      @Data
     public static class ChatCostUpdateRequest {
         private double costPerHour;
     }
-} 
+    
+    @Data
+    public static class ChatCostPerMinuteUpdateRequest {
+        private double costPerMinute;
+    }
+    
+    @Data
+    public static class CommissionRateUpdateRequest {
+        private double commissionRate;
+    }
+}

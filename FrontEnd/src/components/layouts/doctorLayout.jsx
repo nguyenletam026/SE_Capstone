@@ -9,7 +9,9 @@ import {
   FaCalendarCheck, 
   FaChartLine, 
   FaClock,
-  FaBell
+  FaBell,
+  FaMoneyBillWave,
+  FaWallet
 } from "react-icons/fa";
 import { 
   MdDashboard, 
@@ -130,8 +132,7 @@ export default function DoctorLayout({ children }) {
                 <FaComments className="text-xl" />
                 {!collapsed && <span>Tư vấn bệnh nhân</span>}
               </Link>
-              
-              <Link
+                <Link
                 to="/doctor-schedule"
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                   isActive("/doctor-schedule")
@@ -145,6 +146,38 @@ export default function DoctorLayout({ children }) {
               >
                 <FaCalendarCheck className="text-xl" />
                 {!collapsed && <span>Lịch làm việc</span>}
+              </Link>
+              
+              <Link
+                to="/doctor-earnings"
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  isActive("/doctor-earnings")
+                    ? isDarkMode 
+                      ? "bg-blue-600 text-white" 
+                      : "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 font-semibold"
+                    : isDarkMode
+                      ? "text-gray-300 hover:bg-gray-700" 
+                      : "text-gray-700 hover:bg-blue-50"
+                } ${collapsed ? "justify-center" : ""}`}
+              >
+                <FaMoneyBillWave className="text-xl" />
+                {!collapsed && <span>Thu nhập</span>}
+              </Link>
+              
+              <Link
+                to="/doctor-withdrawals"
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  isActive("/doctor-withdrawals")
+                    ? isDarkMode 
+                      ? "bg-blue-600 text-white" 
+                      : "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 font-semibold"
+                    : isDarkMode
+                      ? "text-gray-300 hover:bg-gray-700" 
+                      : "text-gray-700 hover:bg-blue-50"
+                } ${collapsed ? "justify-center" : ""}`}
+              >
+                <FaWallet className="text-xl" />
+                {!collapsed && <span>Rút tiền</span>}
               </Link>
               
               <Link

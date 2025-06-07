@@ -18,4 +18,7 @@ public class ChatPaymentRequest {
     
     @Min(value = 1, message = "Hours must be at least 1")
     private int hours;
-} 
+    
+    @Min(value = 1, message = "Minutes must be at least 1")
+    private Integer minutes; // Optional: for minute-based payments
+}

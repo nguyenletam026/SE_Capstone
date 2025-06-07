@@ -1,6 +1,7 @@
 package com.capstone.controller;
 
 import com.capstone.dto.response.ChatMessageDTO;
+import com.capstone.dto.response.ChatHistoryResponse;
 import com.capstone.service.ChatService;
 
 import lombok.RequiredArgsConstructor;
@@ -74,11 +75,15 @@ public class ChatController {
     public ResponseEntity<Long> getUnreadMessageCount(
             @RequestParam String userId) {
         return ResponseEntity.ok(chatService.getUnreadMessageCount(userId));
-    }
-
-    @GetMapping("/recent")
+    }    @GetMapping("/recent")
     public ResponseEntity<List<ChatMessageDTO>> getRecentMessages(
             @RequestParam String userId) {
         return ResponseEntity.ok(chatService.getRecentMessages(userId));
+    }
+
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<List<ChatHistoryResponse>> getChatHistory(
+            @PathVariable String userId) {
+        return ResponseEntity.ok(chatService.getChatHistory(userId));
     }
 }

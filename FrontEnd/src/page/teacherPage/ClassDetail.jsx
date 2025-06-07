@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Button, Card, Table, Tag, Divider, Input, Space, 
-  Modal, Form, notification, Tabs, Spin, Empty 
+  Modal, Form, notification, Tabs, Spin, Empty, Row, Col, Statistic
 } from 'antd';
 import { 
   UserAddOutlined, 
@@ -10,7 +10,9 @@ import {
   BarChartOutlined, 
   ArrowLeftOutlined,
   ExclamationCircleOutlined,
-  SearchOutlined
+  SearchOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined
 } from '@ant-design/icons';
 import { getToken } from '../../services/localStorageService';
 
@@ -28,13 +30,14 @@ export default function ClassDetail() {
   const navigate = useNavigate();
   const [classData, setClassData] = useState(null);
   const [stressData, setStressData] = useState([]);
+  const [stressOverview, setStressOverview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
-  
-  useEffect(() => {
+    useEffect(() => {
     fetchClassData();
     fetchStressData();
+    fetchStressOverview();
   }, [classId]);
   
   const fetchClassData = async () => {
@@ -63,6 +66,26 @@ export default function ClassDetail() {
     }
   };
   
+  const fetchStressOverview = async () => {
+    try {
+      const token = getToken();
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/classes/${classId}/stress-overview`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch stress overview');
+      }
+      
+      const data = await response.json();
+      setStressOverview(data.result);
+    } catch (error) {
+      console.error('Error fetching stress overview:', error);
+    }
+  };
+
   const fetchStressData = async () => {
     try {
       const token = getToken();
@@ -121,11 +144,11 @@ export default function ClassDetail() {
         message: 'Thành công',
         description: 'Thêm sinh viên vào lớp thành công',
       });
-      
-      setIsModalVisible(false);
+        setIsModalVisible(false);
       form.resetFields();
       fetchClassData();
       fetchStressData();
+      fetchStressOverview();
     } catch (error) {
       console.error('Error adding student:', error);
       notification.error({
@@ -160,14 +183,14 @@ export default function ClassDetail() {
       if (!response.ok) {
         throw new Error('Failed to remove student');
       }
-      
-      notification.success({
+        notification.success({
         message: 'Thành công',
         description: 'Xóa sinh viên khỏi lớp thành công',
       });
       
       fetchClassData();
       fetchStressData();
+      fetchStressOverview();
     } catch (error) {
       console.error('Error removing student:', error);
       notification.error({
@@ -250,17 +273,23 @@ export default function ClassDetail() {
       ),
       onFilter: (value, record) => record.studentName.toLowerCase().includes(value.toLowerCase()),
       filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
-    },
-    {
+    },    {
       title: 'Mức độ căng thẳng',
       dataIndex: 'stressLevel',
       key: 'stressLevel',
-      render: (stressLevel) => (
-        <Tag color={stressLevelColors[stressLevel] || 'gray'}>
-          {stressLevel === 'HIGH' ? 'Cao' : 
-           stressLevel === 'MEDIUM' ? 'Trung bình' : 
-           stressLevel === 'LOW' ? 'Thấp' : 'Không có dữ liệu'}
-        </Tag>
+      render: (stressLevel, record) => (
+        <div>
+          <Tag color={stressLevelColors[stressLevel] || 'gray'}>
+            {stressLevel === 'HIGH' ? 'Cao' : 
+             stressLevel === 'MEDIUM' ? 'Trung bình' : 
+             stressLevel === 'LOW' ? 'Thấp' : 'Không có dữ liệu'}
+          </Tag>
+          {record.dailyAverageStressScore && (
+            <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+              Điểm TB: {record.dailyAverageStressScore.toFixed(2)}
+            </div>
+          )}
+        </div>
       ),
       filters: [
         { text: 'Cao', value: 'HIGH' },
@@ -273,6 +302,20 @@ export default function ClassDetail() {
         const order = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1, 'NO_DATA': 0 };
         return order[a.stressLevel] - order[b.stressLevel];
       },
+    },
+    {
+      title: 'Số lần phân tích hôm nay',
+      dataIndex: 'totalAnalysesToday',
+      key: 'totalAnalysesToday',
+      render: (count) => (
+        <span style={{ 
+          color: count > 0 ? '#1890ff' : '#999',
+          fontWeight: count > 0 ? 'bold' : 'normal'
+        }}>
+          {count || 0}
+        </span>
+      ),
+      sorter: (a, b) => (a.totalAnalysesToday || 0) - (b.totalAnalysesToday || 0),
     },
     {
       title: 'Cập nhật lần cuối',
@@ -364,8 +407,60 @@ export default function ClassDetail() {
               />
             )}
           </TabPane>
-          
-          <TabPane tab="Phân tích căng thẳng" key="2">
+            <TabPane tab="Phân tích căng thẳng" key="2">
+            {stressOverview && (
+              <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+                <Col span={6}>
+                  <Card>
+                    <Statistic 
+                      title="Điểm TB lớp"
+                      value={stressOverview.classAverageStressScore ? stressOverview.classAverageStressScore.toFixed(2) : 'N/A'}
+                      valueStyle={{ color: '#1890ff' }}
+                    />
+                  </Card>
+                </Col>                <Col span={6}>
+                  <Card>
+                    <Statistic 
+                      title="Mức độ cao"
+                      value={stressOverview.studentsWithHighStress || 0}
+                      valueStyle={{ color: 'red' }}
+                      suffix={`/${classData?.students?.length || 0}`}
+                    />
+                  </Card>
+                </Col>
+                <Col span={6}>
+                  <Card>
+                    <Statistic 
+                      title="Mức độ trung bình"
+                      value={stressOverview.studentsWithMediumStress || 0}
+                      valueStyle={{ color: 'orange' }}
+                      suffix={`/${classData?.students?.length || 0}`}
+                    />
+                  </Card>
+                </Col>
+                <Col span={6}>
+                  <Card>
+                    <Statistic 
+                      title="Xu hướng"
+                      value={
+                        stressOverview.trend === 'INCREASING' ? 'Tăng' : 
+                        stressOverview.trend === 'DECREASING' ? 'Giảm' : 'Ổn định'
+                      }
+                      valueStyle={{ 
+                        color: 
+                          stressOverview.trend === 'INCREASING' ? 'red' : 
+                          stressOverview.trend === 'DECREASING' ? 'green' : 'gray'
+                      }}
+                      prefix={
+                        stressOverview.trend === 'INCREASING' ? <ArrowUpOutlined /> : 
+                        stressOverview.trend === 'DECREASING' ? <ArrowDownOutlined /> : null
+                      }
+                    />
+                  </Card>
+                </Col>
+              </Row>
+            )}
+            
             {stressData.length === 0 ? (
               <Empty 
                 description="Chưa có dữ liệu căng thẳng cho lớp này"

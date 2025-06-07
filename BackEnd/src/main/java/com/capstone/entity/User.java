@@ -27,11 +27,32 @@ public class User {
     Role role;
     String avtUrl;
     @Column(nullable = false)
+    @Builder.Default
     Double balance = 0.0;
+    
+    @Column(nullable = false)
+    @Builder.Default
+    Double doctorBalance = 0.0;
     
     // Email verification fields
     String verificationToken;
     Date verificationTokenExpiry;
+    @Builder.Default
     Boolean emailVerified = false;
+    @Builder.Default
     Boolean banned = false;
+    
+    // Helper method to get full name
+    public String getFullName() {
+        if (firstName == null && lastName == null) {
+            return username;
+        }
+        if (firstName == null) {
+            return lastName;
+        }
+        if (lastName == null) {
+            return firstName;
+        }
+        return firstName + " " + lastName;
+    }
 }

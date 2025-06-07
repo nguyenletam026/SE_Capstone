@@ -136,33 +136,32 @@ const UserProfile = () => {
   };
   
   const roleBadge = getUserRoleBadge();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8faff] to-[#f0f4ff] py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8faff] to-[#f0f4ff] py-6 sm:py-10 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-indigo-900 bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-blue-700">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 sm:mb-8">
+          <div className="mb-4 lg:mb-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-indigo-900 bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-blue-700">
               Hồ sơ của bạn
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-gray-500 mt-1 text-sm sm:text-base">
               Xem và quản lý thông tin cá nhân của bạn
             </p>
           </div>
           
-          <div className="mt-4 md:mt-0">
+          <div className="w-full lg:w-auto">
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium"
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium w-full lg:w-auto"
               >
                 <FaEdit /> Chỉnh sửa
               </button>
             ) : (
               <button
                 onClick={() => setIsEditing(false)}
-                className="flex items-center gap-2 bg-gray-100 text-gray-600 px-5 py-2.5 rounded-xl hover:bg-gray-200 transition-all font-medium"
+                className="flex items-center justify-center gap-2 bg-gray-100 text-gray-600 px-5 py-2.5 rounded-xl hover:bg-gray-200 transition-all font-medium w-full lg:w-auto"
               >
                 <HiOutlineX /> Hủy
               </button>
@@ -173,11 +172,11 @@ const UserProfile = () => {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left Column - Profile Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-md p-6 text-center">
+          <div className="lg:col-span-1 order-1 lg:order-1">
+            <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 text-center">
               {/* Avatar with Upload Button */}
               <div className="relative inline-block mb-4">
-                <div className={`rounded-full h-28 w-28 mx-auto overflow-hidden border-4 border-indigo-100 ${uploadingAvatar ? 'animate-pulse' : ''}`}>
+                <div className={`rounded-full h-24 w-24 sm:h-28 sm:w-28 mx-auto overflow-hidden border-4 border-indigo-100 ${uploadingAvatar ? 'animate-pulse' : ''}`}>
                   {uploadingAvatar ? (
                     <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
                       <HiOutlineRefresh className="animate-spin text-indigo-500 text-2xl" />
@@ -193,9 +192,9 @@ const UserProfile = () => {
                 
                 <button
                   onClick={handleAvatarClick}
-                  className="absolute bottom-1 right-1 bg-indigo-600 text-white p-2.5 rounded-full hover:bg-indigo-700 transition shadow-md"
+                  className="absolute bottom-1 right-1 bg-indigo-600 text-white p-2 sm:p-2.5 rounded-full hover:bg-indigo-700 transition shadow-md"
                 >
-                  <FaCamera size={14} />
+                  <FaCamera size={12} className="sm:w-3.5 sm:h-3.5" />
                 </button>
                 <input
                   type="file"
@@ -207,19 +206,17 @@ const UserProfile = () => {
               </div>
               
               {/* User Name & Email */}
-              <h3 className="text-xl font-semibold text-gray-800 mb-1">{fullName}</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1 break-words">{fullName}</h3>
               <div className="flex items-center justify-center gap-1.5 text-gray-500 mb-4">
-                <HiOutlineMail className="text-indigo-400" />
-                <p className="text-sm">{userInfo.username}</p>
+                <HiOutlineMail className="text-indigo-400 flex-shrink-0" />
+                <p className="text-xs sm:text-sm break-all">{userInfo.username}</p>
               </div>
               
               {/* Role Badge */}
-              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${roleBadge.color} border text-sm font-medium`}>
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${roleBadge.color} border text-xs sm:text-sm font-medium`}>
                 {roleBadge.icon}
                 {roleBadge.name}
               </div>
-              
-
               
               {/* Quick Actions */}
               <div className="mt-6 flex flex-col gap-3">
@@ -235,15 +232,14 @@ const UserProfile = () => {
           </div>
 
           {/* Right Column - Profile Form */}
-          <div className="lg:col-span-3">
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-8">
-              <h2 className="text-2xl font-bold text-indigo-900 mb-6 flex items-center gap-2">
+          <div className="lg:col-span-3 order-2 lg:order-2">
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-4 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-indigo-900 mb-4 sm:mb-6 flex items-center gap-2">
                 <FaUserCircle className="text-indigo-500" />
                 Thông tin cá nhân
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {/* First Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">                {/* First Name */}
                 <div>
                   <label className="flex items-center gap-1.5 text-gray-700 text-sm font-medium mb-1.5">
                     <FaUser className="text-indigo-400" />
@@ -320,8 +316,8 @@ const UserProfile = () => {
                   />
                 </div>
 
-                {/* Account Type */}
-                <div>
+                {/* Account Type - Full width on mobile */}
+                <div className="sm:col-span-2">
                   <label className="flex items-center gap-1.5 text-gray-700 text-sm font-medium mb-1.5">
                     <FaIdCard className="text-indigo-400" />
                     Loại tài khoản
@@ -341,7 +337,7 @@ const UserProfile = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white px-8 py-2.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all ${
+                    className={`flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white px-6 sm:px-8 py-2.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all w-full sm:w-auto ${
                       loading ? "opacity-70 cursor-not-allowed" : ""
                     }`}
                   >
@@ -364,22 +360,22 @@ const UserProfile = () => {
             </form>
 
             {/* Security Section */}
-            <div className="bg-white rounded-2xl shadow-md p-8 mt-6">
-              <h2 className="text-2xl font-bold text-indigo-900 mb-6 flex items-center gap-2">
+            <div className="bg-white rounded-2xl shadow-md p-4 sm:p-8 mt-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-indigo-900 mb-4 sm:mb-6 flex items-center gap-2">
                 <FaShieldAlt className="text-indigo-500" />
                 Bảo mật
               </h2>
 
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Mật khẩu và bảo mật</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-800">Mật khẩu và bảo mật</h3>
                   <p className="text-gray-500 text-sm mt-1">
                     Cập nhật mật khẩu của bạn thường xuyên để bảo vệ tài khoản
                   </p>
                 </div>
                 <button
                   onClick={handleChangePassword}
-                  className="mt-3 md:mt-0 flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-xl transition font-medium"
+                  className="flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-xl transition font-medium w-full lg:w-auto"
                 >
                   <FaLock />
                   Đổi mật khẩu
@@ -389,14 +385,14 @@ const UserProfile = () => {
               <hr className="my-6" />
               
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">Bảo vệ tài khoản</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Bảo vệ tài khoản</h3>
                 <div className="mt-4 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center">
-                  <div className="p-2 bg-green-100 rounded-full mr-4">
+                  <div className="p-2 bg-green-100 rounded-full mr-4 flex-shrink-0">
                     <HiOutlineCheck className="text-green-600 text-xl" />
                   </div>
                   <div>
-                    <p className="text-green-800 font-medium">Tài khoản của bạn đang được bảo mật</p>
-                    <p className="text-green-600 text-sm">Không có vấn đề bảo mật nào được phát hiện</p>
+                    <p className="text-green-800 font-medium text-sm sm:text-base">Tài khoản của bạn đang được bảo mật</p>
+                    <p className="text-green-600 text-xs sm:text-sm">Không có vấn đề bảo mật nào được phát hiện</p>
                   </div>
                 </div>
               </div>

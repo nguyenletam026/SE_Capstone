@@ -19,4 +19,5 @@ public class QuestionResponse {
     private List<String> options;
     private String createdBy;
     private LocalDateTime createdAt;
+    private List<Double> optionStressScores;
 } 

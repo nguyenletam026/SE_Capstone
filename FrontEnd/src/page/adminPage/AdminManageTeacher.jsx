@@ -51,10 +51,9 @@ const AdminManageTeacher = () => {
       const data = await response.json();
       setTeachers(data.result || []);
     } catch (error) {
-      console.error('Error fetching teachers:', error);
-      notification.error({
-        message: 'Lỗi',
-        description: 'Không thể tải danh sách giáo viên',
+      console.error('Error fetching teachers:', error);      notification.error({
+        message: 'Error',
+        description: 'Unable to load teacher list',
       });
     } finally {
       setLoading(false);
@@ -101,22 +100,19 @@ const AdminManageTeacher = () => {
 
       if (!response.ok) {
         throw new Error('Failed to save teacher');
-      }
-
-      notification.success({
-        message: 'Thành công',
+      }      notification.success({
+        message: 'Success',
         description: editingTeacherId
-          ? 'Cập nhật thông tin giáo viên thành công'
-          : 'Tạo tài khoản giáo viên thành công',
+          ? 'Teacher information updated successfully'
+          : 'Teacher account created successfully',
       });
 
       setModalVisible(false);
       fetchTeachers();
     } catch (error) {
-      console.error('Error saving teacher:', error);
-      notification.error({
-        message: 'Lỗi',
-        description: 'Không thể lưu thông tin giáo viên',
+      console.error('Error saving teacher:', error);      notification.error({
+        message: 'Error',
+        description: 'Unable to save teacher information',
       });
     }
   };
@@ -133,63 +129,59 @@ const AdminManageTeacher = () => {
 
       if (!response.ok) {
         throw new Error('Failed to delete teacher');
-      }
-
-      notification.success({
-        message: 'Thành công',
-        description: 'Xóa tài khoản giáo viên thành công',
+      }      notification.success({
+        message: 'Success',
+        description: 'Teacher account deleted successfully',
       });
 
       fetchTeachers();
     } catch (error) {
       console.error('Error deleting teacher:', error);
       notification.error({
-        message: 'Lỗi',
-        description: 'Không thể xóa tài khoản giáo viên',
+        message: 'Error',
+        description: 'Unable to delete teacher account',
       });
     }
   };
-
   const columns = [
     {
-      title: 'Họ',
+      title: 'Last Name',
       dataIndex: 'lastName',
       key: 'lastName',
       sorter: (a, b) => a.lastName.localeCompare(b.lastName),
     },
     {
-      title: 'Tên',
+      title: 'First Name',
       dataIndex: 'firstName',
       key: 'firstName',
       sorter: (a, b) => a.firstName.localeCompare(b.firstName),
     },
     {
-      title: 'Tên đăng nhập',
+      title: 'Username',
       dataIndex: 'username',
       key: 'username',
     },
     {
-      title: 'Vai trò',
+      title: 'Role',
       key: 'role',
-      render: () => <Tag color="blue">Giáo viên</Tag>,
+      render: () => <Tag color="blue">Teacher</Tag>,
     },
     {
-      title: 'Thao tác',
+      title: 'Actions',
       key: 'action',
-      render: (_, record) => (
-        <Space size="middle">
-          <Tooltip title="Chỉnh sửa">
+      render: (_, record) => (        <Space size="middle">
+          <Tooltip title="Edit">
             <Button
               icon={<EditOutlined />}
               onClick={() => showEditModal(record)}
             />
           </Tooltip>
-          <Tooltip title="Xóa">
+          <Tooltip title="Delete">
             <Popconfirm
-              title="Bạn có chắc chắn muốn xóa giáo viên này?"
+              title="Are you sure you want to delete this teacher?"
               onConfirm={() => handleDeleteTeacher(record.id)}
-              okText="Có"
-              cancelText="Không"
+              okText="Yes"
+              cancelText="No"
             >
               <Button
                 danger
@@ -203,16 +195,15 @@ const AdminManageTeacher = () => {
   ];
 
   return (
-    <div>
-      <Card
-        title="Quản lý giáo viên"
+    <div>      <Card
+        title="Manage Teachers"
         extra={
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={showCreateModal}
           >
-            Thêm giáo viên
+            Add Teacher
           </Button>
         }
       >
@@ -228,10 +219,8 @@ const AdminManageTeacher = () => {
             pagination={{ pageSize: 10 }}
           />
         )}
-      </Card>
-
-      <Modal
-        title={editingTeacherId ? 'Chỉnh sửa giáo viên' : 'Thêm giáo viên mới'}
+      </Card>      <Modal
+        title={editingTeacherId ? 'Edit Teacher' : 'Add New Teacher'}
         open={modalVisible}
         onCancel={handleModalCancel}
         footer={null}
@@ -240,56 +229,53 @@ const AdminManageTeacher = () => {
           form={form}
           layout="vertical"
           onFinish={handleModalSubmit}
-        >
-          <Form.Item
+        >          <Form.Item
             name="firstName"
-            label="Tên"
-            rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
+            label="First Name"
+            rules={[{ required: true, message: 'Please enter first name' }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Nhập tên" />
+            <Input prefix={<UserOutlined />} placeholder="Enter first name" />
           </Form.Item>
 
           <Form.Item
             name="lastName"
-            label="Họ"
-            rules={[{ required: true, message: 'Vui lòng nhập họ' }]}
+            label="Last Name"
+            rules={[{ required: true, message: 'Please enter last name' }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Nhập họ" />
+            <Input prefix={<UserOutlined />} placeholder="Enter last name" />
           </Form.Item>
 
           <Form.Item
             name="username"
-            label="Tên đăng nhập"
-            rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập' }]}
+            label="Username"
+            rules={[{ required: true, message: 'Please enter username' }]}
           >
             <Input
               prefix={<MailOutlined />}
-              placeholder="Nhập tên đăng nhập"
+              placeholder="Enter username"
               disabled={!!editingTeacherId}
             />
-          </Form.Item>
-
-          {!editingTeacherId && (
+          </Form.Item>          {!editingTeacherId && (
             <Form.Item
               name="password"
-              label="Mật khẩu"
+              label="Password"
               rules={[
-                { required: true, message: 'Vui lòng nhập mật khẩu' },
-                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' },
+                { required: true, message: 'Please enter password' },
+                { min: 6, message: 'Password must be at least 6 characters' },
               ]}
             >
               <Input.Password
                 prefix={<LockOutlined />}
-                placeholder="Nhập mật khẩu"
+                placeholder="Enter password"
               />
             </Form.Item>
           )}
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Space>
-              <Button onClick={handleModalCancel}>Hủy</Button>
+              <Button onClick={handleModalCancel}>Cancel</Button>
               <Button type="primary" htmlType="submit">
-                {editingTeacherId ? 'Cập nhật' : 'Tạo mới'}
+                {editingTeacherId ? 'Update' : 'Create'}
               </Button>
             </Space>
           </Form.Item>

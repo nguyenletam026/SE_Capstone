@@ -1,0 +1,34 @@
+# Refund Configuration
+refund:
+  # Timeout before considering refund (in minutes)
+  doctor-response-timeout: 30
+  
+  # Refund percentages based on reason
+  percentages:
+    doctor-no-response: 100
+    manual-admin: 100
+    patient-request: 80
+    technical-issue: 100
+    default: 50
+  
+  # Enable/disable automatic refunds
+  auto-refund-enabled: true
+  
+  # Scheduler settings
+  scheduler:
+    # How often to check for refunds (in milliseconds)
+    check-interval: 600000  # 10 minutes
+    
+    # Enable/disable scheduled refund checks
+    enabled: true
+  
+  # Notification settings
+  notifications:
+    # Enable patient notifications
+    notify-patients: true
+    
+    # Enable doctor warnings
+    notify-doctors: true
+    
+    # Email notifications (if email service is available)
+    email-enabled: false

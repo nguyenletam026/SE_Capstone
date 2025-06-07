@@ -13,7 +13,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOrigins(
+                        "http://localhost:3000",
+                        "https://65d3-2402-800-63e9-f9f5-2846-e458-16a-4cfb.ngrok-free.app",
+                        "https://stresshelper.store"
+                )
                 .withSockJS();
     }
 

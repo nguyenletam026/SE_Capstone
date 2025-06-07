@@ -25,14 +25,14 @@ export default function AdminMusicManage() {
         setMusics(res.result);
       }
     } catch (error) {
-      console.error("❌ Lỗi khi lấy danh sách nhạc:", error);
+      console.error("❌ Error fetching music list:", error);
     }
   };
 
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!uploadData.file || !uploadData.name) {
-      alert("Vui lòng chọn file nhạc và nhập tên bài hát!");
+      alert("Please select a music file and enter the song name!");
       return;
     }
 
@@ -51,23 +51,23 @@ export default function AdminMusicManage() {
       });
 
       if (response.ok) {
-        alert("Upload nhạc thành công!");
+        alert("Music uploaded successfully!");
         setIsUploadModalOpen(false);
         setUploadData({ file: null, name: "" });
         fetchMusics();
       } else {
-        alert("Lỗi khi upload nhạc!");
+        alert("Error uploading music!");
       }
     } catch (error) {
-      console.error("❌ Lỗi khi upload nhạc:", error);
-      alert("Lỗi khi upload nhạc!");
+      console.error("❌ Error uploading music:", error);
+      alert("Error uploading music!");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (musicUrl) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa bài hát này?")) {
+    if (!window.confirm("Are you sure you want to delete this song?")) {
       return;
     }
 
@@ -82,32 +82,32 @@ export default function AdminMusicManage() {
       });
 
       if (response.ok) {
-        alert("Xóa bài hát thành công!");
+        alert("Song deleted successfully!");
         fetchMusics();
       } else {
-        alert("Lỗi khi xóa bài hát!");
+        alert("Error deleting song!");
       }
     } catch (error) {
-      console.error("❌ Lỗi khi xóa bài hát:", error);
-      alert("Lỗi khi xóa bài hát!");
+      console.error("❌ Error deleting song:", error);
+      alert("Error deleting song!");
     }
   };
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">🎵 Quản lý nhạc gợi ý stress</h1>
+        <h1 className="text-2xl font-bold">🎵 Manage Stress Relief Music</h1>
         <button
           onClick={() => setIsUploadModalOpen(true)}
           className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <FiUpload />
-          Thêm nhạc mới
+          Add New Music
         </button>
       </div>
 
       {musics.length === 0 ? (
-        <p className="text-gray-500">Không có bản nhạc nào.</p>
+        <p className="text-gray-500">No music tracks available.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {musics.map((music, idx) => (
@@ -133,7 +133,7 @@ export default function AdminMusicManage() {
                 className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition font-medium w-full"
                 onClick={() => setSelectedMusic(music.recommendUrl)}
               >
-                🎧 Nghe nhạc
+                🎧 Listen to Music
               </button>
             </div>
           ))}
@@ -173,7 +173,7 @@ export default function AdminMusicManage() {
       >
         <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Thêm nhạc mới</h2>
+            <h2 className="text-xl font-semibold">Add New Music</h2>
             <button
               onClick={() => !isLoading && setIsUploadModalOpen(false)}
               className="text-gray-500 hover:text-gray-700"
@@ -184,21 +184,21 @@ export default function AdminMusicManage() {
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tên bài hát
+                Song Name
               </label>
               <input
                 type="text"
                 value={uploadData.name}
                 onChange={(e) => setUploadData({ ...uploadData, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Nhập tên bài hát"
+                placeholder="Enter song name"
                 required
                 disabled={isLoading}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                File nhạc
+                Music File
               </label>
               <input
                 type="file"
@@ -218,7 +218,7 @@ export default function AdminMusicManage() {
               }`}
               disabled={isLoading}
             >
-              {isLoading ? "Đang xử lý..." : "Upload nhạc"}
+              {isLoading ? "Processing..." : "Upload Music"}
             </button>
           </form>
         </div>

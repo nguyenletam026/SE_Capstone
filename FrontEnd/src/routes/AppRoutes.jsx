@@ -22,6 +22,7 @@ import ChatWithDoctor from "../page/userPage/userChatWithDoctor";
 import Recommendation from "../page/userPage/userRecommendation";
 import UserContactDoctor from "../page/userPage/userContactDoctor";
 import UserChatDoctor from "../page/userPage/userChatDoctor";
+import ChatHistory from "../page/userPage/ChatHistory";
 import ApplyDoctor from "../page/userPage/userApplyDoctor";
 import UserProfile from "../page/userPage/userProfile";
 import AboutUs from "../page/userPage/AboutUs";
@@ -33,6 +34,7 @@ import ProductList from "../page/userPage/ProductList";
 import ProductDetail from "../page/userPage/ProductDetail";
 import OrderHistory from "../page/userPage/OrderHistory";
 import CartPage from "../page/userPage/CartPage";
+import RefundHistory from "../components/chat/RefundHistory";
 
 // Admin Pages
 import AdminLayout from "../components/layouts/adminLayout";
@@ -48,7 +50,11 @@ import AdminDepositHistory from "../page/adminPage/AdminDepositHistory";
 import AdminDoctorSchedule from "../page/adminPage/AdminDoctorSchedule";
 import AdminQuestionManage from "../page/adminPage/AdminQuestionManage";
 import AdminSetting from "../page/adminPage/adminSetting";
+import AdminRefundManagement from "../page/adminPage/AdminRefundManagement";
 import AdminOrderManagement from "../page/adminPage/AdminOrderManagementPage";
+import AdminManageConsultation from "../page/adminPage/adminManageConsultation";
+import AdminEarningsManagement from "../page/adminPage/AdminEarningsManagement";
+import AdminWithdrawalManagement from "../page/adminPage/AdminWithdrawalManagement";
 
 // Doctor Pages
 import DoctorLayout from "../components/layouts/doctorLayout";
@@ -56,6 +62,8 @@ import DoctorHome from "../page/doctorPage/doctorHome";
 import DoctorChatPage from "../page/doctorPage/doctorChatPage";
 import PendingRequests from "../page/doctorPage/doctorPendingRequest";
 import DoctorSchedule from "../page/doctorPage/doctorSchedule";
+import DoctorEarnings from "../page/doctorPage/doctorEarnings";
+import DoctorWithdrawals from "../page/doctorPage/doctorWithdrawals";
 
 // Teacher Pages
 import TeacherLayout from "../components/layouts/TeacherLayout";
@@ -64,6 +72,9 @@ import TeacherClasses from "../page/teacherPage/TeacherClasses";
 import ClassDetail from "../page/teacherPage/ClassDetail";
 import StudentDetail from "../page/teacherPage/StudentDetail";
 import TeacherStressAnalysis from "../page/teacherPage/TeacherStressAnalysis";
+
+// Debug Pages
+import AuthDebugPage from "../page/debugPage/AuthDebugPage";
 
 const AppRoutes = () => {
   return (
@@ -76,9 +87,12 @@ const AppRoutes = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          {/* Landing Page */}
+          <Route path="/reset-password" element={<ResetPassword />} />          {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
+          
+          {/* Debug Page - Available without authentication for testing */}
+          <Route path="/debug-auth" element={<AuthDebugPage />} />
+          
           {/* Redirect nếu truy cập "/" mà chưa đăng nhập */}
           {/* <Route path="/" element={<Navigate to="/home" replace />} /> */}
 
@@ -89,9 +103,9 @@ const AppRoutes = () => {
             <Route path="/assessment/step" element={<UserLayout><UserHealthAssessment /></UserLayout>} />
             <Route path="/assessment/result" element={<UserLayout><AssessmentResult /></UserLayout>} />
             <Route path="/assessment/recommend" element={<UserLayout><Recommendation /></UserLayout>} />
-            <Route path="/assessment/recommend" element={<UserLayout><Recommendation /></UserLayout>} />
-            <Route path="/contact-doctor/:id" element={<UserLayout><UserContactDoctor /></UserLayout>} />
+            <Route path="/assessment/recommend" element={<UserLayout><Recommendation /></UserLayout>} />            <Route path="/contact-doctor/:id" element={<UserLayout><UserContactDoctor /></UserLayout>} />
             <Route path="/chatroom" element={<UserLayout><UserChatDoctor /></UserLayout>} />
+            <Route path="/chat-history" element={<UserLayout><ChatHistory /></UserLayout>} />
             <Route path="/apply-doctor" element={<UserLayout><ApplyDoctor /></UserLayout>} />
             <Route path="/user-profile" element={<UserLayout><UserProfile /></UserLayout>} />
             <Route path="/about" element={<UserLayout><AboutUs /></UserLayout>} />
@@ -100,9 +114,9 @@ const AppRoutes = () => {
             <Route path="/help" element={<UserLayout><HelpAndFeedback /></UserLayout>} />
             <Route path="/deposit" element={<UserLayout><DepositPage /></UserLayout>} />
             <Route path="/products" element={<UserLayout><ProductList /></UserLayout>} />
-            <Route path="/products/:id" element={<UserLayout><ProductDetail /></UserLayout>} />
-            <Route path="/orders" element={<UserLayout><OrderHistory /></UserLayout>} />
+            <Route path="/products/:id" element={<UserLayout><ProductDetail /></UserLayout>} />            <Route path="/orders" element={<UserLayout><OrderHistory /></UserLayout>} />
             <Route path="/cart" element={<UserLayout><CartPage /></UserLayout>} />
+            <Route path="/refund-history" element={<UserLayout><RefundHistory /></UserLayout>} />
           </Route>
 
           {/* Route Admin */}
@@ -117,17 +131,19 @@ const AppRoutes = () => {
             <Route path="/admin-music" element={<AdminLayout><AdminMusicManage /></AdminLayout>} />
             <Route path="/admin-video" element={<AdminLayout><AdminVideoManage /></AdminLayout>} />
             <Route path="/admin-deposits" element={<AdminDepositHistory />} />
-            <Route path="/admin-questions" element={<AdminLayout><AdminQuestionManage /></AdminLayout>} />
-            <Route path="/admin-settings" element={<AdminLayout><AdminSetting /></AdminLayout>} />
+            <Route path="/admin-questions" element={<AdminLayout><AdminQuestionManage /></AdminLayout>} />            <Route path="/admin-settings" element={<AdminLayout><AdminSetting /></AdminLayout>} />            <Route path="/admin-refunds" element={<AdminLayout><AdminRefundManagement /></AdminLayout>} />
+            <Route path="/admin-consultations" element={<AdminLayout><AdminManageConsultation /></AdminLayout>} />
             <Route path="/admin-order" element={<AdminLayout><AdminOrderManagement /></AdminLayout>} />
-          </Route>
-
-          {/* Route Doctor */}
+            <Route path="/admin-earnings" element={<AdminLayout><AdminEarningsManagement /></AdminLayout>} />
+            <Route path="/admin-withdrawals" element={<AdminLayout><AdminWithdrawalManagement /></AdminLayout>} />
+          </Route>          {/* Route Doctor */}
           <Route element={<ProtectedRoute allowedRoles={["ROLE_DOCTOR"]} />}>
             <Route path="/doctor-home" element={<DoctorLayout><DoctorHome /></DoctorLayout>} />
             <Route path="/doctor-chat" element={<DoctorLayout><DoctorChatPage /></DoctorLayout>} />
             <Route path="/doctor-pending-requests" element={<DoctorLayout><PendingRequests /></DoctorLayout>} />
             <Route path="/doctor-schedule" element={<DoctorLayout><DoctorSchedule /></DoctorLayout>} />
+            <Route path="/doctor-earnings" element={<DoctorLayout><DoctorEarnings /></DoctorLayout>} />
+            <Route path="/doctor-withdrawals" element={<DoctorLayout><DoctorWithdrawals /></DoctorLayout>} />
           </Route>
 
           {/* Route Teacher */}

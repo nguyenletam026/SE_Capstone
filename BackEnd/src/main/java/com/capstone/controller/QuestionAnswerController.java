@@ -32,12 +32,31 @@ public class QuestionAnswerController {
                 .message("Question created successfully")
                 .result(questionAnswerService.createQuestion(request))
                 .build();
-    }
-    @GetMapping
+    }    @GetMapping
     public ApiResponse<List<QuestionResponse>> getAllQuestions() {
         return ApiResponse.<List<QuestionResponse>>builder()
                 .message("All questions retrieved successfully")
                 .result(questionAnswerService.getAllQuestions())
+                .build();
+    }    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a question", description = "Update an existing question (Admin only)")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<QuestionResponse> updateQuestion(@PathVariable String id, @Valid @RequestBody QuestionRequest request) {
+        return ApiResponse.<QuestionResponse>builder()
+                .message("Question updated successfully")
+                .result(questionAnswerService.updateQuestion(id, request))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a question", description = "Delete an existing question (Admin only)")
+    @SecurityRequirement(name = "bearerAuth")
+    public ApiResponse<Void> deleteQuestion(@PathVariable String id) {
+        questionAnswerService.deleteQuestion(id);
+        return ApiResponse.<Void>builder()
+                .message("Question deleted successfully")
                 .build();
     }
 

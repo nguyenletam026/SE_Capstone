@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { getRoles } from "../../lib/admin/adminServices";
 import {
-  getRoles,
-  deleteRole,
-} from "../../lib/admin/adminServices";
-import { HiPlus, HiTrash, HiPencil, HiSearch } from "react-icons/hi";
+  HiPlus,
+  HiSearch,
+  HiUserGroup,
+  HiShieldCheck,
+  HiOutlineUserCircle,
+} from "react-icons/hi";
 
 const AdminManageRole = () => {
   const [roles, setRoles] = useState([]);
@@ -18,91 +21,62 @@ const AdminManageRole = () => {
     setRoles(data);
   };
 
-  const handleDelete = async (roleName) => {
-    const confirmDelete = window.confirm(`Delete role "${roleName}"?`);
-    if (confirmDelete) {
-      await deleteRole(roleName);
-      fetchRoles();
-    }
-  };
+  const filteredRoles = roles.filter((role) =>
+    role.name.toLowerCase().includes(filter.toLowerCase())
+  );
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">🔐 Manage Roles</h2>
-
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-        <div className="relative w-full md:w-1/3">
-          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-            <HiSearch />
-          </span>
-          <input
-            type="text"
-            placeholder="Search roles..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-400"
-          />
+    <div className="p-6 sm:p-10 max-w-5xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3 text-gray-800">
+          <HiUserGroup className="text-4xl text-blue-600" />
+          <h2 className="text-3xl font-bold">Manage Roles</h2>
         </div>
 
-        <button
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition"
-          onClick={() => alert("Add Role Modal")}
-        >
-          <HiPlus className="text-lg" />
-          Add Role
-        </button>
+       
       </div>
 
-      <div className="overflow-x-auto rounded-lg shadow">
-        <table className="w-full text-left border border-gray-200">
-          <thead className="bg-gray-100 text-gray-700">
+      {/* Search Bar */}
+      <div className="relative mb-6">
+        <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <HiSearch className="text-lg" />
+        </span>
+        <input
+          type="text"
+          placeholder="Search for a role..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none shadow-sm text-gray-700"
+        />
+      </div>
+
+      {/* Roles List */}
+      <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+        <table className="w-full text-left">
+          <thead className="bg-gray-100 text-gray-600 text-sm uppercase tracking-wide">
             <tr>
-              <th className="px-6 py-3 border-b font-semibold">Role Name</th>
-              <th className="px-6 py-3 border-b font-semibold">Permissions</th>
-              <th className="px-6 py-3 border-b font-semibold">Actions</th>
+              <th className="px-6 py-4 flex items-center gap-2">
+                <HiOutlineUserCircle className="text-lg" />
+                Role Name
+              </th>
             </tr>
           </thead>
           <tbody>
-            {roles
-              .filter((role) =>
-                role.name.toLowerCase().includes(filter.toLowerCase())
-              )
-              .map((role) => (
-                <tr
-                  key={role.name}
-                  className="hover:bg-gray-50 transition duration-150"
-                >
-                  <td className="px-6 py-4 border-b font-medium text-gray-800">
-                    {role.name}
-                  </td>
-                  <td className="px-6 py-4 border-b text-sm text-gray-600">
-                    {role.permissions?.length
-                      ? role.permissions.join(", ")
-                      : "None"}
-                  </td>
-                  <td className="px-6 py-4 border-b space-x-4">
-                    <button
-                      className="text-blue-600 hover:text-blue-800 transition"
-                      onClick={() => alert("Edit Role")}
-                    >
-                      <HiPencil className="inline mr-1" />
-                      Edit
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-800 transition"
-                      onClick={() => handleDelete(role.name)}
-                    >
-                      <HiTrash className="inline mr-1" />
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            {roles.filter((role) =>
-              role.name.toLowerCase().includes(filter.toLowerCase())
-            ).length === 0 && (
+            {filteredRoles.map((role) => (
+              <tr
+                key={role.name}
+                className="border-t hover:bg-gray-50 transition"
+              >
+                <td className="px-6 py-4 text-gray-800 font-medium flex items-center gap-2">
+                  <HiShieldCheck className="text-blue-500" />
+                  {role.name}
+                </td>
+              </tr>
+            ))}
+            {filteredRoles.length === 0 && (
               <tr>
-                <td colSpan={3} className="text-center text-gray-500 py-6 italic">
+                <td className="px-6 py-6 text-center text-gray-400 italic">
                   No roles found.
                 </td>
               </tr>

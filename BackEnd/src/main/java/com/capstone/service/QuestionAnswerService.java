@@ -95,11 +95,41 @@ import java.util.stream.Collectors;
         return questions.stream()
                 .map(this::convertToQuestionResponse)
                 .collect(Collectors.toList());
-    }
-
-    public QuestionResponse getQuestionById(String id) {
+    }    public QuestionResponse getQuestionById(String id) {
         Question question = findQuestionById(id);
         return convertToQuestionResponse(question);
+    }
+
+    @Transactional
+    public QuestionResponse updateQuestion(String id, @Valid QuestionRequest request) {
+        Question existingQuestion = findQuestionById(id);
+        
+        validateQuestionRequest(request);
+        
+        // Update the question fields
+        existingQuestion.setContent(request.getContent());
+        existingQuestion.setOptions(new ArrayList<>(request.getOptions()));
+        existingQuestion.setOptionStressScores(new ArrayList<>(request.getOptionStressScores()));
+        
+        Question updatedQuestion = questionRepository.save(existingQuestion);
+        log.info("Updated question with ID: {}", id);
+        
+        return convertToQuestionResponse(updatedQuestion);
+    }
+
+    @Transactional
+    public void deleteQuestion(String id) {
+        Question question = findQuestionById(id);
+        
+        // Check if there are any answers for this question
+        List<Answer> answers = answerRepository.findByQuestionOrderByCreatedAtDesc(question);
+        if (!answers.isEmpty()) {
+            log.warn("Cannot delete question {} - it has {} associated answers", id, answers.size());
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        
+        questionRepository.delete(question);
+        log.info("Deleted question with ID: {}", id);
     }
 
     @Transactional
@@ -252,6 +282,7 @@ import java.util.stream.Collectors;
                 .options(new ArrayList<>(question.getOptions()))
                 .createdBy(question.getCreatedBy().getUsername())
                 .createdAt(question.getCreatedAt())
+                .optionStressScores( new ArrayList<>(question.getOptionStressScores()))
                 .build();
     }
     

@@ -225,12 +225,23 @@ export default function StudentDetail() {
             <Title level={3}>{student.firstName} {student.lastName}</Title>
             <Text type="secondary">Tên đăng nhập: {student.username}</Text>
           </Col>
-          
-          <Col span={24} md={12} style={{ textAlign: 'right' }}>
+            <Col span={24} md={12} style={{ textAlign: 'right' }}>
             {!loading.stress && stressData && (
               <div>
                 <Text strong>Mức độ căng thẳng hiện tại: </Text>
                 {renderStressLevel(stressData.currentLevel || 'NO_DATA')}
+                {stressData.dailyAverageStressScore && (
+                  <div style={{ marginTop: '8px' }}>
+                    <Text type="secondary">Điểm TB hôm nay: </Text>
+                    <Text strong>{stressData.dailyAverageStressScore.toFixed(2)}</Text>
+                  </div>
+                )}
+                {stressData.totalAnalysesToday && (
+                  <div style={{ marginTop: '4px' }}>
+                    <Text type="secondary">Số lần phân tích: </Text>
+                    <Text strong>{stressData.totalAnalysesToday}</Text>
+                  </div>
+                )}
               </div>
             )}
           </Col>
@@ -255,9 +266,8 @@ export default function StudentDetail() {
             ) : !stressData ? (
               <Empty description="Không có dữ liệu phân tích căng thẳng" />
             ) : (
-              <div>
-                <Row gutter={16}>
-                  <Col span={8}>
+              <div>                <Row gutter={16}>
+                  <Col span={6}>
                     <Card>
                       <Statistic 
                         title="Mức độ căng thẳng hiện tại"
@@ -266,10 +276,27 @@ export default function StudentDetail() {
                           color: stressLevelColors[stressData.currentLevel] || 'gray'
                         }}
                       />
+                      {stressData.dailyAverageStressScore > 0 && (
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                          Điểm TB: {stressData.dailyAverageStressScore.toFixed(2)}
+                        </div>
+                      )}
                     </Card>
                   </Col>
                   
-                  <Col span={8}>
+                  <Col span={6}>
+                    <Card>
+                      <Statistic 
+                        title="Số lần phân tích hôm nay"
+                        value={stressData.totalAnalysesToday || 0}
+                        valueStyle={{ 
+                          color: stressData.totalAnalysesToday > 0 ? '#1890ff' : '#999'
+                        }}
+                      />
+                    </Card>
+                  </Col>
+                  
+                  <Col span={6}>
                     <Card>
                       <Statistic 
                         title="Mức độ trung bình (7 ngày)"
@@ -281,7 +308,7 @@ export default function StudentDetail() {
                     </Card>
                   </Col>
                   
-                  <Col span={8}>
+                  <Col span={6}>
                     <Card>
                       <Statistic 
                         title="Xu hướng"

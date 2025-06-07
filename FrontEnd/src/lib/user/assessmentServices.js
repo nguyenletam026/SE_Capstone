@@ -249,3 +249,30 @@ export const getMyAnswers = async () => {
       return 100000;
     }
   };
+
+  export const getChatCostPerMinute = async () => {
+    const token = getToken();
+    
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/api/admin/chat-cost-minute`;
+      
+      const res = await fetch(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!res.ok) {
+        console.error("Error fetching chat cost per minute:", res.status, res.statusText);
+        // Return default cost if API fails
+        return 2000; 
+      }
+      
+      const data = await res.json();
+      return data.result;
+    } catch (error) {
+      console.error("Error fetching chat cost per minute:", error);
+      // Return default cost on error
+      return 2000;
+    }
+  };

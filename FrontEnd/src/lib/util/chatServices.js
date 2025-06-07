@@ -75,12 +75,17 @@ export const getConversation = async (user1Id, user2Id) => {
   }
 };
 
-export const createChatPayment = async (doctorId, hours) => {
+export const createChatPayment = async (doctorId, hours, minutes = null) => {
   if (!doctorId) {
     throw new Error("Doctor ID is required");
   }
   
-  if (!hours || isNaN(hours) || hours <= 0) {
+  // Validate that either hours or minutes is provided
+  if (minutes !== null && minutes > 0) {
+    if (isNaN(minutes) || minutes <= 0) {
+      throw new Error("Valid number of minutes is required");
+    }
+  } else if (!hours || isNaN(hours) || hours <= 0) {
     throw new Error("Valid number of hours is required");
   }
   
@@ -90,16 +95,23 @@ export const createChatPayment = async (doctorId, hours) => {
   }
   
   try {
+    // Build request body based on whether minutes or hours is provided
+    const requestBody = {
+      doctorId,
+      hours: hours || 1, // Default to 1 hour if not provided (for backward compatibility)
+    };
+    
+    if (minutes !== null && minutes > 0) {
+      requestBody.minutes = minutes;
+    }
+    
     const res = await fetch(`${process.env.REACT_APP_API_URL}/api/chat-payments`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        doctorId,
-        hours,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!res.ok) {
@@ -414,6 +426,46 @@ export const markMessagesAsRead = async (userId, senderId) => {
     return res.json();
   } catch (error) {
     console.error('Mark messages as read error:', error);
+    throw error;
+  }
+};
+
+export const getChatHistory = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  
+  const token = getToken();
+  if (!token) {
+    throw new Error("Authentication token is missing");
+  }
+  
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/chat/history/${userId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('Get chat history failed:', {
+        status: res.status,
+        statusText: res.statusText,
+        errorData
+      });
+      throw new Error(errorData.message || "Failed to get chat history");
+    }
+    
+    const data = await res.json();
+    return data.result || data;
+  } catch (error) {
+    console.error('Get chat history error:', error);
     throw error;
   }
 };

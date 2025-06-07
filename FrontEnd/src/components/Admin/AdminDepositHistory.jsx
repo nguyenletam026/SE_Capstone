@@ -100,21 +100,21 @@ const getDateRangeLabel = (range) => {
   
   switch(range) {
     case 'today':
-      return 'Hôm nay';
+      return 'Today';
     case 'yesterday':
-      return 'Hôm qua';
+      return 'Yesterday';
     case 'thisWeek':
-      return 'Tuần này';
+      return 'This Week';
     case 'lastWeek':
-      return 'Tuần trước';
+      return 'Last Week';
     case 'thisMonth':
-      return 'Tháng này';
+      return 'This Month';
     case 'lastMonth':
-      return 'Tháng trước';
+      return 'Last Month';
     case 'custom':
-      return 'Tùy chỉnh';
+      return 'Custom';
     default:
-      return 'Tất cả';
+      return 'All';
   }
 };
 
@@ -171,8 +171,7 @@ const AdminDepositHistory = () => {
       const data = await getAllDepositHistory();
       setHistory(data);
       setFilteredHistory(data);
-    } catch (err) {
-      setError("Không thể tải lịch sử nạp tiền. Vui lòng thử lại sau.");
+    } catch (err) {      setError("Unable to load deposit history. Please try again later.");
       console.error("Error fetching deposit history:", err);
     } finally {
       setLoading(false);
@@ -352,12 +351,10 @@ const AdminDepositHistory = () => {
     <Box sx={{ width: "100%" }}>
       {/* Header and Summary Section */}
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          <Typography variant="h5" fontWeight={600} color="primary.dark">
-            Lịch sử nạp tiền
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>          <Typography variant="h5" fontWeight={600} color="primary.dark">
+            Deposit History
           </Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Tooltip title="Làm mới dữ liệu">
+          <Box sx={{ display: "flex", gap: 1 }}>            <Tooltip title="Refresh data">
               <IconButton
                 onClick={handleRefresh}
                 sx={{
@@ -386,16 +383,15 @@ const AdminDepositHistory = () => {
                     }}
                   >
                     <AccountBalanceWallet color="primary" />
-                  </Box>
-                  <Typography color="textSecondary" variant="body2">
-                    Tổng số tiền đã nạp
+                  </Box>                  <Typography color="textSecondary" variant="body2">
+                    Total Amount Deposited
                   </Typography>
                 </Box>
                 <Typography variant="h4" fontWeight={600}>
                   {stats.totalCompletedAmount.toLocaleString()} VND
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Từ {stats.completedTransactions} giao dịch hoàn thành
+                  From {stats.completedTransactions} completed transactions
                 </Typography>
               </CardContent>
             </StatsCard>
@@ -414,9 +410,8 @@ const AdminDepositHistory = () => {
                     }}
                   >
                     <CheckCircle color="success" />
-                  </Box>
-                  <Typography color="textSecondary" variant="body2">
-                    Giao dịch hoàn thành
+                  </Box>                  <Typography color="textSecondary" variant="body2">
+                    Completed Transactions
                   </Typography>
                 </Box>
                 <Typography variant="h4" fontWeight={600} color="success.main">
@@ -424,8 +419,8 @@ const AdminDepositHistory = () => {
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   {stats.totalTransactions > 0 
-                    ? `${((stats.completedTransactions / stats.totalTransactions) * 100).toFixed(1)}% tổng giao dịch`
-                    : 'Chưa có giao dịch nào'}
+                    ? `${((stats.completedTransactions / stats.totalTransactions) * 100).toFixed(1)}% of total transactions`
+                    : 'No transactions yet'}
                 </Typography>
               </CardContent>
             </StatsCard>
@@ -444,9 +439,8 @@ const AdminDepositHistory = () => {
                     }}
                   >
                     <Pending color="warning" />
-                  </Box>
-                  <Typography color="textSecondary" variant="body2">
-                    Giao dịch đang xử lý
+                  </Box>                  <Typography color="textSecondary" variant="body2">
+                    Fail Transactions
                   </Typography>
                 </Box>
                 <Typography variant="h4" fontWeight={600} color="warning.main">
@@ -454,8 +448,8 @@ const AdminDepositHistory = () => {
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   {stats.totalTransactions > 0 
-                    ? `${((stats.pendingTransactions / stats.totalTransactions) * 100).toFixed(1)}% tổng giao dịch`
-                    : 'Chưa có giao dịch nào'}
+                    ? `${((stats.pendingTransactions / stats.totalTransactions) * 100).toFixed(1)}% of total transactions`
+                    : 'No transactions yet'}
                 </Typography>
               </CardContent>
             </StatsCard>
@@ -474,9 +468,8 @@ const AdminDepositHistory = () => {
                     }}
                   >
                     <DateRange color="info" />
-                  </Box>
-                  <Typography color="textSecondary" variant="body2">
-                    Tổng số giao dịch
+                  </Box>                  <Typography color="textSecondary" variant="body2">
+                    Total Transactions
                   </Typography>
                 </Box>
                 <Typography variant="h4" fontWeight={600}>
@@ -489,7 +482,7 @@ const AdminDepositHistory = () => {
                     <Refresh fontSize="small" sx={{ mr: 1, opacity: 0.6 }} />
                   )}
                   <Typography variant="body2" color="text.secondary">
-                    Cập nhật mới nhất
+                    Last updated
                   </Typography>
                 </Box>
               </CardContent>
@@ -502,9 +495,8 @@ const AdminDepositHistory = () => {
       <Box sx={{ mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
           {/* Search Field */}
-          <Grid item xs={12} md={4}>
-            <TextField
-              label="Tìm kiếm theo tên hoặc mã giao dịch"
+          <Grid item xs={12} md={4}>            <TextField
+              label="Search by name or transaction ID"
               variant="outlined"
               fullWidth
               size="small"
@@ -535,9 +527,8 @@ const AdminDepositHistory = () => {
                 variant="text" 
                 startIcon={<CalendarToday fontSize="small" />}
                 selected={dateRange === 'today'}
-                onClick={() => setDateRange('today')}
-              >
-                Hôm nay
+                onClick={() => setDateRange('today')}              >
+                Today
               </FilterButton>
               <FilterButton 
                 size="small" 
@@ -546,7 +537,7 @@ const AdminDepositHistory = () => {
                 selected={dateRange === 'yesterday'}
                 onClick={() => setDateRange('yesterday')}
               >
-                Hôm qua
+                Yesterday
               </FilterButton>
               <FilterButton 
                 size="small" 
@@ -555,7 +546,7 @@ const AdminDepositHistory = () => {
                 selected={dateRange === 'thisWeek'}
                 onClick={() => setDateRange('thisWeek')}
               >
-                Tuần này
+                This Week
               </FilterButton>
               <FilterButton 
                 size="small" 
@@ -564,7 +555,7 @@ const AdminDepositHistory = () => {
                 selected={dateRange === 'lastWeek'}
                 onClick={() => setDateRange('lastWeek')}
               >
-                Tuần trước
+                Last Week
               </FilterButton>
               <FilterButton 
                 size="small" 
@@ -573,7 +564,7 @@ const AdminDepositHistory = () => {
                 selected={dateRange === 'thisMonth'}
                 onClick={() => setDateRange('thisMonth')}
               >
-                Tháng này
+                This Month
               </FilterButton>
               <FilterButton 
                 size="small" 
@@ -582,7 +573,7 @@ const AdminDepositHistory = () => {
                 selected={dateRange === 'lastMonth'}
                 onClick={() => setDateRange('lastMonth')}
               >
-                Tháng trước
+                Last Month
               </FilterButton>
             </Stack>
           </Grid>
@@ -601,9 +592,8 @@ const AdminDepositHistory = () => {
                 }
                 variant="outlined"
                 onClick={handleFilterClick}
-                color={activeFilterCount > 0 ? "primary" : "inherit"}
-              >
-                {activeFilterCount > 0 ? "Bộ lọc hoạt động" : "Thêm bộ lọc"}
+                color={activeFilterCount > 0 ? "primary" : "inherit"}              >
+                {activeFilterCount > 0 ? "Active Filters" : "Add Filters"}
               </Button>
             </Box>
           </Grid>
@@ -611,10 +601,9 @@ const AdminDepositHistory = () => {
         
         {/* Active filter indicators */}
         {activeFilterCount > 0 && (
-          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
-            {dateRange !== 'all' && (
+          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>            {dateRange !== 'all' && (
               <Chip 
-                label={`Thời gian: ${dateRangeLabel}`}
+                label={`Time: ${dateRangeLabel}`}
                 onDelete={() => setDateRange('all')}
                 color="primary"
                 variant="outlined"
@@ -624,7 +613,7 @@ const AdminDepositHistory = () => {
             )}
             {statusFilter !== 'all' && (
               <Chip 
-                label={`Trạng thái: ${statusFilter === 'completed' ? 'Hoàn thành' : 'Đang xử lý'}`}
+                label={`Status: ${statusFilter === 'completed' ? 'Completed' : 'Fail'}`}
                 onDelete={() => setStatusFilter('all')}
                 color="primary"
                 variant="outlined"
@@ -638,7 +627,7 @@ const AdminDepositHistory = () => {
                 onClick={handleClearFilters}
                 sx={{ ml: 1 }}
               >
-                Xóa tất cả bộ lọc
+                Clear All Filters
               </Button>
             )}
           </Box>
@@ -653,9 +642,8 @@ const AdminDepositHistory = () => {
         PaperProps={{
           sx: { maxWidth: 340, p: 1, mt: 1 },
         }}
-      >
-        <Typography variant="subtitle2" sx={{ px: 2, py: 1 }}>
-          Lọc theo trạng thái
+      >        <Typography variant="subtitle2" sx={{ px: 2, py: 1 }}>
+          Filter by Status
         </Typography>
         <Divider sx={{ my: 0.5 }} />
         <MenuItem 
@@ -668,7 +656,7 @@ const AdminDepositHistory = () => {
           <ListItemIcon>
             <FilterList fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Tất cả trạng thái</ListItemText>
+          <ListItemText>All Status</ListItemText>
         </MenuItem>
         <MenuItem 
           selected={statusFilter === 'completed'} 
@@ -680,7 +668,7 @@ const AdminDepositHistory = () => {
           <ListItemIcon>
             <Check fontSize="small" color="success" />
           </ListItemIcon>
-          <ListItemText>Đã hoàn thành</ListItemText>
+          <ListItemText>Completed</ListItemText>
         </MenuItem>
         <MenuItem 
           selected={statusFilter === 'pending'} 
@@ -692,19 +680,18 @@ const AdminDepositHistory = () => {
           <ListItemIcon>
             <Pending fontSize="small" color="warning" />
           </ListItemIcon>
-          <ListItemText>Đang xử lý</ListItemText>
+          <ListItemText>Fail</ListItemText>
         </MenuItem>
 
         <Typography variant="subtitle2" sx={{ px: 2, pt: 2, pb: 1, mt: 1 }}>
-          Thời gian tùy chỉnh
+          Custom Date Range
         </Typography>
         <Divider sx={{ my: 0.5 }} />
         
         <Box sx={{ p: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <TextField
-                label="Từ ngày"
+            <Grid item xs={6}>              <TextField
+                label="From Date"
                 type="date"
                 size="small"
                 fullWidth
@@ -717,7 +704,7 @@ const AdminDepositHistory = () => {
             </Grid>
             <Grid item xs={6}>
               <TextField
-                label="Đến ngày"
+                label="To Date"
                 type="date"
                 size="small"
                 fullWidth
@@ -730,8 +717,7 @@ const AdminDepositHistory = () => {
             </Grid>
           </Grid>
 
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-            <Button 
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>            <Button 
               size="small" 
               onClick={() => {
                 setCustomStartDate("");
@@ -739,7 +725,7 @@ const AdminDepositHistory = () => {
               }}
               disabled={!customStartDate && !customEndDate}
             >
-              Đặt lại
+              Reset
             </Button>
             <Button 
               variant="contained" 
@@ -752,27 +738,25 @@ const AdminDepositHistory = () => {
               }}
               disabled={!customStartDate || !customEndDate}
             >
-              Áp dụng
+              Apply
             </Button>
           </Box>
         </Box>
         
-        <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={handleClearFilters}>
+        <Divider sx={{ my: 0.5 }} />        <MenuItem onClick={handleClearFilters}>
           <ListItemIcon>
             <Close fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Xóa tất cả bộ lọc</ListItemText>
+          <ListItemText>Clear All Filters</ListItemText>
         </MenuItem>
       </Menu>
 
       {error && (
         <Alert 
           severity="error" 
-          sx={{ mb: 2 }}
-          action={
+          sx={{ mb: 2 }}          action={
             <Button color="inherit" size="small" onClick={handleRefresh}>
-              Thử lại
+              Try Again
             </Button>
           }
         >
@@ -792,30 +776,28 @@ const AdminDepositHistory = () => {
             borderRadius: 2,
             bgcolor: alpha('#42a5f5', 0.1)
           }}
-        >
-          <Info sx={{ fontSize: 48, color: 'info.main', opacity: 0.6, mb: 2 }} />
+        >          <Info sx={{ fontSize: 48, color: 'info.main', opacity: 0.6, mb: 2 }} />
           <Typography variant="h6" gutterBottom>
-            Không tìm thấy giao dịch nào
+            No transactions found
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 3 }}>
             {activeFilterCount > 0 
-              ? 'Thay đổi hoặc xóa bộ lọc để xem thêm kết quả'
-              : 'Chưa có giao dịch nạp tiền nào được thực hiện'}
+              ? 'Change or remove filters to see more results'
+              : 'No deposit transactions have been made yet'}
           </Typography>
           {activeFilterCount > 0 && (
             <Button variant="outlined" onClick={handleClearFilters}>
-              Xóa tất cả bộ lọc
+              Clear All Filters
             </Button>
           )}
         </Paper>
       ) : (
         <Paper sx={{ width: "100%", borderRadius: 2, overflow: 'hidden' }}>
-          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="subtitle1" fontWeight={500}>
-              {filteredHistory.length} giao dịch được tìm thấy
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}>            <Typography variant="subtitle1" fontWeight={500}>
+              {filteredHistory.length} transactions found
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Tooltip title="Sắp xếp theo">
+              <Tooltip title="Sort by">
                 <Button 
                   endIcon={<KeyboardArrowDown />}
                   size="small"
@@ -827,7 +809,7 @@ const AdminDepositHistory = () => {
                     }
                   }}
                 >
-                  Sắp xếp: {sortBy === 'amount' ? 'Số tiền' : sortBy === 'createdAt' ? 'Ngày tạo' : 'Mặc định'}
+                  Sort by: {sortBy === 'amount' ? 'Amount' : sortBy === 'createdAt' ? 'Date Created' : 'Default'}
                 </Button>
               </Tooltip>
               <Box 
@@ -843,21 +825,19 @@ const AdminDepositHistory = () => {
                   p: 1,
                   display: 'none'
                 }}
-              >
-                <MenuItem dense onClick={() => handleSortByChange('createdAt')}>
+              >                <MenuItem dense onClick={() => handleSortByChange('createdAt')}>
                   <ListItemIcon>
                     {sortBy === 'createdAt' && <Check fontSize="small" />}
                   </ListItemIcon>
-                  <ListItemText>Ngày tạo</ListItemText>
+                  <ListItemText>Date Created</ListItemText>
                 </MenuItem>
                 <MenuItem dense onClick={() => handleSortByChange('amount')}>
                   <ListItemIcon>
                     {sortBy === 'amount' && <Check fontSize="small" />}
                   </ListItemIcon>
-                  <ListItemText>Số tiền</ListItemText>
+                  <ListItemText>Amount</ListItemText>
                 </MenuItem>
-              </Box>
-              <Tooltip title={`Sắp xếp ${sortOrder === 'asc' ? 'tăng dần' : 'giảm dần'}`}>
+              </Box>              <Tooltip title={`Sort ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}>
                 <IconButton size="small" onClick={handleSortToggle}>
                   <Sort 
                     fontSize="small" 
@@ -872,14 +852,13 @@ const AdminDepositHistory = () => {
           </Box>
           
           <TableContainer>
-            <Table sx={{ minWidth: 650 }} aria-label="deposit history table">
-              <StyledTableHead>
+            <Table sx={{ minWidth: 650 }} aria-label="deposit history table">              <StyledTableHead>
                 <TableRow>
-                  <TableCell>Người dùng</TableCell>
-                  <TableCell>Mã giao dịch</TableCell>
-                  <TableCell align="right">Số tiền</TableCell>
-                  <TableCell align="center">Trạng thái</TableCell>
-                  <TableCell align="right">Ngày tạo</TableCell>
+                  <TableCell>User</TableCell>
+                  <TableCell>Transaction ID</TableCell>
+                  <TableCell align="right">Amount</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                  <TableCell align="right">Date Created</TableCell>
                 </TableRow>
               </StyledTableHead>
               <TableBody>
@@ -905,11 +884,10 @@ const AdminDepositHistory = () => {
                           {(deposit?.amount || 0).toLocaleString()} VND
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">
-                        {deposit?.completed ? (
+                      <TableCell align="center">                        {deposit?.completed ? (
                           <Chip
                             icon={<Check fontSize="small" />}
-                            label="Hoàn thành"
+                            label="Completed"
                             color="success"
                             size="small"
                             variant="outlined"
@@ -918,7 +896,7 @@ const AdminDepositHistory = () => {
                         ) : (
                           <Chip
                             icon={<Pending fontSize="small" />}
-                            label="Đang xử lý"
+                            label="Fail"
                             color="warning"
                             size="small"
                             variant="outlined"
@@ -935,8 +913,7 @@ const AdminDepositHistory = () => {
                   ))}
               </TableBody>
             </Table>
-          </TableContainer>
-          <TablePagination
+          </TableContainer>          <TablePagination
             rowsPerPageOptions={[10, 25, 50, 100]}
             component="div"
             count={filteredHistory.length}
@@ -944,8 +921,8 @@ const AdminDepositHistory = () => {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            labelRowsPerPage="Số hàng mỗi trang"
-            labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
+            labelRowsPerPage="Rows per page"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} of ${count}`}
           />
         </Paper>
       )}

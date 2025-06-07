@@ -13,7 +13,7 @@ import {
   FiAlertTriangle, FiCheckCircle, FiInfo
 } from 'react-icons/fi';
 import { format, startOfWeek, endOfWeek, addDays, addWeeks, subWeeks, isSameDay, isToday } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale'; // Changed from 'en' to 'enUS'
 import { toast } from 'react-toastify';
 
 const AdminDoctorSchedule = () => {
@@ -64,7 +64,7 @@ const AdminDoctorSchedule = () => {
         }));
       }
     } catch (error) {
-      toast.error('Có lỗi khi tải dữ liệu lịch làm việc', {
+      toast.error('Error loading schedule data', {
         position: "top-right",
         hideProgressBar: false,
         closeOnClick: true,
@@ -90,17 +90,17 @@ const AdminDoctorSchedule = () => {
     try {
       if (currentSchedule) {
         await updateDoctorSchedule(currentSchedule.id, formData);
-        toast.success('Cập nhật lịch làm việc thành công');
+        toast.success('Schedule updated successfully');
       } else {
         await createDoctorSchedule(formData);
-        toast.success('Tạo lịch làm việc mới thành công');
+        toast.success('New schedule created successfully');
       }
       
       setIsModalOpen(false);
       resetForm();
       fetchData();
     } catch (error) {
-      toast.error(currentSchedule ? 'Không thể cập nhật lịch làm việc' : 'Không thể tạo lịch làm việc mới');
+      toast.error(currentSchedule ? 'Unable to update schedule' : 'Unable to create new schedule');
     }
   };
 
@@ -109,11 +109,11 @@ const AdminDoctorSchedule = () => {
     
     try {
       await deleteDoctorSchedule(currentSchedule.id);
-      toast.success('Đã xóa lịch làm việc thành công');
+      toast.success('Schedule deleted successfully');
       setIsDeleteModalOpen(false);
       fetchData();
     } catch (error) {
-      toast.error('Không thể xóa lịch làm việc');
+      toast.error('Unable to delete schedule');
     }
   };
 
@@ -140,7 +140,7 @@ const AdminDoctorSchedule = () => {
 
   const openCreateModal = (date) => {
     if (doctors.length === 0) {
-      toast.warning('Không có bác sĩ nào để tạo lịch. Vui lòng phê duyệt bác sĩ trước.');
+      toast.warning('No doctors available to create schedule. Please approve doctors first.');
       return;
     }
     
@@ -229,7 +229,7 @@ const AdminDoctorSchedule = () => {
   };
 
   const getDayName = (date) => {
-    return format(date, 'EEEE', { locale: vi });
+    return format(date, 'EEEE', { locale: enUS }); // Changed from 'en' to 'enUS'
   };
 
   const getWeekDays = () => {
@@ -249,8 +249,8 @@ const AdminDoctorSchedule = () => {
   };
 
   const weekDays = getWeekDays();
-  const weekStart = format(weekDays[0], 'dd/MM/yyyy');
-  const weekEnd = format(weekDays[6], 'dd/MM/yyyy');
+  const weekStart = format(weekDays[0], 'MM/dd/yyyy');
+  const weekEnd = format(weekDays[6], 'MM/dd/yyyy');
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -261,9 +261,9 @@ const AdminDoctorSchedule = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-800 flex items-center">
                 <FiCalendar className="mr-3 text-indigo-600" size={28} />
-                Quản lý lịch làm việc bác sĩ
+                Doctor Schedule Management
               </h1>
-              <p className="text-gray-500 mt-1">Quản lý và điều chỉnh lịch làm việc cho bác sĩ trong hệ thống</p>
+              <p className="text-gray-500 mt-1">Manage and adjust doctor schedules in the system</p>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -271,7 +271,7 @@ const AdminDoctorSchedule = () => {
                 onClick={() => goToToday()}
                 className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
-                Hôm nay
+                Today
               </button>
               
               <button
@@ -279,7 +279,7 @@ const AdminDoctorSchedule = () => {
                 className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
               >
                 <FiPlus className="mr-2" />
-                Thêm lịch mới
+                Add New Schedule
               </button>
             </div>
           </div>
@@ -296,7 +296,7 @@ const AdminDoctorSchedule = () => {
                 </div>
                 <input
                   type="text"
-                  placeholder="Tìm theo tên bác sĩ hoặc ngày..."
+                  placeholder="Search by doctor name or date..."
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -310,7 +310,7 @@ const AdminDoctorSchedule = () => {
                   onChange={(e) => setActiveDoctor(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                  <option value="all">Tất cả bác sĩ</option>
+                  <option value="all">All Doctors</option>
                   {doctors.map(doctor => (
                     <option key={doctor.id} value={doctor.id}>
                       {doctor.firstName} {doctor.lastName}
@@ -326,9 +326,9 @@ const AdminDoctorSchedule = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                  <option value="all">Tất cả trạng thái</option>
-                  <option value="available">Có sẵn</option>
-                  <option value="unavailable">Không có sẵn</option>
+                  <option value="all">All Status</option>
+                  <option value="available">Available</option>
+                  <option value="unavailable">Unavailable</option>
                 </select>
               </div>
             </div>
@@ -344,7 +344,7 @@ const AdminDoctorSchedule = () => {
                 }`}
               >
                 <FiGrid className="mr-1.5" />
-                Lịch
+                Calendar
               </button>
               <button
                 onClick={() => setViewMode('list')}
@@ -355,7 +355,7 @@ const AdminDoctorSchedule = () => {
                 }`}
               >
                 <FiList className="mr-1.5" />
-                Danh sách
+                List
               </button>
             </div>
           </div>
@@ -365,7 +365,7 @@ const AdminDoctorSchedule = () => {
         {isLoading && (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-            <span className="ml-3 text-lg font-medium text-gray-700">Đang tải dữ liệu...</span>
+            <span className="ml-3 text-lg font-medium text-gray-700">Loading data...</span>
           </div>
         )}
 
@@ -375,16 +375,16 @@ const AdminDoctorSchedule = () => {
             <div className="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-indigo-100 mb-4">
               <FiCalendar className="h-12 w-12 text-indigo-600" />
             </div>
-            <h3 className="text-xl font-medium text-gray-900 mb-2">Chưa có lịch làm việc nào</h3>
+            <h3 className="text-xl font-medium text-gray-900 mb-2">No schedules yet</h3>
             <p className="text-gray-500 max-w-md mx-auto mb-6">
-              Bắt đầu bằng cách tạo lịch làm việc đầu tiên cho bác sĩ. Các lịch làm việc sẽ hiển thị ở đây.
+              Start by creating the first doctor schedule. Schedules will be displayed here.
             </p>
             <button
               onClick={() => openCreateModal()}
               className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
             >
               <FiPlus className="mr-2" />
-              Thêm lịch mới
+              Add New Schedule
             </button>
           </div>
         )}
@@ -396,13 +396,13 @@ const AdminDoctorSchedule = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bác sĩ</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cuộc hẹn</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ghi chú</th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointments</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -413,7 +413,7 @@ const AdminDoctorSchedule = () => {
                           <div className="flex items-center">
                             <div>
                               <div className="text-sm font-medium text-gray-900">{schedule.doctorName}</div>
-                              <div className="text-xs text-gray-500">{schedule.specialization || "Chưa có chuyên khoa"}</div>
+                              <div className="text-xs text-gray-500">{schedule.specialization || "No specialization"}</div>
                             </div>
                           </div>
                         </td>
@@ -444,17 +444,17 @@ const AdminDoctorSchedule = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           {schedule.isAvailable ? (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              <FiCheckCircle className="mr-1" /> Có sẵn
+                              <FiCheckCircle className="mr-1" /> Available
                             </span>
                           ) : (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              <FiX className="mr-1" /> Không có sẵn
+                              <FiX className="mr-1" /> Unavailable
                             </span>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-500 line-clamp-1">
-                            {schedule.notes || "Không có ghi chú"}
+                            {schedule.notes || "No notes"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -472,14 +472,14 @@ const AdminDoctorSchedule = () => {
                     <tr>
                       <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                         <FiAlertCircle className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                        <p className="font-medium text-gray-900 mb-1">Không tìm thấy lịch làm việc nào</p>
-                        <p className="text-gray-500 mb-4">Thử thay đổi bộ lọc hoặc tạo lịch mới</p>
+                        <p className="font-medium text-gray-900 mb-1">No schedules found</p>
+                        <p className="text-gray-500 mb-4">Try changing filters or create a new schedule</p>
                         <button
                           onClick={() => openCreateModal()}
                           className="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
                         >
                           <FiPlus className="mr-1.5" />
-                          Thêm lịch mới
+                          Add New Schedule
                         </button>
                       </td>
                     </tr>
@@ -527,7 +527,7 @@ const AdminDoctorSchedule = () => {
                   <div className={`text-sm font-medium mb-0.5 ${isToday(day) ? 'text-indigo-600' : 'text-gray-900'}`}>
                     {getDayName(day)}
                   </div>
-                  <div className="text-xs text-gray-500">{format(day, 'dd/MM')}</div>
+                  <div className="text-xs text-gray-500">{format(day, 'MM/dd')}</div>
                   
                   {isToday(day) && (
                     <span className="inline-block w-2 h-2 bg-indigo-500 rounded-full mt-1"></span>
@@ -547,70 +547,69 @@ const AdminDoctorSchedule = () => {
                     className={`border-r last:border-r-0 min-h-[400px] ${isToday(day) ? 'bg-indigo-50 bg-opacity-50' : ''}`}
                   >
                     <div className="p-3">
-                      {daySchedules.length > 0 ? (
-                        <div className="space-y-3">
-                          {daySchedules.map((schedule) => (
-                            <div 
-                              key={schedule.id} 
-                              className={`p-3 rounded-lg text-sm border-l-4 ${
-                                schedule.isAvailable 
-                                  ? 'border-green-500 bg-green-50 hover:bg-green-100' 
-                                  : 'border-red-500 bg-red-50 hover:bg-red-100'
-                              } transition-colors cursor-pointer shadow-sm`}
-                              onClick={() => openEditModal(schedule)}
-                            >
-                              <div className="flex justify-between items-start">
-                                <div className="font-medium truncate flex-grow">{schedule.doctorName}</div>
-                                <button
-                                  ref={(el) => (buttonRefs.current[`cal-${schedule.id}`] = el)}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleDropdown(`cal-${schedule.id}`);
-                                  }}
-                                  className="text-gray-400 hover:text-gray-600 focus:outline-none p-0.5 flex-shrink-0"
-                                >
-                                  <FiMoreVertical />
-                                </button>
-                              </div>
-                              
-                              <div className="mt-2 flex items-center text-xs text-gray-600">
-                                <FiClock className="mr-1" /> {schedule.startTime} - {schedule.endTime}
-                              </div>
-                              
-                              <div className="mt-1 flex items-center justify-between">
-                                <div 
-                                  className={`flex items-center text-xs ${
-                                    schedule.currentAppointments >= schedule.maxAppointments
-                                      ? 'text-red-700'
-                                      : 'text-gray-600'
-                                  }`}
-                                >
-                                  <FiUsers className="mr-1" />
-                                  <span>{schedule.currentAppointments}/{schedule.maxAppointments}</span>
-                                </div>
-                                
-                                {schedule.notes && (
-                                  <Tooltip title={schedule.notes}>
-                                    <div className="flex items-center text-xs text-gray-500">
-                                      <FiFileText className="mr-1" />
-                                      <span>Ghi chú</span>
-                                    </div>
-                                  </Tooltip>
-                                )}
-                              </div>
+                      <div className="space-y-3 min-h-[180px]">
+                        {daySchedules.map((schedule) => (
+                          <div 
+                            key={schedule.id} 
+                            className={`p-3 rounded-lg text-sm border-l-4 ${
+                              schedule.isAvailable 
+                                ? 'border-green-500 bg-green-50 hover:bg-green-100' 
+                                : 'border-red-500 bg-red-50 hover:bg-red-100'
+                            } transition-colors cursor-pointer shadow-sm`}
+                            onClick={() => openEditModal(schedule)}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="font-medium truncate flex-grow">{schedule.doctorName}</div>
+                              <button
+                                ref={(el) => (buttonRefs.current[`cal-${schedule.id}`] = el)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleDropdown(`cal-${schedule.id}`);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 focus:outline-none p-0.5 flex-shrink-0"
+                              >
+                                <FiMoreVertical />
+                              </button>
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-full min-h-[200px]">
+                            
+                            <div className="mt-2 flex items-center text-xs text-gray-600">
+                              <FiClock className="mr-1" /> {schedule.startTime} - {schedule.endTime}
+                            </div>
+                            
+                            <div className="mt-1 flex items-center justify-between">
+                              <div 
+                                className={`flex items-center text-xs ${
+                                  schedule.currentAppointments >= schedule.maxAppointments
+                                    ? 'text-red-700'
+                                    : 'text-gray-600'
+                                }`}
+                              >
+                                <FiUsers className="mr-1" />
+                                <span>{schedule.currentAppointments}/{schedule.maxAppointments}</span>
+                              </div>
+                              
+                              {schedule.notes && (
+                                <Tooltip title={schedule.notes}>
+                                  <div className="flex items-center text-xs text-gray-500">
+                                    <FiFileText className="mr-1" />
+                                    <span>Notes</span>
+                                  </div>
+                                </Tooltip>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {/* Always show the Add New Schedule button at the bottom of each day */}
+                        <div className="flex items-center justify-center mt-3">
                           <button
                             onClick={() => openCreateModal(day)}
                             className="flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-400 hover:text-indigo-600 hover:border-indigo-400 transition-colors w-full"
                           >
-                            <FiPlus className="mr-1" /> Thêm lịch mới
+                            <FiPlus className="mr-1" /> Add New Schedule
                           </button>
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -641,7 +640,7 @@ const AdminDoctorSchedule = () => {
                 className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <FiEdit2 className="mr-3 text-gray-500" />
-                Chỉnh sửa
+                Edit
               </button>
               <button
                 onClick={() => {
@@ -653,7 +652,7 @@ const AdminDoctorSchedule = () => {
                 className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
               >
                 <FiTrash2 className="mr-3 text-red-500" />
-                Xóa lịch
+                Delete
               </button>
             </div>
           </div>
@@ -669,7 +668,7 @@ const AdminDoctorSchedule = () => {
               <div className="flex justify-between items-center mb-5">
                 <h3 className="text-xl font-bold text-gray-900 flex items-center">
                   <FiCalendar className={`mr-3 ${currentSchedule ? 'text-amber-500' : 'text-indigo-600'}`} />
-                  {currentSchedule ? 'Chỉnh sửa lịch làm việc' : 'Tạo lịch làm việc mới'}
+                  {currentSchedule ? 'Edit Schedule' : 'Create New Schedule'}
                 </h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -683,7 +682,7 @@ const AdminDoctorSchedule = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label htmlFor="doctorId" className="block text-sm font-medium text-gray-700 mb-1">
-                    Chọn bác sĩ <span className="text-red-500">*</span>
+                    Select Doctor <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="doctorId"
@@ -693,7 +692,7 @@ const AdminDoctorSchedule = () => {
                     className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     required
                   >
-                    <option value="">-- Chọn bác sĩ --</option>
+                    <option value="">-- Select Doctor --</option>
                     {doctors.map((doctor) => (
                       <option key={doctor.id} value={doctor.id}>
                         {doctor.firstName} {doctor.lastName} {doctor.specialization ? `- ${doctor.specialization}` : ''}
@@ -704,7 +703,7 @@ const AdminDoctorSchedule = () => {
 
                 <div>
                   <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                    Ngày làm việc <span className="text-red-500">*</span>
+                    Work Date <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-center">
                     <FiCalendar className="text-gray-400 mr-2" />
@@ -723,7 +722,7 @@ const AdminDoctorSchedule = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                      Thời gian bắt đầu <span className="text-red-500">*</span>
+                      Start Time <span className="text-red-500">*</span>
                     </label>
                     <div className="flex items-center">
                       <FiClock className="text-gray-400 mr-2" />
@@ -740,7 +739,7 @@ const AdminDoctorSchedule = () => {
                   </div>
                   <div>
                     <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                      Thời gian kết thúc <span className="text-red-500">*</span>
+                      End Time <span className="text-red-500">*</span>
                     </label>
                     <div className="flex items-center">
                       <FiClock className="text-gray-400 mr-2" />
@@ -759,7 +758,7 @@ const AdminDoctorSchedule = () => {
 
                 <div>
                   <label htmlFor="maxAppointments" className="block text-sm font-medium text-gray-700 mb-1">
-                    Số lượng cuộc hẹn tối đa <span className="text-red-500">*</span>
+                    Maximum Appointments <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-center">
                     <FiUsers className="text-gray-400 mr-2" />
@@ -775,12 +774,12 @@ const AdminDoctorSchedule = () => {
                       required
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Số lượng bệnh nhân tối đa có thể đặt hẹn trong khung giờ này</p>
+                  <p className="text-xs text-gray-500 mt-1">Maximum number of patients that can book appointments in this time slot</p>
                 </div>
 
                 <div>
                   <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                    Ghi chú (Tùy chọn)
+                    Notes (Optional)
                   </label>
                   <div className="flex">
                     <FiFileText className="text-gray-400 mr-2 mt-3" />
@@ -790,7 +789,7 @@ const AdminDoctorSchedule = () => {
                       value={formData.notes}
                       onChange={handleInputChange}
                       rows="3"
-                      placeholder="Thêm ghi chú về lịch làm việc này..."
+                      placeholder="Add notes about this schedule..."
                       className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     ></textarea>
                   </div>
@@ -807,10 +806,10 @@ const AdminDoctorSchedule = () => {
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                     />
                     <label htmlFor="isAvailable" className="ml-2 block text-sm text-gray-700">
-                      Trạng thái có sẵn để đặt lịch
+                      Available for appointment booking
                     </label>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1 ml-6">Khi không chọn, bệnh nhân sẽ không thể đặt lịch trong khung giờ này</p>
+                  <p className="text-xs text-gray-500 mt-1 ml-6">When unchecked, patients will not be able to book appointments in this time slot</p>
                 </div>
 
                 <div className="pt-2 border-t border-gray-200 flex justify-end gap-3">
@@ -819,7 +818,7 @@ const AdminDoctorSchedule = () => {
                     onClick={() => setIsModalOpen(false)}
                     className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                   >
-                    Hủy
+                    Cancel
                   </button>
                   <button
                     type="submit"
@@ -829,7 +828,7 @@ const AdminDoctorSchedule = () => {
                         : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
                     }`}
                   >
-                    {currentSchedule ? 'Cập nhật' : 'Tạo lịch'}
+                    {currentSchedule ? 'Update' : 'Create Schedule'}
                   </button>
                 </div>
               </form>
@@ -848,11 +847,11 @@ const AdminDoctorSchedule = () => {
               </div>
               
               <h3 className="text-xl font-semibold text-center text-gray-900 mb-2">
-                Xác nhận xóa lịch làm việc
+                Confirm Schedule Deletion
               </h3>
               
               <p className="text-gray-600 text-center mb-6">
-                Bạn có chắc chắn muốn xóa lịch làm việc này? Hành động này không thể hoàn tác và có thể ảnh hưởng đến các cuộc hẹn đã đặt.
+                Are you sure you want to delete this schedule? This action cannot be undone and may affect existing appointments.
               </p>
 
               <div className="flex justify-center gap-3">
@@ -860,13 +859,13 @@ const AdminDoctorSchedule = () => {
                   onClick={() => setIsDeleteModalOpen(false)}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   onClick={handleDelete}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
-                  Xóa lịch
+                  Delete Schedule
                 </button>
               </div>
             </div>

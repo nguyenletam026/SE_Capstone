@@ -8,6 +8,7 @@ import com.capstone.service.ChatPaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,4 +57,39 @@ public class ChatPaymentController {
                 .result(chatPaymentService.getPaidChatPatients())
                 .build();
     }
-} 
+    
+    /**
+     * Get refund history for current user (patient or doctor)
+     */
+    @GetMapping("/refund-history")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_ADMIN')")
+    public ApiResponse<List<ChatPaymentResponse>> getRefundHistory() {
+        log.info("Fetching refund history for current user");
+        return ApiResponse.<List<ChatPaymentResponse>>builder()
+                .result(chatPaymentService.getRefundHistory())
+                .build();
+    }
+      /**
+     * Get all refund history for admin users
+     */
+    @GetMapping("/refund-history/all")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<List<ChatPaymentResponse>> getAllRefundHistory() {
+        log.info("Fetching all refund history for admin");
+        return ApiResponse.<List<ChatPaymentResponse>>builder()
+                .result(chatPaymentService.getAllRefundHistory())
+                .build();
+    }
+    
+    /**
+     * Get all consultations for admin users
+     */
+    @GetMapping("/admin/all-consultations")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ApiResponse<List<ChatPaymentResponse>> getAllConsultations() {
+        log.info("Fetching all consultations for admin");
+        return ApiResponse.<List<ChatPaymentResponse>>builder()
+                .result(chatPaymentService.getAllConsultations())
+                .build();
+    }
+}

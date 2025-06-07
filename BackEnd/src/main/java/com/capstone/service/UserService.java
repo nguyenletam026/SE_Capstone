@@ -216,4 +216,9 @@ public class UserService {
         user.setBanned(false);
         userRepository.save(user);
     }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
 }

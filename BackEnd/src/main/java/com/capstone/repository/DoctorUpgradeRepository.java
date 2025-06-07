@@ -14,10 +14,8 @@ import java.util.Optional;
 
 @Repository
 public interface DoctorUpgradeRepository extends JpaRepository<DoctorUpgrade, String> {
-    List<DoctorUpgrade> findByUser(User user);
-    
-    // Find the latest doctor upgrade request for a user
-    @Query("SELECT d FROM DoctorUpgrade d WHERE d.user = :user ORDER BY d.id DESC")
+    List<DoctorUpgrade> findByUser(User user);    // Find the latest approved doctor upgrade request for a user
+    @Query("SELECT d FROM DoctorUpgrade d WHERE d.user = :user AND d.status = 'APPROVED' ORDER BY d.id DESC")
     Optional<DoctorUpgrade> findLatestByUser(@Param("user") User user);
     
     // Find pending doctor upgrade requests for a user

@@ -26,10 +26,11 @@ public class ChatPayment {
     private ChatRequest chatRequest;
 
     @Column(nullable = false)
-    private double amount; // Amount in Vietnamese Dong (VND)
-
-    @Column(nullable = false)
+    private double amount; // Amount in Vietnamese Dong (VND)    @Column(nullable = false)
     private int hours; // Number of hours purchased
+
+    @Column(nullable = true)
+    private Integer minutes; // Number of minutes purchased (nullable for backward compatibility)
 
     @Column(nullable = false)
     private LocalDateTime expiresAt; // When the chat time expires
@@ -38,6 +39,17 @@ public class ChatPayment {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    // Refund related fields
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean refunded = false;
+
+    private Double refundAmount;
+
+    private String refundReason;
+
+    private LocalDateTime refundedAt;
 
     @PrePersist
     protected void onCreate() {

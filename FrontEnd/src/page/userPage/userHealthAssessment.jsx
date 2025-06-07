@@ -86,35 +86,34 @@ export default function UserHealthAssessment() {
 
   const current = questions[currentIndex];
   const alreadyAnswered = answeredMap[current.id];
-
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Left - Bot image */}
-      <div className="w-1/2 bg-[#9BB168] flex items-center justify-center">
-        <img src={Bot} alt="Bot" className="w-64 h-64" />
+      <div className="w-full lg:w-1/2 bg-[#9BB168] flex items-center justify-center py-8 lg:py-0">
+        <img src={Bot} alt="Bot" className="w-48 h-48 sm:w-56 sm:h-56 lg:w-64 lg:h-64" />
       </div>
 
       {/* Right - Question + options */}
-      <div className="w-1/2 bg-yellow-100 flex flex-col justify-center px-12">
-        <h2 className="text-2xl font-bold text-brown-700 mb-8">
+      <div className="w-full lg:w-1/2 bg-yellow-100 flex flex-col justify-center px-6 sm:px-8 lg:px-12 py-8 lg:py-0">
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-brown-700 mb-6 sm:mb-8">
           {current.content} ({currentIndex + 1}/{questions.length})
         </h2>
 
-        <div className="space-y-4 mb-8">
+        <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
           {current.options.map((opt, idx) => {
             const isSelected = selectedOption === idx;
             const isDisabled = alreadyAnswered && !isSelected;
             return (
               <label
                 key={idx}
-                className={`flex items-center justify-between px-4 py-3 rounded-full border transition-all cursor-pointer ${
-                  isDisabled ? "opacity-50 cursor-not-allowed" : "hover:shadow"
+                className={`flex items-center justify-between px-4 sm:px-6 py-4 sm:py-3 rounded-lg sm:rounded-full border transition-all cursor-pointer min-h-[56px] ${
+                  isDisabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg active:scale-[0.98]"
                 } ${
-                  isSelected ? "bg-[#9BB168] text-white" : "bg-white"
+                  isSelected ? "bg-[#9BB168] text-white border-[#9BB168]" : "bg-white border-gray-200 hover:border-[#9BB168]"
                 }`}
                 onClick={() => !alreadyAnswered && setSelectedOption(idx)}
               >
-                <span>{opt}</span>
+                <span className="text-sm sm:text-base font-medium flex-1 pr-4">{opt}</span>
                 <input
                   type="radio"
                   name="answer"
@@ -124,22 +123,26 @@ export default function UserHealthAssessment() {
                   disabled={alreadyAnswered}
                 />
                 <div
-                  className={`w-4 h-4 rounded-full border-2 ${
-                    isSelected ? "bg-black border-white" : "border-gray-400"
+                  className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex-shrink-0 ${
+                    isSelected ? "bg-white border-white" : "border-gray-400"
                   }`}
-                ></div>
+                >
+                  {isSelected && (
+                    <div className="w-full h-full rounded-full bg-[#9BB168] transform scale-75"></div>
+                  )}
+                </div>
               </label>
             );
           })}
         </div>
 
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-black">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <span className="text-sm sm:text-base text-black font-medium">
             Câu hỏi {currentIndex + 1} / {questions.length}
           </span>
           <button
             onClick={handleSubmit}
-            className="bg-brown-700 hover:bg-brown-800 text-black py-2 px-6 rounded-full shadow-md transition-transform transform hover:scale-105"
+            className="w-full sm:w-auto bg-brown-700 hover:bg-brown-800 active:bg-brown-900 text-white py-3 sm:py-2 px-8 sm:px-6 rounded-full shadow-md transition-all transform hover:scale-105 active:scale-95 font-semibold min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={selectedOption === null}
           >
             {currentIndex + 1 === questions.length ? "Hoàn tất" : "Tiếp tục →"}

@@ -49,11 +49,9 @@ public class AuthFaceService {
                     .sourceImage(source)
                     .targetImage(target)
                     .similarityThreshold(90F)
-                    .build();
-
-            CompareFacesResponse response = rekognitionClient.compareFaces(request);
+                    .build();            CompareFacesResponse response = rekognitionClient.compareFaces(request);
             boolean result = !response.faceMatches().isEmpty() &&
-                    response.faceMatches().getFirst().similarity() > 90;
+                    response.faceMatches().get(0).similarity() > 90;
             if (result){
                 String token = authenticationService.generateToken(user);
                 return AuthenticationResponse.builder()

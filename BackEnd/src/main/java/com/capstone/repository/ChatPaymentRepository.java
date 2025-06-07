@@ -30,9 +30,30 @@ public interface ChatPaymentRepository extends JpaRepository<ChatPayment, String
            "AND cp.expiresAt > :now " +
            "AND cr.status = com.capstone.enums.RequestStatus.APPROVED")
     List<ChatPayment> findByDoctorAndExpiresAtGreaterThan(@Param("doctor") User doctor, @Param("now") LocalDateTime now);
-    
-    @Query("SELECT CASE WHEN COUNT(cp) > 0 THEN true ELSE false END FROM ChatPayment cp " +
+      @Query("SELECT CASE WHEN COUNT(cp) > 0 THEN true ELSE false END FROM ChatPayment cp " +
            "WHERE cp.chatRequest = :chatRequest " +
            "AND cp.expiresAt > :now")
     boolean existsByChatRequestAndExpiresAtGreaterThan(@Param("chatRequest") ChatRequest chatRequest, @Param("now") LocalDateTime now);
-} 
+    
+    // Refund related queries
+    @Query("SELECT cp FROM ChatPayment cp " +
+           "JOIN cp.chatRequest cr " +
+           "WHERE cp.refunded = false " +
+           "AND cp.createdAt < :timeoutThreshold " +
+           "AND cr.status = com.capstone.enums.RequestStatus.APPROVED")
+    List<ChatPayment> findPaymentsEligibleForRefund(@Param("timeoutThreshold") LocalDateTime timeoutThreshold);
+    
+    @Query("SELECT cp FROM ChatPayment cp " +
+           "JOIN cp.chatRequest cr " +
+           "WHERE cr.patient = :patient " +
+           "AND cp.refunded = true " +
+           "ORDER BY cp.refundedAt DESC")
+    List<ChatPayment> findRefundHistoryByPatient(@Param("patient") User patient);
+    
+    @Query("SELECT cp FROM ChatPayment cp " +
+           "JOIN cp.chatRequest cr " +
+           "WHERE cr.doctor = :doctor " +
+           "AND cp.refunded = true " +
+           "ORDER BY cp.refundedAt DESC")
+    List<ChatPayment> findRefundHistoryByDoctor(@Param("doctor") User doctor);
+}

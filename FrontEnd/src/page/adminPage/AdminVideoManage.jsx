@@ -25,14 +25,14 @@ export default function AdminVideoManage() {
         setVideos(res.result);
       }
     } catch (error) {
-      console.error("❌ Lỗi khi lấy danh sách video:", error);
+      console.error("❌ Error fetching video list:", error);
     }
   };
 
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!uploadData.file || !uploadData.name) {
-      alert("Vui lòng chọn file video và nhập tên video!");
+      alert("Please select a video file and enter the video name!");
       return;
     }
 
@@ -51,23 +51,23 @@ export default function AdminVideoManage() {
       });
 
       if (response.ok) {
-        alert("Upload video thành công!");
+        alert("Video uploaded successfully!");
         setIsUploadModalOpen(false);
         setUploadData({ file: null, name: "" });
         fetchVideos();
       } else {
-        alert("Lỗi khi upload video!");
+        alert("Error uploading video!");
       }
     } catch (error) {
-      console.error("❌ Lỗi khi upload video:", error);
-      alert("Lỗi khi upload video!");
+      console.error("❌ Error uploading video:", error);
+      alert("Error uploading video!");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (videoUrl) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa video này?")) {
+    if (!window.confirm("Are you sure you want to delete this video?")) {
       return;
     }
 
@@ -82,32 +82,32 @@ export default function AdminVideoManage() {
       });
 
       if (response.ok) {
-        alert("Xóa video thành công!");
+        alert("Video deleted successfully!");
         fetchVideos();
       } else {
-        alert("Lỗi khi xóa video!");
+        alert("Error deleting video!");
       }
     } catch (error) {
-      console.error("❌ Lỗi khi xóa video:", error);
-      alert("Lỗi khi xóa video!");
+      console.error("❌ Error deleting video:", error);
+      alert("Error deleting video!");
     }
   };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">🎥 Quản lý video gợi ý stress</h1>
+        <h1 className="text-3xl font-bold text-gray-800">🎥 Manage Stress Relief Videos</h1>
         <button
           onClick={() => setIsUploadModalOpen(true)}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <FiUpload />
-          Thêm video mới
+          Add New Video
         </button>
       </div>
 
       {videos.length === 0 ? (
-        <p className="text-gray-500">Không có video nào.</p>
+        <p className="text-gray-500">No videos available.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {videos.map((video, idx) => (
@@ -133,7 +133,7 @@ export default function AdminVideoManage() {
                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition font-medium w-full"
                 onClick={() => setSelectedVideo(video.videoUrl)}
               >
-                🎬 Xem video
+                🎬 Watch Video
               </button>
             </div>
           ))}
@@ -173,7 +173,7 @@ export default function AdminVideoManage() {
       >
         <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Thêm video mới</h2>
+            <h2 className="text-xl font-semibold">Add New Video</h2>
             <button
               onClick={() => !isLoading && setIsUploadModalOpen(false)}
               className="text-gray-500 hover:text-gray-700"
@@ -184,21 +184,21 @@ export default function AdminVideoManage() {
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tên video
+                Video Name
               </label>
               <input
                 type="text"
                 value={uploadData.name}
                 onChange={(e) => setUploadData({ ...uploadData, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Nhập tên video"
+                placeholder="Enter video name"
                 required
                 disabled={isLoading}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                File video
+                Video File
               </label>
               <input
                 type="file"
@@ -218,7 +218,7 @@ export default function AdminVideoManage() {
               }`}
               disabled={isLoading}
             >
-              {isLoading ? "Đang xử lý..." : "Upload video"}
+              {isLoading ? "Processing..." : "Upload Video"}
             </button>
           </form>
         </div>

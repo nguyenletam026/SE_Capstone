@@ -61,12 +61,13 @@ export default function TeacherStressAnalysis() {
       console.error('Error fetching classes:', error);
     }
   };
-  
-  const fetchAllStudentsStressData = async () => {
+    const fetchAllStudentsStressData = async () => {
     try {
       setLoading(true);
       const token = getToken();
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/classes/all-students-stress`, {
+      
+      // Use new API endpoint for all classes stress overview
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/classes/stress-overview/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
@@ -77,61 +78,85 @@ export default function TeacherStressAnalysis() {
       }
       
       const data = await response.json();
-      const studentsData = data.result?.students || [];
+      const classesOverview = data.result || [];
       
-      // Calculate statistics
-      const highStress = studentsData.filter(s => s.stressLevel === 'HIGH').length;
-      const mediumStress = studentsData.filter(s => s.stressLevel === 'MEDIUM').length;
-      const lowStress = studentsData.filter(s => s.stressLevel === 'LOW').length;
-      const noData = studentsData.filter(s => s.stressLevel === 'NO_DATA' || !s.stressLevel).length;
+      // Combine all students from all classes
+      const allStudents = [];
+      let totalHighStress = 0;
+      let totalMediumStress = 0;
+      let totalLowStress = 0;
+      let totalNoData = 0;
       
-      setStats({
-        total: studentsData.length,
-        highStress,
-        mediumStress,
-        lowStress,
-        noData,
-        trend: data.result?.trend || 'stable'
+      // Also get detailed student data
+      const studentsResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/classes/all-students-stress`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
       });
       
-      setStudents(studentsData);
+      if (studentsResponse.ok) {
+        const studentsData = await studentsResponse.json();
+        allStudents.push(...(studentsData.result?.students || []));
+      }
+        // Calculate statistics from class overviews
+      classesOverview.forEach(classOverview => {
+        totalHighStress += classOverview.studentsWithHighStress || 0;
+        totalMediumStress += classOverview.studentsWithMediumStress || 0;
+        totalLowStress += classOverview.studentsWithLowStress || 0;
+        totalNoData += classOverview.studentsWithNoData || 0;
+      });
+      
+      setStats({
+        total: allStudents.length,
+        highStress: totalHighStress,
+        mediumStress: totalMediumStress,
+        lowStress: totalLowStress,
+        noData: totalNoData,
+        trend: classesOverview.length > 0 ? classesOverview[0].trend?.toLowerCase() || 'stable' : 'stable'
+      });
+      
+      setStudents(allStudents);
     } catch (error) {
       console.error('Error fetching stress data:', error);
     } finally {
       setLoading(false);
     }
   };
-  
-  const fetchClassStudentsStressData = async (classId) => {
+    const fetchClassStudentsStressData = async (classId) => {
     try {
       setLoading(true);
       const token = getToken();
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/classes/${classId}/stress-data`, {
+      
+      // Use new API endpoint for class stress overview
+      const overviewResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/classes/${classId}/stress-overview`, {
         headers: {
           Authorization: `Bearer ${token}`,
         }
       });
       
-      if (!response.ok) {
+      // Also get detailed student data
+      const detailResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/classes/${classId}/stress-data`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      
+      if (!overviewResponse.ok || !detailResponse.ok) {
         throw new Error('Failed to fetch stress data');
       }
       
-      const data = await response.json();
-      const studentsData = data.result || [];
+      const overviewData = await overviewResponse.json();
+      const detailData = await detailResponse.json();
       
-      // Calculate statistics
-      const highStress = studentsData.filter(s => s.stressLevel === 'HIGH').length;
-      const mediumStress = studentsData.filter(s => s.stressLevel === 'MEDIUM').length;
-      const lowStress = studentsData.filter(s => s.stressLevel === 'LOW').length;
-      const noData = studentsData.filter(s => s.stressLevel === 'NO_DATA' || !s.stressLevel).length;
-      
-      setStats({
+      const classOverview = overviewData.result;
+      const studentsData = detailData.result || [];
+        setStats({
         total: studentsData.length,
-        highStress,
-        mediumStress,
-        lowStress,
-        noData,
-        trend: 'unknown' // We don't have trend for single class
+        highStress: classOverview.studentsWithHighStress || 0,
+        mediumStress: classOverview.studentsWithMediumStress || 0,
+        lowStress: classOverview.studentsWithLowStress || 0,
+        noData: classOverview.studentsWithNoData || 0,
+        trend: classOverview.trend?.toLowerCase() || 'stable'
       });
       
       setStudents(studentsData);
@@ -196,17 +221,23 @@ export default function TeacherStressAnalysis() {
       key: 'className',
       filters: classes.map(c => ({ text: c.name, value: c.name })),
       onFilter: (value, record) => record.className === value,
-    },
-    {
+    },    {
       title: 'Mức độ căng thẳng',
       dataIndex: 'stressLevel',
       key: 'stressLevel',
-      render: (stressLevel) => (
-        <Tag color={stressLevelColors[stressLevel] || 'gray'}>
-          {stressLevel === 'HIGH' ? 'Cao' : 
-           stressLevel === 'MEDIUM' ? 'Trung bình' : 
-           stressLevel === 'LOW' ? 'Thấp' : 'Không có dữ liệu'}
-        </Tag>
+      render: (stressLevel, record) => (
+        <div>
+          <Tag color={stressLevelColors[stressLevel] || 'gray'}>
+            {stressLevel === 'HIGH' ? 'Cao' : 
+             stressLevel === 'MEDIUM' ? 'Trung bình' : 
+             stressLevel === 'LOW' ? 'Thấp' : 'Không có dữ liệu'}
+          </Tag>
+          {record.dailyAverageStressScore && (
+            <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+              Điểm TB: {record.dailyAverageStressScore.toFixed(2)}
+            </div>
+          )}
+        </div>
       ),
       filters: [
         { text: 'Cao', value: 'HIGH' },
@@ -219,6 +250,20 @@ export default function TeacherStressAnalysis() {
         const order = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1, 'NO_DATA': 0 };
         return order[a.stressLevel] - order[b.stressLevel];
       },
+    },
+    {
+      title: 'Số lần phân tích hôm nay',
+      dataIndex: 'totalAnalysesToday',
+      key: 'totalAnalysesToday',
+      render: (count) => (
+        <span style={{ 
+          color: count > 0 ? '#1890ff' : '#999',
+          fontWeight: count > 0 ? 'bold' : 'normal'
+        }}>
+          {count || 0}
+        </span>
+      ),
+      sorter: (a, b) => (a.totalAnalysesToday || 0) - (b.totalAnalysesToday || 0),
     },
     {
       title: 'Cập nhật lần cuối',
@@ -248,8 +293,7 @@ export default function TeacherStressAnalysis() {
   
   return (
     <div>
-      <Card title="Phân tích mức độ căng thẳng sinh viên">
-        <Row gutter={[16, 16]}>
+      <Card title="Phân tích mức độ căng thẳng sinh viên">        <Row gutter={[16, 16]}>
           <Col span={24} md={6}>
             <Card>
               <Statistic 
@@ -268,6 +312,9 @@ export default function TeacherStressAnalysis() {
                 valueStyle={{ color: 'red' }}
                 suffix={`/${stats.total}`}
               />
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                {stats.total > 0 ? `${((stats.highStress / stats.total) * 100).toFixed(1)}%` : '0%'}
+              </div>
             </Card>
           </Col>
           
@@ -279,6 +326,9 @@ export default function TeacherStressAnalysis() {
                 valueStyle={{ color: 'orange' }}
                 suffix={`/${stats.total}`}
               />
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                {stats.total > 0 ? `${((stats.mediumStress / stats.total) * 100).toFixed(1)}%` : '0%'}
+              </div>
             </Card>
           </Col>
           

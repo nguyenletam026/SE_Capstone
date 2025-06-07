@@ -55,7 +55,7 @@ public class AuthenticationService {
     protected String CLIENT_SECRET = "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";
 
     @NonFinal
-    protected String REDIRECT_URI = "http://localhost:3000/authenticate";
+    protected String REDIRECT_URI = "https://stresshelper.store/authenticate";
 
     @NonFinal
     protected String GRANT_TYPE = "authorization_code";

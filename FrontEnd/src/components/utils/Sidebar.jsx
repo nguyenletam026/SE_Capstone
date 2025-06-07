@@ -10,23 +10,29 @@ import {
   FaCalendarAlt,
   FaQuestionCircle,
   FaCog,
+  FaUndo,
+  FaStethoscope,
 } from "react-icons/fa";
 import { FaMusic, FaUserDoctor } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const sidebarItems = [
-  { to: "/admin-dashboard", icon: <FaChartBar />, label: "Dashboard" },
+  
   { to: "/admin-role", icon: <FaProjectDiagram />, label: "Role" },
   { to: "/admin-user", icon: <FaUser />, label: "User" },
   { to: "/admin-doctor", icon: <FaUserDoctor />, label: "Doctor" },
   { to: "/admin-doctor-schedule", icon: <FaCalendarAlt />, label: "Doctor Schedule" },
+  { to: "/admin-consultations", icon: <FaStethoscope />, label: "Consultations" },
   { to: "/admin-teacher", icon: <FaChalkboardTeacher />, label: "Teacher" },
   { to: "/admin-products", icon: <FaShoppingBag />, label: "Products" },
   { to: "/admin-questions", icon: <FaQuestionCircle />, label: "Questions" },
   { to: "/admin-music", icon: <FaMusic />, label: "Music" },
   { to: "/admin-video", icon: <FaPhotoVideo />, label: "Video" },
   { to: "/admin-deposits", icon: <FaMoneyBillWave />, label: "Deposits" },
+  { to: "/admin-earnings", icon: <FaChartBar />, label: "Earnings Management" },
+  { to: "/admin-withdrawals", icon: <FaMoneyBillWave />, label: "Withdrawal Management" },
+  { to: "/admin-refunds", icon: <FaUndo />, label: "Refund Management" },
   { to: "/admin-settings", icon: <FaCog />, label: "Setting" },
   { to: "/admin-order", icon: <FaShoppingBag />, label: "Order Management" },
 ];

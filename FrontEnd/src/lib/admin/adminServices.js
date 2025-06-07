@@ -333,6 +333,94 @@ export const updateChatCost = async (newCost) => {
   }
 };
 
+export const getChatCostPerMinute = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/chat-cost-minute`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to fetch chat cost per minute");
+    }
+    
+    const data = await response.json();
+    return data.result;
+  } catch (error) {
+    console.error("Error fetching chat cost per minute:", error);
+    throw error;
+  }
+};
+
+export const updateChatCostPerMinute = async (newCost) => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/chat-cost-minute`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ costPerMinute: newCost }),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to update chat cost per minute");
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating chat cost per minute:", error);
+    throw error;
+  }
+};
+
+export const getDoctorCommissionRate = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/doctor-commission-rate`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to fetch doctor commission rate");
+    }
+    
+    const data = await response.json();
+    return data.result;
+  } catch (error) {
+    console.error("Error fetching doctor commission rate:", error);
+    throw error;
+  }
+};
+
+export const updateDoctorCommissionRate = async (newRate) => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/doctor-commission-rate`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({ commissionRate: newRate }),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to update doctor commission rate");
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating doctor commission rate:", error);
+    throw error;
+  }
+};
+
 export const getAllSystemConfigs = async () => {
   try {
     const response = await fetch(`${API_URL}/api/admin/system-configs`, {
@@ -351,6 +439,69 @@ export const getAllSystemConfigs = async () => {
     return data.result;
   } catch (error) {
     console.error("Error fetching system configurations:", error);
+    throw error;
+  }
+};
+
+export const getAllRefunds = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/chat-payments/refund-history/all`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch refunds");
+    }
+    const data = await response.json();
+    return data.result;
+  } catch (error) {
+    console.error("Error fetching refunds:", error);
+    throw error;
+  }
+};
+
+export const getRefundStatistics = async () => {
+  try {
+    const refunds = await getAllRefunds();
+    const totalRefunds = refunds.length;
+    const totalAmount = refunds.reduce((sum, refund) => sum + refund.refundAmount, 0);
+    const refundsByReason = refunds.reduce((acc, refund) => {
+      acc[refund.refundReason] = (acc[refund.refundReason] || 0) + 1;
+      return acc;
+    }, {});    return {
+      totalRefunds,
+      totalAmount,
+      refundsByReason,
+      recentRefunds: refunds.slice(0, 10)
+    };
+  } catch (error) {
+    console.error("Error calculating refund statistics:", error);
+    throw error;
+  }
+};
+
+// Get all consultations for admin
+export const getAllConsultations = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/chat-payments/admin/all-consultations`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to fetch consultations");
+    }
+    
+    const data = await response.json();
+    return data.result || [];
+  } catch (error) {
+    console.error("Error fetching consultations:", error);
     throw error;
   }
 };

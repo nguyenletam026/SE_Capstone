@@ -191,8 +191,8 @@ public class StressController {
                     return DailyStressReportResponse.builder()
                             .average_stress_score(avgScore)
                             .dominant_stress_level(dominantLevel)
-                            .end_date(analyses.getFirst().getCreatedAt())
-                            .start_date(analyses.getLast().getCreatedAt())
+                            .end_date(analyses.get(0).getCreatedAt())
+                            .start_date(analyses.get(analyses.size() - 1).getCreatedAt())
                             .total_analyses(analyses.size())
                             .stress_analyses(analysisResponses)
                             .build();

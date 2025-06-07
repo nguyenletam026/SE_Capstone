@@ -1,8 +1,11 @@
 package com.capstone.service;
 
 import com.capstone.dto.response.ChatMessageDTO;
+import com.capstone.dto.response.ChatHistoryResponse;
 import com.capstone.entity.ChatMessage;
 import com.capstone.entity.ChatRequest;
+import com.capstone.entity.ChatPayment;
+import com.capstone.entity.DoctorUpgrade;
 import com.capstone.entity.User;
 import com.capstone.enums.RequestStatus;
 import com.capstone.exception.AppException;
@@ -10,6 +13,8 @@ import com.capstone.exception.ErrorCode;
 import com.capstone.mapper.ChatMessageMapper;
 import com.capstone.repository.ChatMessageRepository;
 import com.capstone.repository.ChatRequestRepository;
+import com.capstone.repository.ChatPaymentRepository;
+import com.capstone.repository.DoctorUpgradeRepository;
 import com.capstone.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +27,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ChatService {
-
-    private final ChatMessageRepository chatMessageRepository;
+public class ChatService {    private final ChatMessageRepository chatMessageRepository;
     private final ChatRequestRepository chatRequestRepository;
+    private final ChatPaymentRepository chatPaymentRepository;
+    private final DoctorUpgradeRepository doctorUpgradeRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageMapper chatMessageMapper;
@@ -288,12 +294,8 @@ public class ChatService {
         });
 
         return messages;
-    }
-
-    public List<ChatMessageDTO> markMessagesAsRead(String userId, String senderId) {
+    }    public List<ChatMessageDTO> markMessagesAsRead(String userId, String senderId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         List<ChatMessage> messages = chatMessageRepository.findByReceiverAndReadFalseOrderByTimestampDesc(user);
@@ -335,5 +337,74 @@ public class ChatService {
                 .filter(message -> message != null)
                 .map(chatMessageMapper::toDTO)
                 .collect(Collectors.toList());
+    }    public List<ChatHistoryResponse> getChatHistory(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        log.info("Getting chat history for user: {}", user.getUsername());        // Get all distinct doctors that the user has chatted with
+        // This includes doctors that sent messages to user and doctors that received messages from user
+        List<User> doctorsReceived = chatMessageRepository.findDistinctReceiversByUser(user);
+        List<User> doctorsSent = chatMessageRepository.findDistinctSendersByUser(user);
+        
+        // Combine and deduplicate the lists
+        List<User> doctors = new ArrayList<>(doctorsReceived);
+        for (User doctor : doctorsSent) {
+            if (!doctors.contains(doctor)) {
+                doctors.add(doctor);
+            }
+        }
+        
+        // Filter to only include doctors (users with DOCTOR role)
+        doctors = doctors.stream()
+                .filter(u -> u.getRole().getName().equals("DOCTOR"))
+                .collect(Collectors.toList());
+                
+        log.info("Found {} doctors that user has chatted with", doctors.size());
+
+        List<ChatHistoryResponse> chatHistory = new ArrayList<>();
+
+        for (User doctor : doctors) {
+            try {
+                // Get the latest chat message between user and doctor
+                ChatMessage latestMessage = chatMessageRepository.findTopBySenderAndReceiverOrderByTimestampDesc(user, doctor)
+                        .orElse(null);
+
+                // Get unread message count from this doctor
+                int unreadCount = chatMessageRepository.countUnreadMessagesFromUser(user.getId(), doctor.getId());
+                
+                // Get total message count between user and doctor
+                List<ChatMessage> allMessages = chatMessageRepository.findConversation(user, doctor);
+                int totalMessages = allMessages.size();                // Find any chat payment/request between user and doctor
+                ChatPayment payment = null;
+                List<ChatRequest> chatRequests = chatRequestRepository
+                        .findByPatientAndDoctorAndStatusOrderByCreatedAtDesc(user, doctor, RequestStatus.APPROVED);
+                
+                if (!chatRequests.isEmpty()) {
+                    ChatRequest latestRequest = chatRequests.get(0);
+                    payment = chatPaymentRepository.findByChatRequest(latestRequest).orElse(null);
+                }
+
+                // Get doctor specialization from DoctorUpgrade
+                String specialization = "Bác sĩ tư vấn"; // Default value
+                Optional<DoctorUpgrade> doctorUpgradeOpt = doctorUpgradeRepository.findLatestByUser(doctor);
+                if (doctorUpgradeOpt.isPresent()) {
+                    specialization = doctorUpgradeOpt.get().getSpecialization();
+                }
+
+                // Create chat history response using the static factory method
+                ChatHistoryResponse historyResponse = ChatHistoryResponse.fromChatData(
+                        doctor, latestMessage, payment, unreadCount, totalMessages, specialization);
+
+                chatHistory.add(historyResponse);
+                log.info("Added chat history for doctor: {} with {} messages", doctor.getUsername(), totalMessages);
+
+            } catch (Exception e) {
+                log.error("Error processing chat history for doctor {}: ", doctor.getUsername(), e);
+                // Continue with other doctors even if one fails
+            }
+        }
+
+        log.info("Returning {} chat history entries", chatHistory.size());
+        return chatHistory;
     }
 }

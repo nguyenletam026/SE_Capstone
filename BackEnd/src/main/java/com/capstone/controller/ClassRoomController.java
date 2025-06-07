@@ -3,6 +3,7 @@ package com.capstone.controller;
 import com.capstone.dto.ClassRoomDto;
 import com.capstone.dto.StudentStressDto;
 import com.capstone.dto.StudentAnswerDto;
+import com.capstone.dto.ClassStressOverviewDto;
 import com.capstone.dto.ApiResponse;
 import com.capstone.service.ClassRoomService;
 import lombok.RequiredArgsConstructor;
@@ -169,13 +170,14 @@ public class ClassRoomController {
                     (studentStress.getLastUpdated() != null && 
                      uniqueStudentMap.get(studentStress.getStudentId()).getLastUpdated() != null &&
                      studentStress.getLastUpdated().after(uniqueStudentMap.get(studentStress.getStudentId()).getLastUpdated()))) {
-                    
-                    // Add class information to the student stress data
+                      // Add class information to the student stress data
                     StudentStressDto updatedDto = StudentStressDto.builder()
                             .studentId(studentStress.getStudentId())
                             .studentName(studentStress.getStudentName())
                             .username(studentStress.getUsername())
                             .stressLevel(studentStress.getStressLevel())
+                            .dailyAverageStressScore(studentStress.getDailyAverageStressScore())
+                            .totalAnalysesToday(studentStress.getTotalAnalysesToday())
                             .lastUpdated(studentStress.getLastUpdated())
                             .className(classRoom.getName())  // Add class name
                             .build();
@@ -208,7 +210,21 @@ public class ClassRoomController {
         Map<String, Object> result = new HashMap<>();
         result.put("students", allStudentsStressData);
         result.put("trend", trend);
-        
-        return ResponseEntity.ok(ApiResponse.success(result));
+          return ResponseEntity.ok(ApiResponse.success(result));
     }
-} 
+
+    @GetMapping("/{classId}/stress-overview")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ResponseEntity<ApiResponse> getClassStressOverview(@PathVariable String classId) {
+        ClassStressOverviewDto overview = classRoomService.getClassStressOverview(classId);
+        return ResponseEntity.ok(ApiResponse.success(overview));
+    }
+
+    @GetMapping("/stress-overview/all")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    public ResponseEntity<ApiResponse> getAllClassesStressOverview(Principal principal) {
+        String username = principal.getName();
+        List<ClassStressOverviewDto> overviews = classRoomService.getAllClassesStressOverview(username);
+        return ResponseEntity.ok(ApiResponse.success(overviews));
+    }
+}

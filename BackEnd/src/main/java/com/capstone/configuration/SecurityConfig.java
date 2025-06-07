@@ -31,6 +31,7 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
             "/auth/token", "/auth/introspect",
             "/swagger-ui/**", "/v3/api-docs/**",
+            "https://stressbackend.shop/**",
             "/auth/outbound/**",
             "/api/users",
             "/auth-face",

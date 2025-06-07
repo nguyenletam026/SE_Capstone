@@ -229,8 +229,8 @@ export default function ApplyDoctor() {
   function Field({ icon, children, error }) {
     return (
       <div>
-        <div className={`flex items-center bg-blue-50/50 rounded-xl border px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400 transition ${error ? "border-red-400" : "border-blue-100"}`}>
-          <span className="mr-3">{icon}</span>
+        <div className={`flex items-center bg-blue-50/50 rounded-xl border px-3 sm:px-4 py-2 sm:py-3 focus-within:ring-2 focus-within:ring-blue-400 transition min-h-[44px] ${error ? "border-red-400" : "border-blue-100"}`}>
+          <span className="mr-3 flex-shrink-0">{icon}</span>
           {children}
         </div>
         {error && <p className="text-red-500 text-xs mt-1 ml-2">{error}</p>}
@@ -239,42 +239,42 @@ export default function ApplyDoctor() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f4fbff] via-[#e8f0fe] to-[#e3e7ff] px-4 py-12 flex flex-col md:flex-row items-center justify-center gap-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#f4fbff] via-[#e8f0fe] to-[#e3e7ff] px-4 sm:px-6 py-8 sm:py-12 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12">
       {/* Left: Banner with shadow and float icon */}
-      <div className="w-full md:w-1/2 flex flex-col items-center">
-        <div className="relative w-full max-w-md">
+      <div className="w-full lg:w-1/2 flex flex-col items-center">
+        <div className="relative w-full max-w-sm sm:max-w-md">
           <img
             src={doctorBanner}
             alt="Doctor Banner"
-            className="rounded-3xl shadow-2xl w-full object-cover border-4 border-white"
+            className="rounded-2xl sm:rounded-3xl shadow-2xl w-full object-cover border-2 sm:border-4 border-white"
           />
-          <div className="absolute -top-7 -left-7 bg-blue-100 rounded-full p-4 shadow-lg animate-bounce">
+          <div className="absolute -top-4 sm:-top-7 -left-4 sm:-left-7 bg-blue-100 rounded-full p-3 sm:p-4 shadow-lg animate-bounce">
             {/* Doctor SVG "avatar" */}
-            <svg className="w-10 h-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <circle cx="12" cy="7" r="4" strokeWidth={2} />
               <path d="M21 20c0-3.866-3.582-7-8-7s-8 3.134-8 7" strokeWidth={2}/>
             </svg>
           </div>
         </div>
-        <p className="mt-6 text-center text-blue-600 font-bold text-lg flex items-center justify-center gap-2">
-          <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7" strokeWidth={2} strokeLinecap="round"/></svg>
-          Đáng tin cậy - An toàn - Hỗ trợ 24/7
+        <p className="mt-4 sm:mt-6 text-center text-blue-600 font-bold text-base sm:text-lg flex flex-col sm:flex-row items-center justify-center gap-2">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7" strokeWidth={2} strokeLinecap="round"/></svg>
+          <span className="text-center sm:text-left">Đáng tin cậy - An toàn - Hỗ trợ 24/7</span>
         </p>
       </div>
 
       {/* Right: Form */}
-      <div className="w-full md:w-1/2 bg-white shadow-2xl rounded-3xl p-10 max-w-xl border-[1.5px] border-blue-100">
-        <h2 className="text-3xl font-extrabold text-center text-blue-700 mb-8 flex items-center justify-center gap-3">
-          <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M20 7V6a2 2 0 00-2-2h-1.5a1.5 1.5 0 010-3h-9a1.5 1.5 0 010 3H6a2 2 0 00-2 2v1" strokeWidth={2}/><circle cx="12" cy="13" r="7" strokeWidth={2}/></svg>
-          Đăng ký bác sĩ tư vấn
+      <div className="w-full lg:w-1/2 bg-white shadow-2xl rounded-2xl sm:rounded-3xl p-6 sm:p-10 max-w-xl border-[1.5px] border-blue-100">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-center text-blue-700 mb-6 sm:mb-8 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+          <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M20 7V6a2 2 0 00-2-2h-1.5a1.5 1.5 0 010-3h-9a1.5 1.5 0 010 3H6a2 2 0 00-2 2v1" strokeWidth={2}/><circle cx="12" cy="13" r="7" strokeWidth={2}/></svg>
+          <span>Đăng ký bác sĩ tư vấn</span>
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <Field icon={icons.specialization} error={errors.specialization}>
             <input
               type="text"
               name="specialization"
               placeholder="Chuyên môn (VD: General Psychology)"
-              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base"
               onChange={handleChange}
               value={formData.specialization}
             />
@@ -284,17 +284,17 @@ export default function ApplyDoctor() {
               type="number"
               name="experienceYears"
               placeholder="Số năm kinh nghiệm"
-              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base"
               onChange={handleChange}
               value={formData.experienceYears}
             />
           </Field>
           <Field icon={icons.description} error={errors.description}>
-            <input
-              type="text"
+            <textarea
               name="description"
-              placeholder="Mô tả bản thân (VD: Tốt nghiệp tại...)"
-              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
+              placeholder="Mô tả về bản thân và kỹ năng"
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base resize-none"
+              rows="3"
               onChange={handleChange}
               value={formData.description}
             />
@@ -304,7 +304,7 @@ export default function ApplyDoctor() {
               type="text"
               name="phoneNumber"
               placeholder="Số điện thoại"
-              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base"
               onChange={handleChange}
               value={formData.phoneNumber}
             />
@@ -314,18 +314,18 @@ export default function ApplyDoctor() {
               type="text"
               name="hospital"
               placeholder="Bệnh viện đang công tác"
-              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm"
+              className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base"
               onChange={handleChange}
               value={formData.hospital}
             />
           </Field>
           <div>
-            <label className="block text-sm font-semibold text-blue-600 mb-1 flex items-center gap-2">
+            <label className="block text-xs sm:text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
               {icons.cert} Ảnh bằng cấp
             </label>
-            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg border border-blue-200 w-fit">
+            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-blue-200 w-fit min-h-[44px] transition-colors active:scale-95">
               {icons.upload}
-              <span className="text-xs font-medium text-blue-500">Chọn file</span>
+              <span className="text-xs sm:text-sm font-medium text-blue-500">Chọn file</span>
               <input
                 type="file"
                 name="certificateImage"
@@ -335,16 +335,16 @@ export default function ApplyDoctor() {
               />
             </label>
             {errors.certificateImage && <p className="text-red-500 text-xs mt-1">{errors.certificateImage}</p>}
-            {previewCert && <img src={previewCert} alt="Preview Certificate" className="w-32 rounded-lg mt-2 border border-blue-100 shadow" />}
+            {previewCert && <img src={previewCert} alt="Preview Certificate" className="w-24 sm:w-32 rounded-lg mt-2 border border-blue-100 shadow" />}
             <p className="text-xs text-gray-400 mt-2">Chỉ chấp nhận JPG/PNG, tối đa 5MB</p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-blue-600 mb-1 flex items-center gap-2">
+            <label className="block text-xs sm:text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
               {icons.cccd} Ảnh CCCD
             </label>
-            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg border border-blue-200 w-fit">
+            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-blue-200 w-fit min-h-[44px] transition-colors active:scale-95">
               {icons.upload}
-              <span className="text-xs font-medium text-blue-500">Chọn file</span>
+              <span className="text-xs sm:text-sm font-medium text-blue-500">Chọn file</span>
               <input
                 type="file"
                 name="cccdImage"
@@ -354,21 +354,22 @@ export default function ApplyDoctor() {
               />
             </label>
             {errors.cccdImage && <p className="text-red-500 text-xs mt-1">{errors.cccdImage}</p>}
-            {previewCccd && <img src={previewCccd} alt="Preview CCCD" className="w-32 rounded-lg mt-2 border border-blue-100 shadow" />}
-            <p className="text-xs text-gray-400">Chỉ chấp nhận JPG/PNG, tối đa 5MB</p>
+            {previewCccd && <img src={previewCccd} alt="Preview CCCD" className="w-24 sm:w-32 rounded-lg mt-2 border border-blue-100 shadow" />}
+            <p className="text-xs text-gray-400 mt-2">Chỉ chấp nhận JPG/PNG, tối đa 5MB</p>
             <p className="text-xs text-gray-500 font-medium">Tên trong CCCD phải khớp với tên tài khoản của bạn</p>
           </div>
+          
           <button
             type="submit"
-            className={`w-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-bold py-3 rounded-xl shadow-xl flex items-center justify-center gap-2 text-lg transition-all duration-150 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`w-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-bold py-3 sm:py-4 rounded-xl shadow-xl flex items-center justify-center gap-2 text-base sm:text-lg transition-all duration-150 min-h-[44px] active:scale-95 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             disabled={loading}
           >
             {loading ? <>
               {icons.loading}
-              Đang xử lý...
+              <span>Đang xử lý...</span>
             </> : <>
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7" strokeWidth={2} strokeLinecap="round"/></svg>
-              Gửi Yêu Cầu
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7" strokeWidth={2} strokeLinecap="round"/></svg>
+              <span>Gửi Yêu Cầu</span>
             </>}
           </button>
         </form>
