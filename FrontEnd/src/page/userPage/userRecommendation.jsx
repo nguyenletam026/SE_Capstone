@@ -6,7 +6,8 @@ import {
   FiClock, FiUser, FiCalendar, FiMusic, FiVideo, FiArrowLeft, 
   FiMessageCircle, FiX, FiFilter, FiHome, FiCheck, FiInfo, 
   FiStar, FiPlay, FiChevronRight, FiMaximize, FiHeart, 
-  FiMessageSquare, FiHeadphones, FiActivity, FiZap, FiTrendingUp
+  FiMessageSquare, FiHeadphones, FiActivity, FiZap, FiTrendingUp,
+  FiAlertCircle
 } from "react-icons/fi";
 
 export default function Recommendation() {
@@ -28,47 +29,49 @@ export default function Recommendation() {
         try {
           const recommendRes = await getMyRecommendation();
           let updatedData = recommendRes.result;
-          
-          // Handle specific recommendation types that need additional API calls
+            // Handle specific recommendation types that need additional API calls
           if (recommendRes.result?.recommendationType === "MUSIC_LISTENING") {
             try {
               const musicRes = await getAllMusicRecommend();
+              console.log("Music API response:", musicRes);
+              console.log("Music recommendations:", musicRes.result);
               
-              // Transform music data to match expected format
-              const transformedMusic = musicRes.result?.map(music => ({
-                recommendName: music.musicName,
-                recommendUrl: music.musicUrl,
-                // Keep original fields as backup
-                musicName: music.musicName,
-                musicUrl: music.musicUrl
-              })) || [];
-              
+              // The API already returns data in the correct format with recommendName and recommendUrl
               updatedData = {
                 ...recommendRes.result,
-                recommendations: transformedMusic
-              };            } catch (musicErr) {
+                recommendations: musicRes.result || []
+              };
+            } catch (musicErr) {
               console.error("Error fetching music recommendations:", musicErr);
-            }
-          } else if (recommendRes.result?.recommendationType === "YOGA_EXCERSITE") {
+            }} else if (recommendRes.result?.recommendationType === "YOGA_EXCERSITE") {
             try {
               const videoRes = await getAllVideoRecommend();
               console.log("Video API response:", videoRes);
               console.log("Video recommendations:", videoRes.result);
               
-              // Transform video data to match expected format
-              const transformedVideos = videoRes.result?.map(video => ({
-                recommendName: video.videoName,
-                recommendUrl: video.videoUrl,
-                // Keep original fields as backup
-                videoName: video.videoName,
-                videoUrl: video.videoUrl
-              })) || [];
+              // Check if we have the actual video data in the recommendRes instead
+              let videoData = [];
+              if (recommendRes.result?.recommendations && recommendRes.result.recommendations.length > 0) {
+                // Use recommendations from the original response
+                videoData = recommendRes.result.recommendations;
+                console.log("Using video data from recommendation response:", videoData);
+              } else if (videoRes.result && Array.isArray(videoRes.result)) {
+                // Transform video data from separate API call
+                videoData = videoRes.result.map(video => ({
+                  recommendName: video.videoName,
+                  recommendUrl: video.videoUrl,
+                  // Keep original fields as backup
+                  videoName: video.videoName,
+                  videoUrl: video.videoUrl
+                }));
+                console.log("Using video data from video API:", videoData);
+              }
               
               updatedData = {
                 ...recommendRes.result,
-                recommendations: transformedVideos
+                recommendations: videoData
               };
-              console.log("Updated data with videos:", updatedData);
+              console.log("Final updated data with videos:", updatedData);
             } catch (videoErr) {
               console.error("Error fetching video recommendations:", videoErr);
             }
@@ -213,10 +216,7 @@ export default function Recommendation() {
                 <FiUser className="text-indigo-500" size={18} />
                 <span className="font-semibold text-indigo-700">{currentUser}</span>
               </div>
-              <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-slate-50 to-gray-50 rounded-full border border-gray-200">
-                <FiClock className="text-gray-500" size={18} />
-                <span className="text-gray-600 font-medium">{currentDateTime}</span>
-              </div>
+             
             </div>
           </div>
         </div>
@@ -266,7 +266,8 @@ export default function Recommendation() {
         </div>        {/* Recommendations Section */}
         {data?.recommendations && data.recommendations.length > 0 && (
           <div className="mt-12">
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">              <div className="flex items-center space-x-3 mb-6">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+              <div className="flex items-center space-x-3 mb-6">
                 <div className="p-3 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl">
                   {data?.recommendationType === "MUSIC_LISTENING" ? 
                     <FiHeadphones className="w-6 h-6 text-indigo-600" /> :
@@ -284,10 +285,188 @@ export default function Recommendation() {
                   </h3>
                   <p className="text-gray-600">Specially selected for your wellness journey</p>
                 </div>
-              </div>
+              </div>              {/* Music Recommendations Grid */}
+              {data?.recommendationType === "MUSIC_LISTENING" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {data.recommendations.map((music, index) => {
+                    const audioUrl = music.recommendUrl;
+                    const audioName = music.recommendName;
+                    
+                    console.log(`Music ${index + 1}:`, { audioName, audioUrl, music });
+                    
+                    return (
+                      <div key={index} className="group bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl p-6 border border-green-100 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <div className="flex items-center space-x-4 mb-4">
+                          <div className="p-3 bg-green-500 rounded-xl">
+                            <FiMusic className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-lg font-semibold text-gray-800 truncate">
+                              {audioName || `Music ${index + 1}`}
+                            </h4>
+                            <p className="text-green-600 text-sm">Therapeutic Audio</p>
+                          </div>
+                        </div>
+                        
+                        {audioUrl ? (
+                          <div className="mb-4">
+                            <div className="bg-white rounded-lg p-3 border border-gray-200">
+                              <audio 
+                                controls 
+                                preload="metadata"
+                                className="w-full"
+                                style={{ height: '40px' }}
+                                onPlay={(e) => handleAudioPlay(e.target)}
+                                onError={(e) => console.error(`Audio error for ${audioName}:`, e)}
+                              >
+                                <source src={audioUrl} type="audio/mpeg" />
+                                <source src={audioUrl} type="audio/mp3" />
+                                <source src={audioUrl} type="audio/wav" />
+                                <source src={audioUrl} type="audio/mp4" />
+                                Your browser does not support the audio element.
+                              </audio>
+                            </div>
+                            
+                            {/* Debug info */}
+                            <div className="mt-2 text-xs text-gray-500">
+                              <div className="truncate">URL: {audioUrl}</div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div className="flex items-center space-x-2 text-yellow-700">
+                              <FiAlertCircle size={16} />
+                              <span className="text-sm">Audio URL not available</span>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <div className="flex items-center space-x-2">
+                            <FiStar className="text-yellow-500" />
+                            <span>Recommended for you</span>
+                          </div>
+                          {audioUrl && (
+                            <button
+                              onClick={() => {
+                                const audioElement = document.querySelector(`audio[src="${audioUrl}"]`);
+                                if (audioElement) {
+                                  if (audioElement.paused) {
+                                    audioElement.play();
+                                  } else {
+                                    audioElement.pause();
+                                  }
+                                }
+                              }}
+                              className="text-green-600 hover:text-green-700 font-medium flex items-center space-x-1 hover:bg-green-100 px-2 py-1 rounded"
+                            >
+                              <FiPlay size={14} />
+                              <span>Play</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
-              
-              </div>
+              {/* Video Recommendations Grid */}
+              {data?.recommendationType === "YOGA_EXCERSITE" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {data.recommendations.map((video, index) => (
+                    <div key={index} className="group bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                      <div className="flex items-center space-x-4 mb-4">
+                        <div className="p-3 bg-blue-500 rounded-xl">
+                          <FiVideo className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-lg font-semibold text-gray-800 truncate">
+                            {video.recommendName || video.videoName}
+                          </h4>
+                          <p className="text-blue-600 text-sm">Guided Exercise</p>
+                        </div>
+                      </div>
+                      
+                      <div className="relative mb-4">
+                        <div className="aspect-video bg-gray-100 rounded-xl flex items-center justify-center">
+                          <button
+                            onClick={() => openVideoModal(video)}
+                            className="group-hover:scale-110 transition-transform p-4 bg-blue-500 rounded-full shadow-lg"
+                          >
+                            <FiPlay className="w-8 h-8 text-white" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-600">
+                        <div className="flex items-center space-x-2">
+                          <FiStar className="text-yellow-500" />
+                          <span>Recommended for you</span>
+                        </div>
+                        <button
+                          onClick={() => openVideoModal(video)}
+                          className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1"
+                        >
+                          <FiMaximize size={14} />
+                          <span>Watch</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Doctor Recommendations Grid */}
+              {data?.recommendationType === "DOCTOR_ADVISE" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {doctors.map((doctor, index) => (
+                    <div key={index} className="group bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                      <div className="flex items-center space-x-4 mb-4">
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
+                          {doctor.avtUrl ? (
+                            <img 
+                              src={doctor.avtUrl} 
+                              alt={doctor.fullname}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-purple-100">
+                              <FiUser className="w-8 h-8 text-purple-500" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-lg font-semibold text-gray-800 truncate">
+                            Dr. {doctor.fullname}
+                          </h4>
+                          <p className="text-purple-600 text-sm">{doctor.specialization || 'General Practice'}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 mb-4 text-sm text-gray-600">
+                        <div className="flex items-center space-x-2">
+                          <FiCalendar size={14} />
+                          <span>Available for consultation</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <FiStar className="text-yellow-500" size={14} />
+                          <span>Verified Professional</span>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleSelectDoctor(doctor.id)}
+                        className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
+                      >
+                        <FiMessageCircle size={16} />
+                        <span>Consult Now</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
         
