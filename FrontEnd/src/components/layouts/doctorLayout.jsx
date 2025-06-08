@@ -94,7 +94,7 @@ export default function DoctorLayout({ children }) {
                     <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-blue-800'}`}>
                       {user?.username || "Doctor"}
                     </p>
-                    <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-blue-600'}`}>Bác sĩ tâm lý</p>
+                    <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-blue-600'}`}>Psychologist</p>
                   </div>
                 </div>
               </div>
@@ -112,9 +112,8 @@ export default function DoctorLayout({ children }) {
                       ? "text-gray-300 hover:bg-gray-700" 
                       : "text-gray-700 hover:bg-blue-50"
                 } ${collapsed ? "justify-center" : ""}`}
-              >
-                <MdDashboard className="text-xl" />
-                {!collapsed && <span>Tổng quan</span>}
+              >                <MdDashboard className="text-xl" />
+                {!collapsed && <span>Dashboard</span>}
               </Link>
               
               <Link
@@ -128,9 +127,8 @@ export default function DoctorLayout({ children }) {
                       ? "text-gray-300 hover:bg-gray-700" 
                       : "text-gray-700 hover:bg-blue-50"
                 } ${collapsed ? "justify-center" : ""}`}
-              >
-                <FaComments className="text-xl" />
-                {!collapsed && <span>Tư vấn bệnh nhân</span>}
+              >                <FaComments className="text-xl" />
+                {!collapsed && <span>Patient Consultation</span>}
               </Link>
                 <Link
                 to="/doctor-schedule"
@@ -143,9 +141,8 @@ export default function DoctorLayout({ children }) {
                       ? "text-gray-300 hover:bg-gray-700" 
                       : "text-gray-700 hover:bg-blue-50"
                 } ${collapsed ? "justify-center" : ""}`}
-              >
-                <FaCalendarCheck className="text-xl" />
-                {!collapsed && <span>Lịch làm việc</span>}
+              >                <FaCalendarCheck className="text-xl" />
+                {!collapsed && <span>Work Schedule</span>}
               </Link>
               
               <Link
@@ -159,9 +156,8 @@ export default function DoctorLayout({ children }) {
                       ? "text-gray-300 hover:bg-gray-700" 
                       : "text-gray-700 hover:bg-blue-50"
                 } ${collapsed ? "justify-center" : ""}`}
-              >
-                <FaMoneyBillWave className="text-xl" />
-                {!collapsed && <span>Thu nhập</span>}
+              >                <FaMoneyBillWave className="text-xl" />
+                {!collapsed && <span>Earnings</span>}
               </Link>
               
               <Link
@@ -175,26 +171,11 @@ export default function DoctorLayout({ children }) {
                       ? "text-gray-300 hover:bg-gray-700" 
                       : "text-gray-700 hover:bg-blue-50"
                 } ${collapsed ? "justify-center" : ""}`}
-              >
-                <FaWallet className="text-xl" />
-                {!collapsed && <span>Rút tiền</span>}
+              >                <FaWallet className="text-xl" />
+                {!collapsed && <span>Withdrawals</span>}
               </Link>
               
-              <Link
-                to="/doctor-stats"
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  isActive("/doctor-stats")
-                    ? isDarkMode 
-                      ? "bg-blue-600 text-white" 
-                      : "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 font-semibold"
-                    : isDarkMode
-                      ? "text-gray-300 hover:bg-gray-700" 
-                      : "text-gray-700 hover:bg-blue-50"
-                } ${collapsed ? "justify-center" : ""}`}
-              >
-                <FaChartLine className="text-xl" />
-                {!collapsed && <span>Thống kê</span>}
-              </Link>
+              
             </nav>
           </div>
 
@@ -268,12 +249,11 @@ export default function DoctorLayout({ children }) {
 
           {/* Footer */}
           <footer className={`${isDarkMode ? 'bg-gray-900 text-gray-400' : 'bg-white text-gray-600'} text-center text-sm py-4 shadow-inner mt-auto`}>
-            <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-              <p>© 2025 Student Stress Helper - Hệ thống hỗ trợ sức khỏe tinh thần</p>
+            <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">              <p>© 2025 Student Stress Helper - Mental Health Support System</p>
               <div className="flex gap-4 mt-2 md:mt-0">
-                <a href="#" className="hover:text-blue-500 transition-colors">Điều khoản</a>
-                <a href="#" className="hover:text-blue-500 transition-colors">Hỗ trợ</a>
-                <a href="#" className="hover:text-blue-500 transition-colors">Liên hệ</a>
+                <a href="#" className="hover:text-blue-500 transition-colors">Terms</a>
+                <a href="#" className="hover:text-blue-500 transition-colors">Support</a>
+                <a href="#" className="hover:text-blue-500 transition-colors">Contact</a>
               </div>
             </div>
           </footer>

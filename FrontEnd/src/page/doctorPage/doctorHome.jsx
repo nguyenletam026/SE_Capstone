@@ -67,10 +67,11 @@ export default function DoctorHome() {
     {/* Left: Text */}
     <div className="md:w-1/2 pr-4">
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-        Quản lý các cuộc hẹn dễ dàng
+        Manage appointments easily
       </h1>
       <p className="text-base text-gray-700">
-        Tương tác nhanh chóng với bệnh nhân và duy trì kết nối chăm sóc sức khỏe.
+        
+Quickly engage with patients and maintain healthcare connections.
       </p>
     </div>
 

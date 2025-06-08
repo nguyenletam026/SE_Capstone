@@ -203,7 +203,7 @@ function DoctorChatLayout() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
             </svg>
-            Bệnh nhân đã thanh toán
+            Patient has paid
           </h2>
         </div>
         
@@ -229,8 +229,8 @@ function DoctorChatLayout() {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
               </svg>
-              <p className="text-blue-900 font-medium">Không có bệnh nhân nào đã thanh toán</p>
-              <p className="text-blue-700 text-sm mt-1">Bệnh nhân sẽ xuất hiện ở đây sau khi họ thanh toán</p>
+              <p className="text-blue-900 font-medium">No patients have paid yet.</p>
+              <p className="text-blue-700 text-sm mt-1">Patients will appear here after they pay.</p>
             </div>
           </div>
         ) : (
@@ -289,10 +289,10 @@ function DoctorChatLayout() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </div>
-              <p className="text-xl text-gray-700 font-medium mb-2">Chọn một bệnh nhân để bắt đầu trò chuyện</p>
-              <p className="text-sm text-gray-500 mb-6">Hoặc chờ thông báo khi có người muốn trò chuyện với bạn</p>
+              <p className="text-xl text-gray-700 font-medium mb-2">Select a patient to start chatting</p>
+              <p className="text-sm text-gray-500 mb-6">Or wait for a notification when someone wants to chat with you</p>
               <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
-                <p>Mẹo: Bệnh nhân đã thanh toán sẽ xuất hiện ở bên trái.</p>
+                <p> Paid patients will appear on the left.</p>
               </div>
             </div>
           </div>

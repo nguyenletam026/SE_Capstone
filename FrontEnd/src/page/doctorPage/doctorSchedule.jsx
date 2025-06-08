@@ -29,8 +29,7 @@ export default function DoctorSchedule() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDateSchedules, setSelectedDateSchedules] = useState([]);
-  
-  // Hiển thị thông tin debug
+    // Show debug information
   const showDebugInfo = () => {
     setDebugInfo({
       userObject: user,
@@ -38,7 +37,7 @@ export default function DoctorSchedule() {
       currentDoctor: currentDoctor,
       localStorage: localStorage.getItem('user')
     });
-    showNotification("Đang hiển thị thông tin debug", "info");
+    showNotification("Displaying debug information", "info");
   };
 
   // Animate the refresh button
@@ -77,7 +76,7 @@ export default function DoctorSchedule() {
       
       if (!doctorInfo || !doctorInfo.id) {
         console.error("Could not get doctor ID from myInfo API");
-        showNotification("Không thể lấy thông tin bác sĩ. Vui lòng đăng nhập lại.", "error");
+        showNotification("Could not get doctor information. Please log in again.", "error");
         setLoading(false);
         return;
       }
@@ -98,7 +97,7 @@ export default function DoctorSchedule() {
       }
     } catch (error) {
       console.error("Error in fetchSchedules:", error);
-      showNotification("Không thể tải lịch làm việc", "error");
+      showNotification("Unable to load work schedule", "error");
       setSchedules([]);
     } finally {
       setLoading(false);
@@ -116,21 +115,20 @@ export default function DoctorSchedule() {
       setNotification(null);
     }, 5000);
   };
-
   // Helper functions
   const formatDate = (dateString) => {
     const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString("vi-VN", options);
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   const formatShortDate = (date) => {
     const options = { month: "short", day: "numeric" };
-    return new Date(date).toLocaleDateString("vi-VN", options);
+    return new Date(date).toLocaleDateString("en-US", options);
   };
 
   const formatMonth = (date) => {
     const options = { month: "long", year: "numeric" };
-    return new Date(date).toLocaleDateString("vi-VN", options);
+    return new Date(date).toLocaleDateString("en-US", options);
   };
 
   // Format date to YYYY-MM-DD for comparison
@@ -176,10 +174,8 @@ export default function DoctorSchedule() {
     const year = currentDate.getFullYear();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const today = new Date();
-
-    // Days of week headers
-    const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+    const today = new Date();    // Days of week headers
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     
     // Generate empty cells for days before the first day of the month
     const calendarRows = [];
@@ -264,8 +260,7 @@ export default function DoctorSchedule() {
               {hasSchedules && (
                 <div className="time-slots mt-1">
                   {dateSchedules.length <= 3 ? (
-                    dateSchedules.map((schedule, idx) => (
-                      <div 
+                    dateSchedules.map((schedule, idx) => (                      <div 
                         key={`schedule-${dayCounter}-${idx}`}
                         className={`text-xs py-0.5 px-1.5 mb-0.5 rounded flex items-center gap-1 
                                     truncate ${schedule.isAvailable ? 
@@ -273,12 +268,11 @@ export default function DoctorSchedule() {
                                     'bg-red-50 text-red-600 dark:bg-red-900/10 dark:text-red-400'}`}
                       >
                         <FaClock className="flex-shrink-0" size={10} />
-                        <span className="truncate">{schedule.startTime}</span>
+                        <span className="truncate">{schedule.startTime} - {schedule.endTime}</span>
                       </div>
-                    ))
-                  ) : (
+                    ))                  ) : (
                     <div className="text-xs py-0.5 px-1.5 mb-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/10 dark:text-blue-400 flex items-center justify-center">
-                      <span>{dateSchedules.length} lịch</span>
+                      <span>{dateSchedules.length} schedules</span>
                     </div>
                   )}
                 </div>
@@ -301,11 +295,10 @@ export default function DoctorSchedule() {
   };
 
   // Format status for visual display
-  const getStatusInfo = (schedule) => {
-    if (!schedule.isAvailable) {
+  const getStatusInfo = (schedule) => {    if (!schedule.isAvailable) {
       return {
         icon: <MdOutlineEventBusy size={18} />,
-        label: "Không có sẵn",
+        label: "Not Available",
         classes: "bg-red-50 text-red-600 border-red-200"
       };
     }
@@ -314,14 +307,14 @@ export default function DoctorSchedule() {
     if (appointmentsRatio >= 0.8) {
       return {
         icon: <HiOutlineBadgeCheck size={18} />,
-        label: "Sắp đầy",
+        label: "Almost Full",
         classes: "bg-amber-50 text-amber-600 border-amber-200"
       };
     }
     
     return {
       icon: <MdOutlineEventAvailable size={18} />,
-      label: "Có sẵn",
+      label: "Available",
       classes: "bg-green-50 text-green-600 border-green-200"
     };
   };
@@ -331,7 +324,7 @@ export default function DoctorSchedule() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-blue-600"></div>
-        <p className="mt-4 text-gray-600 font-medium">Đang tải lịch làm việc...</p>
+        <p className="mt-4 text-gray-600 font-medium">Loading work schedule...</p>
       </div>
     );
   }
@@ -418,8 +411,7 @@ export default function DoctorSchedule() {
                     {JSON.stringify(debugInfo.currentDoctor, null, 2)}
                   </pre>
                 </div>
-              </div>
-              <div className="mt-6 flex justify-end">
+              </div>              <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setDebugInfo(null)}
                   className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg flex items-center gap-2 transition-all font-medium shadow-md"
@@ -427,7 +419,7 @@ export default function DoctorSchedule() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  Đóng
+                  Close
                 </button>
               </div>
             </motion.div>
@@ -489,14 +481,12 @@ export default function DoctorSchedule() {
                       
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2">
-                          <FaUserInjured className="text-blue-400" />
-                          <span className="text-sm text-gray-600 dark:text-gray-300">
-                            <span className="font-bold">{schedule.currentAppointments}</span>/{schedule.maxAppointments} cuộc hẹn
-                          </span>
-                        </div>
+                          <FaUserInjured className="text-blue-400" />                          <span className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-bold">{schedule.currentAppointments}</span>/{schedule.maxAppointments} appointments
+                          </span>                        </div>
                         
                         <button className="flex items-center gap-1 text-blue-500 hover:text-blue-600 text-sm font-medium">
-                          Chi tiết
+                          Details
                           <HiOutlineChevronRight className="w-4 h-4" />
                         </button>
                       </div>
@@ -513,8 +503,7 @@ export default function DoctorSchedule() {
                   );
                 })}
               </div>
-              
-              <div className="mt-6 flex justify-end">
+                <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setSelectedDate(null)}
                   className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg flex items-center gap-2 transition-all font-medium shadow-md"
@@ -522,7 +511,7 @@ export default function DoctorSchedule() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  Đóng
+                  Close
                 </button>
               </div>
             </motion.div>
@@ -533,25 +522,22 @@ export default function DoctorSchedule() {
       {/* Header with fancy gradient background */}
       <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-3xl shadow-sm">
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 mb-2 flex items-center gap-3">
+          <div>            <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 mb-2 flex items-center gap-3">
               <FaCalendarAlt className="text-blue-500" />
-              Lịch Làm Việc
+              Work Schedule
             </h1>
             {currentDoctor && (
               <div className="flex items-center gap-2 mt-2 text-gray-600 dark:text-gray-300">
                 <HiUserCircle className="text-xl text-blue-500" />
                 <p className="font-medium">
-                  {currentDoctor.firstName} {currentDoctor.lastName}
-                  <span className="ml-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full text-xs font-medium">
-                    {currentDoctor.role?.name === "DOCTOR" ? "Bác sĩ" : "Y tá"}
+                  {currentDoctor.firstName} {currentDoctor.lastName}                  <span className="ml-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full text-xs font-medium">
+                    {currentDoctor.role?.name === "DOCTOR" ? "Doctor" : "Nurse"}
                   </span>
                 </p>
               </div>
-            )}
-            <div className="flex items-center gap-2 mt-1 text-gray-500 dark:text-gray-400 text-sm">
+            )}            <div className="flex items-center gap-2 mt-1 text-gray-500 dark:text-gray-400 text-sm">
               <FaRegClock className="text-yellow-500" />
-              <p>Xem và quản lý lịch làm việc của bạn</p>
+              <p>View and manage your work schedule</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -576,10 +562,9 @@ export default function DoctorSchedule() {
               viewMode === "list" 
                 ? "bg-blue-500 text-white shadow-md" 
                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-          >
+            }`}          >
             <FaListUl />
-            <span>Danh sách</span>
+            <span>List View</span>
           </button>
           <button 
             onClick={() => setViewMode("calendar")}
@@ -587,18 +572,14 @@ export default function DoctorSchedule() {
               viewMode === "calendar" 
                 ? "bg-blue-500 text-white shadow-md" 
                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-          >
+            }`}          >
             <FaCalendarWeek />
-            <span>Lịch tháng</span>
+            <span>Monthly Calendar</span>
           </button>
         </div>
         
         <div className="flex items-center gap-3">
-          <button className="bg-green-500 hover:bg-green-600 text-white rounded-lg px-4 py-2 flex items-center gap-2 transition shadow-sm hover:shadow-md">
-            <FaPlusCircle />
-            <span className="font-medium">Thêm lịch mới</span>
-          </button>
+          
           
           <button className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
             <HiFilter />
@@ -620,12 +601,11 @@ export default function DoctorSchedule() {
                 className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition"
               >
                 <FaChevronLeft />
-              </button>
-              <button 
+              </button>              <button 
                 onClick={goToToday} 
                 className="px-3 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-800/40 transition"
               >
-                Hôm nay
+                Today
               </button>
               <button 
                 onClick={goToNextMonth} 
@@ -642,18 +622,17 @@ export default function DoctorSchedule() {
           </div>
           
           {/* Legend */}
-          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-4">
-            <div className="flex items-center gap-2">
+          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-4">            <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Có sẵn</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Available</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Không có sẵn</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Not Available</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 border-2 border-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Hôm nay</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Today</span>
             </div>
           </div>
         </div>
@@ -670,10 +649,9 @@ export default function DoctorSchedule() {
                   activeTab === "upcoming"
                     ? "text-blue-600 border-b-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/30"
-                }`}
-              >
+                }`}                >
                 <FaRegCalendarCheck className={activeTab === "upcoming" ? "text-blue-500" : "text-gray-400"} />
-                <span>Sắp tới ({upcomingSchedules.length})</span>
+                <span>Upcoming ({upcomingSchedules.length})</span>
               </button>
               <button
                 onClick={() => setActiveTab("past")}
@@ -681,10 +659,9 @@ export default function DoctorSchedule() {
                   activeTab === "past"
                     ? "text-blue-600 border-b-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/30"
-                }`}
-              >
+                }`}                >
                 <FaRegCalendarTimes className={activeTab === "past" ? "text-blue-500" : "text-gray-400"} />
-                <span>Đã qua ({pastSchedules.length})</span>
+                <span>Past ({pastSchedules.length})</span>
               </button>
             </div>
           </div>
@@ -706,10 +683,9 @@ export default function DoctorSchedule() {
                 <div className="flex flex-col items-center">
                   <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
                     <HiOutlineCalendar className="w-10 h-10 text-blue-500 dark:text-blue-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">Chưa có lịch sắp tới</h3>
+                  </div>                  <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">No upcoming schedules</h3>
                   <p className="text-gray-500 dark:text-gray-400 max-w-md">
-                    Bạn chưa có lịch làm việc nào sắp tới. Tại đây sẽ hiển thị lịch làm việc của bạn khi có.
+                    You don't have any upcoming work schedules. Your work schedules will appear here when available.
                   </p>
                 </div>
               </div>
@@ -718,10 +694,9 @@ export default function DoctorSchedule() {
                 <div className="flex flex-col items-center">
                   <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
                     <HiOutlineCalendar className="w-10 h-10 text-blue-500 dark:text-blue-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">Chưa có lịch đã qua</h3>
+                  </div>                  <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">No past schedules</h3>
                   <p className="text-gray-500 dark:text-gray-400 max-w-md">
-                    Bạn chưa có lịch làm việc nào đã qua. Tại đây sẽ hiển thị lịch làm việc của bạn sau khi kết thúc.
+                    You don't have any past work schedules. Your work schedules will appear here after they end.
                   </p>
                 </div>
               </div>
@@ -740,10 +715,9 @@ export default function DoctorSchedule() {
                       className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border ${isToday ? "border-blue-200 dark:border-blue-800" : "border-gray-100 dark:border-gray-700"} hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
                     >
                       {/* Card Header with Gradient */}
-                      <div className={`p-1 ${isToday ? "bg-gradient-to-r from-blue-500 to-indigo-500" : "bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600"}`}>
-                        {isToday && (
+                      <div className={`p-1 ${isToday ? "bg-gradient-to-r from-blue-500 to-indigo-500" : "bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600"}`}>                        {isToday && (
                           <div className="bg-white dark:bg-gray-800 rounded-lg px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 inline-flex items-center gap-1 float-right -mt-1">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div> Hôm nay
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div> Today
                           </div>
                         )}
                       </div>
@@ -799,12 +773,11 @@ export default function DoctorSchedule() {
                             <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-2">
                               <HiLocationMarker className="w-4 h-4 text-blue-500" />
                             </div>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">Phòng khám trực tuyến</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Online clinic</span>
                           </div>
-                          
-                          {activeTab === "upcoming" && (
+                            {activeTab === "upcoming" && (
                             <button className="flex items-center gap-1 text-blue-500 hover:text-blue-600 text-sm font-medium">
-                              Chi tiết
+                              Details
                               <HiOutlineChevronRight className="w-4 h-4" />
                             </button>
                           )}

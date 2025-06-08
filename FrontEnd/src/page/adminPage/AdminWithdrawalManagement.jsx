@@ -115,19 +115,18 @@ const AdminWithdrawalManagement = () => {
       setShowUploadModal(false);
       setProofFile(null);
       setSelectedWithdrawal(null);
-      fetchWithdrawals();
-      alert('Chứng từ đã được upload và liên kết thành công!');
+      fetchWithdrawals();      alert('Transfer proof uploaded and linked successfully!');
     } catch (error) {
       console.error('Error uploading transfer proof:', error);
-      alert('Có lỗi xảy ra khi upload chứng từ');
+      alert('An error occurred while uploading transfer proof');
     }
   };
   const getStatusBadge = (status) => {
     const statusConfig = {
-      PENDING: { color: 'yellow', text: 'Đang chờ' },
-      APPROVED: { color: 'green', text: 'Đã duyệt' },
-      REJECTED: { color: 'red', text: 'Đã từ chối' },
-      COMPLETED: { color: 'blue', text: 'Hoàn thành' }
+      PENDING: { color: 'yellow', text: 'Pending' },
+      APPROVED: { color: 'green', text: 'Approved' },
+      REJECTED: { color: 'red', text: 'Rejected' },
+      COMPLETED: { color: 'blue', text: 'Completed' }
     };
 
     const config = statusConfig[status] || { color: 'gray', text: status };
@@ -143,13 +142,12 @@ const AdminWithdrawalManagement = () => {
     };
     return statusConfig[status] || 'gray';
   };
-
   const getStatusText = (status) => {
     const statusConfig = {
-      PENDING: 'Đang chờ',
-      APPROVED: 'Đã duyệt',
-      REJECTED: 'Đã từ chối',
-      COMPLETED: 'Hoàn thành'
+      PENDING: 'Pending',
+      APPROVED: 'Approved',
+      REJECTED: 'Rejected',
+      COMPLETED: 'Completed'
     };
     return statusConfig[status] || status;
   };
@@ -167,9 +165,9 @@ const AdminWithdrawalManagement = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'VND'
+      currency: 'USD'
     }).format(amount);
   };
 
@@ -186,23 +184,21 @@ const AdminWithdrawalManagement = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
+    <div className="p-6 space-y-6">      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý rút tiền</h1>
-          <p className="text-gray-600">Quản lý các yêu cầu rút tiền từ bác sĩ</p>
+          <h1 className="text-2xl font-bold text-gray-900">Withdrawal Management</h1>
+          <p className="text-gray-600">Manage withdrawal requests from doctors</p>
         </div>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card>
-          <Card.Content className="p-6">
-            <div className="text-2xl font-bold text-blue-600">
+          <Card.Content className="p-6">            <div className="text-2xl font-bold text-blue-600">
               {statistics.totalWithdrawals}
             </div>
-            <p className="text-sm text-gray-600">Tổng yêu cầu</p>
+            <p className="text-sm text-gray-600">Total Requests</p>
           </Card.Content>
         </Card>
 
@@ -211,7 +207,7 @@ const AdminWithdrawalManagement = () => {
             <div className="text-2xl font-bold text-yellow-600">
               {statistics.pendingWithdrawals}
             </div>
-            <p className="text-sm text-gray-600">Đang chờ</p>
+            <p className="text-sm text-gray-600">Pending</p>
           </Card.Content>
         </Card>
 
@@ -220,7 +216,7 @@ const AdminWithdrawalManagement = () => {
             <div className="text-2xl font-bold text-green-600">
               {statistics.approvedWithdrawals}
             </div>
-            <p className="text-sm text-gray-600">Đã duyệt</p>
+            <p className="text-sm text-gray-600">Approved</p>
           </Card.Content>
         </Card>
 
@@ -229,7 +225,7 @@ const AdminWithdrawalManagement = () => {
             <div className="text-2xl font-bold text-red-600">
               {statistics.rejectedWithdrawals}
             </div>
-            <p className="text-sm text-gray-600">Đã từ chối</p>
+            <p className="text-sm text-gray-600">Rejected</p>
           </Card.Content>
         </Card>
 
@@ -238,7 +234,7 @@ const AdminWithdrawalManagement = () => {
             <div className="text-2xl font-bold text-purple-600">
               {formatCurrency(statistics.totalWithdrawalAmount)}
             </div>
-            <p className="text-sm text-gray-600">Tổng tiền rút</p>
+            <p className="text-sm text-gray-600">Total Amount</p>
           </Card.Content>
         </Card>
 
@@ -247,35 +243,33 @@ const AdminWithdrawalManagement = () => {
             <div className="text-2xl font-bold text-orange-600">
               {formatCurrency(statistics.pendingAmount)}
             </div>
-            <p className="text-sm text-gray-600">Tiền chờ duyệt</p>
+            <p className="text-sm text-gray-600">Pending Amount</p>
           </Card.Content>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card>
-        <Card.Content className="p-4">
+      <Card>        <Card.Content className="p-4">
           <div className="flex gap-4 items-center">
-            <label className="text-sm font-medium text-gray-700">Lọc theo trạng thái:</label>
+            <label className="text-sm font-medium text-gray-700">Filter by status:</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm"
             >
-              <option value="ALL">Tất cả</option>
-              <option value="PENDING">Đang chờ</option>
-              <option value="APPROVED">Đã duyệt</option>
-              <option value="REJECTED">Đã từ chối</option>
-              <option value="COMPLETED">Hoàn thành</option>
+              <option value="ALL">All</option>
+              <option value="PENDING">Pending</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="COMPLETED">Completed</option>
             </select>
           </div>
         </Card.Content>
       </Card>
 
-      {/* Withdrawals Table */}
-      <Card>
+      {/* Withdrawals Table */}      <Card>
         <Card.Header>
-          <Card.Title>Danh sách yêu cầu rút tiền</Card.Title>
+          <Card.Title>Withdrawal Requests List</Card.Title>
         </Card.Header>
         <Card.Content>
           <div className="overflow-x-auto">
@@ -283,22 +277,22 @@ const AdminWithdrawalManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Bác sĩ
+                    Doctor
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Số tiền
+                    Amount
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ngân hàng
+                    Bank
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ngày yêu cầu
+                    Request Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
+                    Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thao tác
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -342,9 +336,8 @@ const AdminWithdrawalManagement = () => {
                               setSelectedWithdrawal(withdrawal);
                               setShowApproveModal(true);
                             }}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            Duyệt
+                            className="bg-green-600 hover:bg-green-700"                          >
+                            Approve
                           </Button>
                           <Button
                             size="sm"
@@ -355,7 +348,7 @@ const AdminWithdrawalManagement = () => {
                             }}
                             className="text-red-600 border-red-600 hover:bg-red-50"
                           >
-                            Từ chối
+                            Reject
                           </Button>
                         </>
                       )}                      {(withdrawal.status === 'APPROVED' || withdrawal.status === 'COMPLETED') && (
@@ -364,10 +357,9 @@ const AdminWithdrawalManagement = () => {
                           onClick={() => {
                             setSelectedWithdrawal(withdrawal);
                             setShowUploadModal(true);
-                          }}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          }}                          className="bg-blue-600 hover:bg-blue-700"
                         >
-                          {withdrawal.transferProofUrl ? 'Up lại chứng từ' : 'Up chứng từ'}
+                          {withdrawal.transferProofUrl ? 'Re-upload Proof' : 'Upload Proof'}
                         </Button>
                       )}
 
@@ -379,18 +371,16 @@ const AdminWithdrawalManagement = () => {
                           setShowDetailsModal(true);
                         }}
                       >
-                        Chi tiết
+                        Details
                       </Button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-
-          {filteredWithdrawals.length === 0 && (
+          </div>          {filteredWithdrawals.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              Không có yêu cầu rút tiền nào
+              No withdrawal requests found
             </div>
           )}
         </Card.Content>
@@ -402,14 +392,13 @@ const AdminWithdrawalManagement = () => {
           setActionNote('');
           setProofFile(null);
           setSelectedWithdrawal(null);
-        }}
-        title="Duyệt yêu cầu rút tiền"
+        }}        title="Approve Withdrawal Request"
       >
         <div className="space-y-4">          <div>
             <p className="text-sm text-gray-600 mb-2">
-              Bạn có chắc chắn muốn duyệt yêu cầu rút tiền của{' '}
+              Are you sure you want to approve the withdrawal request from{' '}
               <span className="font-medium">{selectedWithdrawal?.doctorName}</span>{' '}
-              với số tiền{' '}
+              for the amount{' '}
               <span className="font-medium text-green-600">
                 {formatCurrency(selectedWithdrawal?.amount || 0)}
               </span>?
@@ -418,7 +407,7 @@ const AdminWithdrawalManagement = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Chứng từ chuyển tiền <span className="text-red-500">*</span>
+              Transfer Proof <span className="text-red-500">*</span>
             </label>
             <Input
               type="file"
@@ -428,18 +417,18 @@ const AdminWithdrawalManagement = () => {
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              Chọn file ảnh hoặc PDF làm chứng từ chuyển tiền
+              Select an image or PDF file as transfer proof
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ghi chú (tùy chọn)
+              Notes (optional)
             </label>
             <Textarea
               value={actionNote}
               onChange={(e) => setActionNote(e.target.value)}
-              placeholder="Nhập ghi chú cho quyết định duyệt..."
+              placeholder="Enter notes for the approval decision..."
               rows={3}
             />
           </div>
@@ -454,14 +443,14 @@ const AdminWithdrawalManagement = () => {
                 setSelectedWithdrawal(null);
               }}
             >
-              Hủy
+              Cancel
             </Button>
             <Button
               onClick={handleApproveWithdrawal}
               disabled={!proofFile}
               className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
             >
-              Xác nhận duyệt
+              Confirm Approval
             </Button>
           </div>
         </div>
@@ -474,14 +463,13 @@ const AdminWithdrawalManagement = () => {
           setShowRejectModal(false);
           setActionNote('');
           setSelectedWithdrawal(null);
-        }}
-        title="Từ chối yêu cầu rút tiền"
+        }}        title="Reject Withdrawal Request"
       >
         <div className="space-y-4">          <div>
             <p className="text-sm text-gray-600 mb-2">
-              Bạn có chắc chắn muốn từ chối yêu cầu rút tiền của{' '}
+              Are you sure you want to reject the withdrawal request from{' '}
               <span className="font-medium">{selectedWithdrawal?.doctorName}</span>{' '}
-              với số tiền{' '}
+              for the amount{' '}
               <span className="font-medium text-red-600">
                 {formatCurrency(selectedWithdrawal?.amount || 0)}
               </span>?
@@ -490,12 +478,12 @@ const AdminWithdrawalManagement = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Lý do từ chối <span className="text-red-500">*</span>
+              Reason for rejection <span className="text-red-500">*</span>
             </label>
             <Textarea
               value={actionNote}
               onChange={(e) => setActionNote(e.target.value)}
-              placeholder="Nhập lý do từ chối yêu cầu rút tiền..."
+              placeholder="Enter reason for rejecting the withdrawal request..."
               rows={3}
               required
             />
@@ -510,14 +498,14 @@ const AdminWithdrawalManagement = () => {
                 setSelectedWithdrawal(null);
               }}
             >
-              Hủy
+              Cancel
             </Button>
             <Button
               onClick={handleRejectWithdrawal}
               disabled={!actionNote.trim()}
               className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
             >
-              Xác nhận từ chối
+              Confirm Rejection
             </Button>
           </div>        </div>
       </Modal>
@@ -528,18 +516,17 @@ const AdminWithdrawalManagement = () => {
         onClose={() => {
           setShowDetailsModal(false);
           setSelectedWithdrawal(null);
-        }}
-        title="Chi tiết yêu cầu rút tiền"
+        }}        title="Withdrawal Request Details"
         size="lg"
       >
         <div className="space-y-6">
           {selectedWithdrawal && (
             <>
               {/* Doctor Information */}              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-800 mb-3">Thông tin bác sĩ</h3>
+                <h3 className="font-semibold text-gray-800 mb-3">Doctor Information</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-600">Họ tên:</span>
+                    <span className="text-sm text-gray-600">Full Name:</span>
                     <p className="font-medium">{selectedWithdrawal.doctorName || 'N/A'}</p>
                   </div>
                   <div>
@@ -547,11 +534,11 @@ const AdminWithdrawalManagement = () => {
                     <p className="font-medium">{selectedWithdrawal.doctorEmail || 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">Số điện thoại:</span>
+                    <span className="text-sm text-gray-600">Phone Number:</span>
                     <p className="font-medium">{selectedWithdrawal.doctorPhone || 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">Chuyên khoa:</span>
+                    <span className="text-sm text-gray-600">Specialty:</span>
                     <p className="font-medium">{selectedWithdrawal.doctorSpecialty || 'N/A'}</p>
                   </div>
                 </div>
@@ -559,30 +546,30 @@ const AdminWithdrawalManagement = () => {
 
               {/* Withdrawal Information */}
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-800 mb-3">Thông tin rút tiền</h3>
+                <h3 className="font-semibold text-gray-800 mb-3">Withdrawal Information</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-600">Số tiền:</span>
+                    <span className="text-sm text-gray-600">Amount:</span>
                     <p className="font-medium text-blue-600 text-lg">
                       {formatCurrency(selectedWithdrawal.amount)}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-600">Trạng thái:</span>
+                    <span className="text-sm text-gray-600">Status:</span>
                     <div className="mt-1">
                       <Badge variant={getStatusBadgeVariant(selectedWithdrawal.status)}>
                         {getStatusText(selectedWithdrawal.status)}
                       </Badge>
                     </div>
                   </div>                  <div>
-                    <span className="text-sm text-gray-600">Ngày yêu cầu:</span>
+                    <span className="text-sm text-gray-600">Request Date:</span>
                     <p className="font-medium">
                       {formatDate(selectedWithdrawal.requestedAt || selectedWithdrawal.createdAt)}
                     </p>
                   </div>
                   {selectedWithdrawal.processedAt && (
                     <div>
-                      <span className="text-sm text-gray-600">Ngày xử lý:</span>
+                      <span className="text-sm text-gray-600">Processed Date:</span>
                       <p className="font-medium">
                         {formatDate(selectedWithdrawal.processedAt)}
                       </p>
@@ -593,18 +580,17 @@ const AdminWithdrawalManagement = () => {
 
               {/* Bank Information */}
               <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-800 mb-3">Thông tin ngân hàng</h3>
+                <h3 className="font-semibold text-gray-800 mb-3">Bank Information</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-600">Tên ngân hàng:</span>
+                    <span className="text-sm text-gray-600">Bank Name:</span>
                     <p className="font-medium">{selectedWithdrawal.bankName}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Số tài khoản:</span>
+                  </div>                  <div>
+                    <span className="text-sm text-gray-600">Account Number:</span>
                     <p className="font-medium">{selectedWithdrawal.accountNumber}</p>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-sm text-gray-600">Tên chủ tài khoản:</span>
+                    <span className="text-sm text-gray-600">Account Holder Name:</span>
                     <p className="font-medium">{selectedWithdrawal.accountHolderName}</p>
                   </div>
                 </div>
@@ -613,7 +599,7 @@ const AdminWithdrawalManagement = () => {
               {/* Admin Notes */}
               {selectedWithdrawal.adminNote && (
                 <div className="bg-yellow-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-800 mb-2">Ghi chú của admin</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">Admin Notes</h3>
                   <p className="text-gray-700">{selectedWithdrawal.adminNote}</p>
                 </div>
               )}
@@ -621,7 +607,7 @@ const AdminWithdrawalManagement = () => {
               {/* Transfer Proof */}
               {selectedWithdrawal.transferProofUrl && (
                 <div className="bg-purple-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-800 mb-3">Chứng từ chuyển tiền</h3>
+                  <h3 className="font-semibold text-gray-800 mb-3">Transfer Proof</h3>
                   <div className="mt-2">
                     {selectedWithdrawal.transferProofUrl.toLowerCase().includes('.pdf') ? (
                       <div className="flex items-center gap-2">
@@ -631,14 +617,14 @@ const AdminWithdrawalManagement = () => {
                           </svg>
                         </div>
                         <div>
-                          <p className="font-medium">Chứng từ PDF</p>
+                          <p className="font-medium">PDF Document</p>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => window.open(selectedWithdrawal.transferProofUrl, '_blank')}
                             className="mt-1"
                           >
-                            Xem file PDF
+                            View PDF File
                           </Button>
                         </div>
                       </div>
@@ -646,7 +632,7 @@ const AdminWithdrawalManagement = () => {
                       <div>
                         <img
                           src={selectedWithdrawal.transferProofUrl}
-                          alt="Chứng từ chuyển tiền"
+                          alt="Transfer Proof"
                           className="max-w-full h-auto rounded-lg shadow-md border"
                           style={{ maxHeight: '400px' }}
                         />
@@ -656,14 +642,13 @@ const AdminWithdrawalManagement = () => {
                           onClick={() => window.open(selectedWithdrawal.transferProofUrl, '_blank')}
                           className="mt-2"
                         >
-                          Xem ảnh full size
+                          View Full Size Image
                         </Button>
                       </div>
                     )}
                   </div>
                 </div>
-              )}
-            </>
+              )}            </>
           )}          <div className="flex justify-end">
             <Button
               variant="outline"
@@ -672,7 +657,7 @@ const AdminWithdrawalManagement = () => {
                 setSelectedWithdrawal(null);
               }}
             >
-              Đóng
+              Close
             </Button>
           </div>
         </div>
@@ -686,14 +671,14 @@ const AdminWithdrawalManagement = () => {
           setProofFile(null);
           setSelectedWithdrawal(null);
         }}
-        title="Upload chứng từ chuyển tiền"
+        title="Upload Transfer Proof"
       >
         <div className="space-y-4">
           <div>
             <p className="text-sm text-gray-600 mb-2">
-              Upload chứng từ chuyển tiền cho yêu cầu rút tiền của{' '}
+              Upload transfer proof for withdrawal request from{' '}
               <span className="font-medium">{selectedWithdrawal?.doctorName}</span>{' '}
-              với số tiền{' '}
+              for the amount{' '}
               <span className="font-medium text-blue-600">
                 {formatCurrency(selectedWithdrawal?.amount || 0)}
               </span>?
@@ -702,7 +687,7 @@ const AdminWithdrawalManagement = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Chứng từ chuyển tiền <span className="text-red-500">*</span>
+              Transfer Proof <span className="text-red-500">*</span>
             </label>
             <Input
               type="file"
@@ -712,7 +697,7 @@ const AdminWithdrawalManagement = () => {
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              Chọn file ảnh hoặc PDF làm chứng từ chuyển tiền
+              Select an image or PDF file as transfer proof
             </p>
           </div>
 
@@ -725,14 +710,14 @@ const AdminWithdrawalManagement = () => {
                 setSelectedWithdrawal(null);
               }}
             >
-              Hủy
+              Cancel
             </Button>
             <Button
               onClick={handleUploadProof}
               disabled={!proofFile}
               className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
             >
-              Upload chứng từ
+              Upload Proof
             </Button>
           </div>
         </div>

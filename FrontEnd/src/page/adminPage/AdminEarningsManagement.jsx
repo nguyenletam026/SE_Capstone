@@ -33,35 +33,34 @@ const AdminEarningsManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
-  const handleConfirmEarning = async (earningId) => {
+  };  const handleConfirmEarning = async (earningId) => {
     // eslint-disable-next-line no-restricted-globals
-    if (!confirm('Bạn có chắc chắn muốn xác nhận thu nhập này?')) {
+    if (!confirm('Are you sure you want to confirm this earning?')) {
       return;
     }
 
     try {
       setConfirmingId(earningId);
       await adminConfirmEarning(earningId);
-      alert('Xác nhận thu nhập thành công!');
+      alert('Earning confirmed successfully!');
       fetchData(); // Refresh data
     } catch (error) {
       console.error('Error confirming earning:', error);
-      alert('Có lỗi xảy ra khi xác nhận thu nhập');
+      alert('An error occurred while confirming the earning');
     } finally {
       setConfirmingId(null);
     }
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'VND'
+      currency: 'USD'
     }).format(amount);
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -75,12 +74,10 @@ const AdminEarningsManagement = () => {
       PENDING: 'bg-yellow-100 text-yellow-800',
       CONFIRMED: 'bg-green-100 text-green-800',
       WITHDRAWN: 'bg-blue-100 text-blue-800'
-    };
-
-    const statusTexts = {
-      PENDING: 'Chờ xác nhận',
-      CONFIRMED: 'Đã xác nhận',
-      WITHDRAWN: 'Đã rút'
+    };    const statusTexts = {
+      PENDING: 'Pending Confirmation',
+      CONFIRMED: 'Confirmed',
+      WITHDRAWN: 'Withdrawn'
     };
 
     return (
@@ -115,11 +112,10 @@ const AdminEarningsManagement = () => {
     );
   }
 
-  return (
-    <div className="container mx-auto px-4 py-6">
+  return (    <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Quản lý thu nhập bác sĩ</h1>
-        <p className="text-gray-600">Theo dõi và xác nhận thu nhập của các bác sĩ</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Doctor Earnings Management</h1>
+        <p className="text-gray-600">Track and confirm doctor earnings</p>
       </div>
 
       {/* Stats Cards */}
@@ -130,9 +126,8 @@ const AdminEarningsManagement = () => {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Tổng thu nhập BS</p>
+            </div>            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Total Doctor Earnings</p>
               <p className="text-2xl font-bold text-gray-900">
                 {formatCurrency(stats.totalEarnings)}
               </p>
@@ -148,11 +143,11 @@ const AdminEarningsManagement = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Chờ xác nhận</p>
+              <p className="text-sm font-medium text-gray-500">Pending Confirmation</p>
               <p className="text-2xl font-bold text-gray-900">
                 {formatCurrency(stats.pendingEarnings)}
               </p>
-              <p className="text-xs text-gray-500">{stats.pendingCount} giao dịch</p>
+              <p className="text-xs text-gray-500">{stats.pendingCount} transactions</p>
             </div>
           </div>
         </div>
@@ -165,7 +160,7 @@ const AdminEarningsManagement = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Đã xác nhận</p>
+              <p className="text-sm font-medium text-gray-500">Confirmed</p>
               <p className="text-2xl font-bold text-gray-900">
                 {formatCurrency(stats.confirmedEarnings)}
               </p>
@@ -181,7 +176,7 @@ const AdminEarningsManagement = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Thu nhập nền tảng</p>
+              <p className="text-sm font-medium text-gray-500">Platform Revenue</p>
               <p className="text-2xl font-bold text-gray-900">
                 {formatCurrency(platformFees)}
               </p>
@@ -197,7 +192,7 @@ const AdminEarningsManagement = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Tổng giao dịch</p>
+              <p className="text-sm font-medium text-gray-500">Total Transactions</p>
               <p className="text-2xl font-bold text-gray-900">{stats.totalCount}</p>
             </div>
           </div>
@@ -205,20 +200,19 @@ const AdminEarningsManagement = () => {
       </div>
 
       {/* Filters and Table */}
-      <div className="bg-white rounded-lg shadow-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white rounded-lg shadow-lg">        <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium text-gray-900">Danh sách thu nhập</h3>
+            <h3 className="text-lg font-medium text-gray-900">Earnings List</h3>
             <div className="flex space-x-4">
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="ALL">Tất cả trạng thái</option>
-                <option value="PENDING">Chờ xác nhận</option>
-                <option value="CONFIRMED">Đã xác nhận</option>
-                <option value="WITHDRAWN">Đã rút</option>
+                <option value="ALL">All Status</option>
+                <option value="PENDING">Pending Confirmation</option>
+                <option value="CONFIRMED">Confirmed</option>
+                <option value="WITHDRAWN">Withdrawn</option>
               </select>
             </div>
           </div>
@@ -229,25 +223,25 @@ const AdminEarningsManagement = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bác sĩ
+                  Doctor
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ngày tạo
+                  Created Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tổng thanh toán
+                  Total Payment
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Thu nhập BS (70%)
+                  Doctor Earnings (70%)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phí nền tảng (30%)
+                  Platform Fee (30%)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Trạng thái
+                  Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Thao tác
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -255,7 +249,7 @@ const AdminEarningsManagement = () => {
               {earnings.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
-                    Không có dữ liệu thu nhập
+                    No earnings data available
                   </td>
                 </tr>
               ) : (
@@ -299,17 +293,16 @@ const AdminEarningsManagement = () => {
                       {earning.status === 'PENDING' && (
                         <button
                           onClick={() => handleConfirmEarning(earning.id)}
-                          disabled={confirmingId === earning.id}
-                          className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
+                          disabled={confirmingId === earning.id}                          className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
                         >
-                          {confirmingId === earning.id ? 'Đang xử lý...' : 'Xác nhận'}
+                          {confirmingId === earning.id ? 'Processing...' : 'Confirm'}
                         </button>
                       )}
                       {earning.status === 'CONFIRMED' && (
-                        <span className="text-gray-400">Đã xác nhận</span>
+                        <span className="text-gray-400">Confirmed</span>
                       )}
                       {earning.status === 'WITHDRAWN' && (
-                        <span className="text-gray-400">Đã rút tiền</span>
+                        <span className="text-gray-400">Withdrawn</span>
                       )}
                     </td>
                   </tr>
