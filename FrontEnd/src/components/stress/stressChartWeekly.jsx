@@ -39,13 +39,13 @@ export default function WeeklyChart({ refreshSignal, onDataStatus }) {
       if (response && response.code === 1000) {
         processChartData(response.result);
       } else {
-        setError("Không thể tải dữ liệu biểu đồ");
+        setError("Unable to load chart data");
         setChartData(null);
         if (onDataStatus) onDataStatus(false);
       }
     } catch (err) {
       console.error("Error fetching weekly chart data:", err);
-      setError("Lỗi khi tải dữ liệu");
+      setError("Error loading data");
       setChartData(null);
       if (onDataStatus) onDataStatus(false);
     } finally {
@@ -61,7 +61,7 @@ export default function WeeklyChart({ refreshSignal, onDataStatus }) {
     }
 
     // Get the last 7 days
-    const daysOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const weekData = [];
     const weekLabels = [];
 
@@ -105,7 +105,7 @@ export default function WeeklyChart({ refreshSignal, onDataStatus }) {
       labels: weekLabels,
       datasets: [
         {
-          label: "Điểm stress trung bình",
+          label: "Average Stress Score",
           data: weekData,
           backgroundColor: colors,
           borderColor: borderColors,
@@ -128,7 +128,7 @@ export default function WeeklyChart({ refreshSignal, onDataStatus }) {
       },
       title: {
         display: true,
-        text: "Mức Độ Stress Trong Tuần",
+        text: "Weekly Stress Levels",
         font: {
           size: 16,
         },
@@ -140,13 +140,13 @@ export default function WeeklyChart({ refreshSignal, onDataStatus }) {
         max: 100,
         title: {
           display: true,
-          text: "Mức độ stress",
+          text: "Stress Level",
         },
       },
       x: {
         title: {
           display: true,
-          text: "Ngày trong tuần",
+          text: "Day of Week",
         },
       },
     },
@@ -166,7 +166,7 @@ export default function WeeklyChart({ refreshSignal, onDataStatus }) {
         <FaExclamationCircle className="text-gray-400 text-4xl mb-3" />
         <p className="text-gray-500 text-lg font-medium">No Data</p>
         <p className="text-gray-400 text-sm mt-1">
-          {error || "Chưa có dữ liệu trong tuần này"}
+          {error || "No data available for this week"}
         </p>
       </div>
     );

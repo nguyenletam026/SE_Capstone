@@ -117,7 +117,7 @@ function UserChatLayout() {
             // If navigated from contact-doctor page via payment, but backend still indicates expired,
             // it might be due to a race condition - the payment exists but the first query is too fast
             if (location.state?.fromPayment) {
-              toast.info("Đang xác minh trạng thái thanh toán...");
+              toast.info("Verifying payment status...");
               
               // Wait a moment and try to fetch the conversation again
               setTimeout(async () => {
@@ -139,7 +139,7 @@ function UserChatLayout() {
                   });
                   
                   if (stillExpired) {
-                    toast.warning("Thanh toán có thể chưa được xử lý. Vui lòng kiểm tra lại sau.");
+                    toast.warning("Payment may not have been processed yet. Please check again later.");
                     console.warn("⚠️ Payment verification failed on navigation - conversation still expired after retry");
                     
                     // If it's still expired, let's try one more time with a longer delay
@@ -152,7 +152,7 @@ function UserChatLayout() {
                         if (!finallyExpired) {
                           // Success on final retry
                           console.log("✅ Payment verification successful on final retry");
-                          toast.success("Thanh toán đã được xác nhận. Bạn có thể gửi tin nhắn ngay bây giờ.");
+                          toast.success("Payment has been confirmed. You can send messages now.");
                           
                           const finalRefreshedMsgs = finalRetry.map((msg, idx) => {
                             if (!msg.id) {
@@ -172,7 +172,7 @@ function UserChatLayout() {
                     }, 3500);
                   } else {
                     // Payment verified successfully
-                    toast.success("Thanh toán đã được xác nhận. Bạn có thể gửi tin nhắn ngay bây giờ.");
+                    toast.success("Payment has been confirmed. You can send messages now.");
                     console.log("✅ Payment verification successful on navigation - conversation is now valid");
                     
                     // Update messages with non-expired status
@@ -198,17 +198,17 @@ function UserChatLayout() {
           
           setMessages(messagesWithIds);
         } catch (err) {
-          console.error("❌ Lỗi tải cuộc trò chuyện:", err);
+          console.error("❌ Error loading conversation:", err);
           
-          // Nếu lỗi là "You do not have permission" hoặc "không tìm thấy yêu cầu tư vấn"
-          // thì đánh dấu cuộc trò chuyện là đã hết hạn
+          // If error is "You do not have permission" or "consultation request not found"
+          // then mark the conversation as expired
           if (err.message && (err.message.includes("permission") || 
-              err.message.includes("không tìm thấy yêu cầu tư vấn") ||
+              err.message.includes("consultation request not found") ||
               err.message.includes("UNAUTHORIZED"))) {
             // Create a placeholder expired message
             const expiredMessage = {
               id: `expired-${Date.now()}`,
-              content: "Phiên chat đã hết hạn hoặc chưa được thanh toán.",
+              content: "Chat session has expired or has not been paid for.",
               senderId: "system",
               receiverId: user.id,
               timestamp: new Date().toISOString(),
@@ -217,10 +217,10 @@ function UserChatLayout() {
             setMessages([expiredMessage]);
             
             // Show toast notification
-            toast.error("Bạn cần thanh toán để bắt đầu trò chuyện với bác sĩ này.");
+            toast.error("You need to pay to start chatting with this doctor.");
             setNotification({
               type: "error",
-              message: "Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục."
+              message: "Chat session has expired. Please pay to continue."
             });
           } else {
             setMessages([]);
@@ -245,14 +245,14 @@ function UserChatLayout() {
             username: res.result.username,
           });
         } catch (err) {
-          console.error("❌ Lỗi lấy thông tin người dùng:", err);
+          console.error("❌ Error getting user info:", err);
         }
       }
     };
     getUser();
   }, [user, setUser]);
 
-  // Kết nối WebSocket khi component mount
+  // Connect WebSocket when component mounts
   useEffect(() => {
     if (user?.username) {
       connectWebSocket(
@@ -262,7 +262,7 @@ function UserChatLayout() {
         },
         (msg) => {
           try {
-            // Sử dụng parsedBody nếu có, nếu không thì parse từ body
+            // Use parsedBody if available, otherwise parse from body
             const parsed = msg.parsedBody || JSON.parse(msg.body);
             
             // Ensure message has a unique ID
@@ -270,14 +270,12 @@ function UserChatLayout() {
               parsed.id = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             }
             
-            setMessages((prev) => [...prev, parsed]);
-            
-            // Show notification for new messages when sidebar is hidden on mobile
-            if (isMobile && !showSidebar) {
-              setNotification({
-                type: "info",
-                message: "Bạn có tin nhắn mới"
-              });
+            setMessages((prev) => [...prev, parsed]);              // Show notification for new messages when sidebar is hidden on mobile
+              if (isMobile && !showSidebar) {
+                setNotification({
+                  type: "info",
+                  message: "You have a new message"
+                });
               
               // Clear notification after 3 seconds
               setTimeout(() => {
@@ -321,7 +319,7 @@ function UserChatLayout() {
               doctorId: history.doctorId,
               doctorName: history.doctorName,
               doctorAvatar: history.doctorAvatar,
-              doctorSpecialty: history.specialization || "Bác sĩ tư vấn",
+              doctorSpecialty: history.specialization || "Medical Consultant",
               doctorRating: 4.5, // Default rating, could be added to backend
               isOnline: true, // Could be determined from last activity
               lastActive: history.lastMessageTime || new Date().toISOString(),
@@ -353,7 +351,7 @@ function UserChatLayout() {
             doctorId: d.id,
             doctorName: `${d.firstName} ${d.lastName}`,
             doctorAvatar: d.avtUrl,
-            doctorSpecialty: d.specialty || "Bác sĩ tư vấn",
+            doctorSpecialty: d.specialty || "Medical Consultant",
             doctorRating: d.rating || 4.5,
             isOnline: true,
             lastActive: new Date().toISOString(),
@@ -379,11 +377,11 @@ function UserChatLayout() {
         setDoctors([]);
       }
     } catch (err) {
-      console.error("❌ Lỗi lấy danh sách bác sĩ:", err);
+      console.error("❌ Error getting doctor list:", err);
       setDoctors([]);
       setNotification({
         type: "error",
-        message: "Không thể lấy danh sách bác sĩ. Vui lòng thử lại sau."
+        message: "Unable to get doctor list. Please try again later."
       });
     } finally {
       setLoadingDoctors(false);
@@ -396,7 +394,7 @@ function UserChatLayout() {
 
   const handleSelect = async (doc) => {
     if (!user?.id || !doc?.doctorId) {
-      console.warn("⚠️ Thiếu userId hoặc doctorId");
+      console.warn("⚠️ Missing userId or doctorId");
       return;
     }
 
@@ -432,7 +430,7 @@ function UserChatLayout() {
         
         // If coming from payment flow, implement retry logic for race condition
         if (fromPayment) {
-          toast.info("Đang xác minh trạng thái thanh toán...");
+          toast.info("Verifying payment status...");
           
           // Wait a moment and try to fetch the conversation again
           setTimeout(async () => {
@@ -449,11 +447,11 @@ function UserChatLayout() {
               });
               
               if (stillExpired) {
-                toast.warning("Thanh toán có thể chưa được xử lý. Vui lòng kiểm tra lại sau.");
+                toast.warning("Payment may not have been processed yet. Please check again later.");
                 console.warn("⚠️ Payment verification failed - conversation still expired after retry");
               } else {
                 // Payment verified successfully
-                toast.success("Thanh toán đã được xác nhận. Bạn có thể gửi tin nhắn ngay bây giờ.");
+                toast.success("Payment has been confirmed. You can send messages now.");
                 console.log("✅ Payment verification successful - conversation is now valid");
                 
                 // Update messages with non-expired status
@@ -479,17 +477,17 @@ function UserChatLayout() {
       
       setMessages(messagesWithIds);
     } catch (err) {
-      console.error("❌ Lỗi tải cuộc trò chuyện:", err);
+      console.error("❌ Error loading conversation:", err);
       
-      // Nếu lỗi là "You do not have permission" hoặc "không tìm thấy yêu cầu tư vấn"
-      // thì đánh dấu cuộc trò chuyện là đã hết hạn
+      // If error is "You do not have permission" or "consultation request not found"
+      // then mark the conversation as expired
       if (err.message && (err.message.includes("permission") || 
-          err.message.includes("không tìm thấy yêu cầu tư vấn") ||
+          err.message.includes("consultation request not found") ||
           err.message.includes("UNAUTHORIZED"))) {
         // Create a placeholder expired message
         const expiredMessage = {
           id: `expired-${Date.now()}`,
-          content: "Phiên chat đã hết hạn hoặc chưa được thanh toán.",
+          content: "Chat session has expired or has not been paid for.",
           senderId: "system",
           receiverId: user.id,
           timestamp: new Date().toISOString(),
@@ -499,7 +497,7 @@ function UserChatLayout() {
         
         // If coming from payment flow, implement retry logic
         if (location.state?.fromPayment) {
-          toast.info("Đang xác minh trạng thái thanh toán...");
+          toast.info("Verifying payment status...");
           
           setTimeout(async () => {
             try {
@@ -517,19 +515,19 @@ function UserChatLayout() {
               });
               
               setMessages(refreshedMsgsWithIds);
-              toast.success("Thanh toán đã được xác nhận thành công.");
+              toast.success("Payment has been confirmed successfully.");
             } catch (retryErr) {
               console.error("❌ Retry fetch conversation error after permission error:", retryErr);
               setNotification({
                 type: "warning",
-                message: "Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục."
+                message: "Chat session has expired. Please pay to continue."
               });
             }
           }, 2500); // Slightly longer delay for permission errors
         } else {
           setNotification({
             type: "warning",
-            message: "Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục."
+            message: "Chat session has expired. Please pay to continue."
           });
         }
       } else {
@@ -550,7 +548,7 @@ function UserChatLayout() {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-gradient-to-b from-blue-50 to-white">
         <MdOutlineHealthAndSafety className="text-5xl text-blue-500 mb-4 animate-pulse" />
-        <div className="text-xl font-medium text-gray-700 mb-2">Đang tải danh sách bác sĩ</div>
+        <div className="text-xl font-medium text-gray-700 mb-2">Loading doctor list</div>
         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
@@ -753,7 +751,7 @@ function UserChatLayout() {
         <button 
           onClick={() => setShowSidebar(true)}
           className="absolute top-4 left-4 z-30 p-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl shadow-2xl backdrop-blur-sm hover:scale-110 transition-all duration-300 hover:shadow-indigo-500/25"
-          aria-label="Mở danh sách bác sĩ"
+          aria-label="Open doctor list"
         >
           <FiChevronRight className="text-lg" />
         </button>
@@ -764,7 +762,7 @@ function UserChatLayout() {
         <button 
           onClick={() => setShowSidebar(false)}
           className="absolute top-4 right-4 z-30 p-3 bg-white/90 backdrop-blur-sm text-indigo-600 rounded-2xl shadow-2xl hover:scale-110 transition-all duration-300 hover:shadow-lg border border-white/20"
-          aria-label="Đóng danh sách bác sĩ"
+          aria-label="Close doctor list"
         >
           <FiChevronLeft className="text-lg" />
         </button>
@@ -819,8 +817,8 @@ function UserChatLayout() {
                   </span>
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed mb-6">
-                  Kết nối với đội ngũ bác sĩ chuyên môn hàng đầu. Nhận tư vấn y tế chính xác, 
-                  kịp thời và đáng tin cậy mọi lúc, mọi nơi.
+                  Connect with our top professional medical team. Get accurate, 
+                  timely and reliable medical advice anytime, anywhere.
                 </p>
                 
                 {/* Feature highlights with beautiful cards */}
@@ -832,7 +830,7 @@ function UserChatLayout() {
                         <FiClock className="text-xl text-white" />
                       </div>
                       <h3 className="font-bold text-gray-800 mb-2">24/7 Available</h3>
-                      <p className="text-sm text-gray-600">Hỗ trợ y tế liên tục, không giới hạn thời gian</p>
+                      <p className="text-sm text-gray-600">Continuous medical support, no time limits</p>
                     </div>
                   </div>
                   
@@ -843,7 +841,7 @@ function UserChatLayout() {
                         <FiShield className="text-xl text-white" />
                       </div>
                       <h3 className="font-bold text-gray-800 mb-2">Secure & Private</h3>
-                      <p className="text-sm text-gray-600">Thông tin bệnh nhân được bảo mật tuyệt đối</p>
+                      <p className="text-sm text-gray-600">Patient information is kept absolutely confidential</p>
                     </div>
                   </div>
                   
@@ -854,7 +852,7 @@ function UserChatLayout() {
                         <FiZap className="text-xl text-white" />
                       </div>
                       <h3 className="font-bold text-gray-800 mb-2">Instant Response</h3>
-                      <p className="text-sm text-gray-600">Phản hồi nhanh chóng từ chuyên gia y tế</p>
+                      <p className="text-sm text-gray-600">Quick response from medical experts</p>
                     </div>
                   </div>
                 </div>
@@ -880,7 +878,7 @@ function UserChatLayout() {
                   )}
                   <div className="relative z-10 flex items-center gap-3">
                     <FiMessageCircle className="text-xl" />
-                    <span>Bắt đầu trò chuyện</span>
+                    <span>Start Chat</span>
                     <FiArrowRight className="text-xl group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </button>
@@ -889,11 +887,11 @@ function UserChatLayout() {
                   <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
                     <FiTrendingUp className="text-green-500" />
                     <span>
-                      <span className="font-semibold text-green-600">{filteredDoctors.length}</span> bác sĩ đang online
+                      <span className="font-semibold text-green-600">{filteredDoctors.length}</span> doctors online
                     </span>
                   </div>
                   <div className="text-xs text-gray-400">
-                    Nhấn để kết nối với bác sĩ có sẵn đầu tiên
+                    Click to connect with the first available doctor
                   </div>
                 </div>
               </div>

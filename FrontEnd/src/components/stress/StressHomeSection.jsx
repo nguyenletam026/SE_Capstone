@@ -86,13 +86,13 @@ export default function StressHomeSection({ onRefreshCharts }) {
 
   const getTimeOfDay = () => {
     const hours = new Date().getHours();
-    if (hours < 12) return "Buổi Sáng";
-    if (hours < 18) return "Buổi Chiều";
-    return "Buổi Tối";
+    if (hours < 12) return "Morning";
+    if (hours < 18) return "Afternoon";
+    return "Evening";
   };
 
   const getUserName = () => {
-    return user?.email?.split('@')[0] || "bạn";
+    return user?.email?.split('@')[0] || "you";
   };
 
   return (
@@ -109,18 +109,18 @@ export default function StressHomeSection({ onRefreshCharts }) {
           <div className="text-center md:text-left mb-6 md:mb-0">
             <div className="flex items-center mb-3">
               <FaUserCircle className="text-2xl mr-2" />
-              <p className={`text-sm font-semibold`}>Xin Chào, <span className="font-bold">{getUserName()}</span>!</p>
+              <p className={`text-sm font-semibold`}>Hello, <span className="font-bold">{getUserName()}</span>!</p>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Chúc {getUserName()} Một {getTimeOfDay()} Tốt Lành</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Wishing {getUserName()} a Good {getTimeOfDay()}</h1>
             <p className={`text-sm opacity-80 mb-6 ${textColor}`}>
-              {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
             
             <div className="flex flex-col items-center md:items-start">
               <div className="flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-xl px-6 py-4 shadow-lg mb-4">
                 <div className="text-center mr-6">
                   <h2 className="text-6xl font-bold">{stressScore !== null ? stressScore : "No Data"}</h2>
-                  <p className="text-xs uppercase tracking-wider mt-1 opacity-80">Điểm Số</p>
+                  <p className="text-xs uppercase tracking-wider mt-1 opacity-80">Score</p>
                 </div>
                 <div className="flex flex-col items-center">
                   {getStressIcon()}
@@ -135,7 +135,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
                 className="flex items-center bg-white text-gray-800 px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-opacity-90 transition duration-300 transform hover:scale-105"
               >
                 <FaCamera className="mr-2" />
-                Phân Tích Stress Qua Camera
+                Analyze Stress via Camera
               </button>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
       <Modal
         isOpen={showWebcam}
         onRequestClose={() => setShowWebcam(false)}
-        contentLabel="Phân tích stress qua camera"
+        contentLabel="Analyze stress via camera"
         overlayClassName="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
         className="bg-white rounded-xl shadow-xl p-6 w-full max-w-xl mx-4 animate-fadeIn"
       >
@@ -182,7 +182,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-800 flex items-center">
               <FaCamera className="mr-2 text-blue-500" />
-              Phân tích stress qua camera
+              Analyze stress via camera
             </h2>
             <button
               onClick={() => setShowWebcam(false)}
@@ -203,7 +203,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
           </div>
 
           <p className="text-sm text-gray-500 mt-4 mb-6">
-            Hãy đảm bảo khuôn mặt của bạn được nhận diện rõ ràng trong khung hình để đạt kết quả chính xác.
+            Please ensure your face is clearly visible in the frame for accurate results.
           </p>
 
           <div className="flex justify-end mt-4">
@@ -212,7 +212,7 @@ export default function StressHomeSection({ onRefreshCharts }) {
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-300"
             >
               <FaTimesCircle className="mr-2" />
-              Đóng Camera
+              Close Camera
             </button>
           </div>
         </div>

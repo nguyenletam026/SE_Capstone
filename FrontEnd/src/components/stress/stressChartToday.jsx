@@ -44,13 +44,13 @@ export default function TodayChart({ refreshSignal, onDataStatus }) {
       if (response && response.code === 1000) {
         processChartData(response.result);
       } else {
-        setError("Không thể tải dữ liệu biểu đồ");
+        setError("Unable to load chart data");
         setChartData(null);
         if (onDataStatus) onDataStatus(false);
       }
     } catch (err) {
       console.error("Error fetching today chart data:", err);
-      setError("Lỗi khi tải dữ liệu");
+      setError("Error loading data");
       setChartData(null);
       if (onDataStatus) onDataStatus(false);
     } finally {
@@ -84,7 +84,7 @@ export default function TodayChart({ refreshSignal, onDataStatus }) {
     );
 
     const labels = stressAnalyses.map(analysis => 
-      new Date(analysis.createdAt).toLocaleTimeString('vi-VN', {
+      new Date(analysis.createdAt).toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit'
       })
@@ -111,7 +111,7 @@ export default function TodayChart({ refreshSignal, onDataStatus }) {
       labels,
       datasets: [
         {
-          label: "Stress hôm nay",
+          label: "Today's Stress",
           data: stressData,
           fill: true,
           backgroundColor,
@@ -134,7 +134,7 @@ export default function TodayChart({ refreshSignal, onDataStatus }) {
       },
       title: {
         display: true,
-        text: "Mức Độ Stress Hôm Nay",
+        text: "Today's Stress Levels",
         font: {
           size: 16,
         },
@@ -146,13 +146,13 @@ export default function TodayChart({ refreshSignal, onDataStatus }) {
         max: 100,
         title: {
           display: true,
-          text: "Mức độ stress",
+          text: "Stress Level",
         },
       },
       x: {
         title: {
           display: true,
-          text: "Thời gian",
+          text: "Time",
         },
       },
     },
@@ -172,7 +172,7 @@ export default function TodayChart({ refreshSignal, onDataStatus }) {
         <FaExclamationCircle className="text-gray-400 text-4xl mb-3" />
         <p className="text-gray-500 text-lg font-medium">No Data</p>
         <p className="text-gray-400 text-sm mt-1">
-          {error || "Chưa có dữ liệu cho hôm nay"}
+          {error || "No data available for today"}
         </p>
       </div>
     );

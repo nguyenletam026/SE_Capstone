@@ -4,19 +4,18 @@ import mascot from '../../assets/4.png';
 const SubscriptionPage = () => {
   const [selectedPlan, setSelectedPlan] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('momo');
-
   const plans = [
-    { label: '1 tháng', price: 'vnd 300.000' },
-    { label: '2 tháng', price: 'vnd 800.000' },
-    { label: '3 tháng', price: 'vnd 1.000.000' },
-    { label: '4 tháng', price: 'vnd 1.200.000' },
+    { label: '1 month', price: 'vnd 300.000' },
+    { label: '2 months', price: 'vnd 800.000' },
+    { label: '3 months', price: 'vnd 1.000.000' },
+    { label: '4 months', price: 'vnd 1.200.000' },
   ];
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gradient-to-br from-[#d1fae5] via-[#fef9c3] to-[#fefce8]">
       {/* Left Side */}
       <div className="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-6">
         <img src={mascot} alt="Mascot" className="w-24 h-24 sm:w-28 sm:h-28 rounded-full shadow-lg" />
-        <h2 className="text-lg sm:text-xl font-bold text-[#166534] bg-white px-4 sm:px-6 py-2 rounded-lg shadow-md">Chọn Gói</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-[#166534] bg-white px-4 sm:px-6 py-2 rounded-lg shadow-md">Choose Plan</h2>
         <div className="bg-white p-4 sm:p-6 rounded-xl w-full max-w-md shadow-md">
           {plans.map((plan, idx) => (
             <label
@@ -37,28 +36,26 @@ const SubscriptionPage = () => {
                 />
                 <div>
                   <p className="font-medium text-gray-800 text-sm sm:text-base">{plan.label}</p>
-                  <p className="text-xs sm:text-sm text-gray-500">1 giờ/buổi</p>
+                  <p className="text-xs sm:text-sm text-gray-500">1 hour/session</p>
                 </div>
               </div>
               <p className="font-semibold text-green-700 text-sm sm:text-base">{plan.price}</p>
             </label>
-          ))}
-          <div className="mt-4 bg-green-50 p-4 rounded-md">
-            <h4 className="font-semibold text-green-800 mb-2 text-sm sm:text-base">Bạn Sẽ Được</h4>
+          ))}          <div className="mt-4 bg-green-50 p-4 rounded-md">
+            <h4 className="font-semibold text-green-800 mb-2 text-sm sm:text-base">What You'll Get</h4>
             <ul className="list-disc list-inside text-xs sm:text-sm text-gray-700 space-y-1">
-              <li>Tư vấn 1:1 với chuyên gia</li>
-              <li>Hỗ trợ mọi lúc, mọi nơi</li>
-              <li>Bài tập tâm lý mỗi tuần</li>
+              <li>1:1 consultation with experts</li>
+              <li>Support anytime, anywhere</li>
+              <li>Weekly psychological exercises</li>
             </ul>
           </div>
         </div>
       </div>
 
-      {/* Right Side */}
-      <div className="flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Thanh Toán Gói</h2>
+      {/* Right Side */}      <div className="flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Package Payment</h2>
         <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md shadow-md">
-          <p className="text-center font-medium mb-4 text-gray-700 text-sm sm:text-base">Phương Thức Thanh Toán</p>
+          <p className="text-center font-medium mb-4 text-gray-700 text-sm sm:text-base">Payment Method</p>
           <select
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}

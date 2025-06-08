@@ -18,12 +18,11 @@ const BookingCalendarPage = () => {
       </div>
 
       {/* Right Side */}
-      <div className="w-full lg:w-1/2 bg-yellow-100 flex flex-col justify-center items-center p-6 sm:p-8 lg:p-10">
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-center mb-2 leading-tight">
-          Đặt Lịch Tư Vấn Sức Khỏe Tâm Lí
+      <div className="w-full lg:w-1/2 bg-yellow-100 flex flex-col justify-center items-center p-6 sm:p-8 lg:p-10">        <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-center mb-2 leading-tight">
+          Book Mental Health Consultation
         </h2>
-        <p className="text-base sm:text-lg font-medium text-center mb-4 sm:mb-6">Chọn Ngày</p>
-        <p className="text-xs sm:text-sm mb-2 text-gray-500 text-center">Chọn ít nhất 1 ngày</p>
+        <p className="text-base sm:text-lg font-medium text-center mb-4 sm:mb-6">Select Date</p>
+        <p className="text-xs sm:text-sm mb-2 text-gray-500 text-center">Select at least 1 day</p>
 
         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-md w-full max-w-md lg:max-w-lg">
           <DayPicker
@@ -31,16 +30,14 @@ const BookingCalendarPage = () => {
             selected={selectedDay}
             onSelect={setSelectedDay}
             footer={
-              selectedDay ? (
-                <p className="text-xs sm:text-sm text-center text-gray-700 mt-2">
-                  Bạn đã chọn: <strong>{format(selectedDay, 'dd/MM/yyyy')}</strong>
+              selectedDay ? (                <p className="text-xs sm:text-sm text-center text-gray-700 mt-2">
+                  You selected: <strong>{format(selectedDay, 'dd/MM/yyyy')}</strong>
                 </p>
               ) : null
-            }
-            locale={{
+            }            locale={{
               localize: {
-                day: n => ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][n],
-                month: n => `Tháng ${n + 1}`,
+                day: n => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][n],
+                month: n => `Month ${n + 1}`,
               },
               formatLong: {
                 date: () => 'dd/MM/yyyy'
@@ -48,15 +45,9 @@ const BookingCalendarPage = () => {
             }}
             className="text-sm w-full"
           />
-        </div>
-
-        <button className="mt-4 sm:mt-6 bg-brown-700 hover:bg-brown-800 active:bg-brown-900 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full flex items-center space-x-2 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium">
-          <span>Tiếp Tục</span>
+        </div>        <button className="mt-4 sm:mt-6 bg-brown-700 hover:bg-brown-800 active:bg-brown-900 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-full flex items-center space-x-2 transition-all duration-200 min-h-[44px] text-sm sm:text-base font-medium">
+          <span>Continue</span>
           <span>&rarr;</span>
-        </button>
-      </div>
-    </div>
-  );
         </button>
       </div>
     </div>

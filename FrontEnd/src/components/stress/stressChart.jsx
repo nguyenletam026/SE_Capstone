@@ -43,12 +43,12 @@ export default function StressChart({ refreshSignal }) {
       if (response && response.code === 1000) {
         processChartData(response.result);
       } else {
-        setError("Không thể tải dữ liệu biểu đồ");
+        setError("Unable to load chart data");
         setChartData(null);
       }
     } catch (err) {
       console.error("Error fetching chart data:", err);
-      setError("Lỗi khi tải dữ liệu");
+      setError("Error loading data");
       setChartData(null);
     } finally {
       setLoading(false);
@@ -69,7 +69,7 @@ export default function StressChart({ refreshSignal }) {
 
     const labels = sortedData.map(item => {
       const date = new Date(item.end_date);
-      return date.toLocaleDateString('vi-VN', { 
+      return date.toLocaleDateString('en-US', { 
         month: 'short', 
         year: '2-digit' 
       });
@@ -96,7 +96,7 @@ export default function StressChart({ refreshSignal }) {
       labels,
       datasets: [
         {
-          label: "Mức độ stress trung bình",
+          label: "Average Stress Level",
           data: stressData,
           fill: true,
           backgroundColor,
@@ -142,7 +142,7 @@ export default function StressChart({ refreshSignal }) {
         <FaExclamationCircle className="text-gray-400 text-4xl mb-3" />
         <p className="text-gray-500 text-lg font-medium">No Data</p>
         <p className="text-gray-400 text-sm mt-1">
-          {error || "Chưa có dữ liệu cho biểu đồ này"}
+          {error || "No data available for this chart"}
         </p>
       </div>
     );

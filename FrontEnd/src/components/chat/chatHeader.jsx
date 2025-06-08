@@ -7,13 +7,12 @@ const ChatHeader = () => {
   if (!selectedUser) {
     return (
       <div className="p-4 bg-white border-b text-gray-600 font-semibold">
-        Đang trò chuyện với: <span className="text-gray-400">Chưa chọn người dùng</span>
+        Chatting with: <span className="text-gray-400">No user selected</span>
       </div>
     );
   }
 
-  // Determine the name based on available properties
-  let name = "Không xác định";
+  // Determine the name based on available properties  let name = "Unknown";
   if (selectedUser.doctorName) {
     name = selectedUser.doctorName;
   } else if (selectedUser.patientName) {
@@ -30,13 +29,13 @@ const ChatHeader = () => {
       <div className="flex justify-between items-center">
         <div>
           <span className="text-gray-600 font-semibold">
-            Đang trò chuyện với: <span className="text-gray-900">{name}</span>
+            Chatting with: <span className="text-gray-900">{name}</span>
           </span>
         </div>
         
         {isExpired && (
           <span className="text-sm text-red-500 font-medium">
-            Phiên đã hết hạn
+            Session expired
           </span>
         )}
       </div>

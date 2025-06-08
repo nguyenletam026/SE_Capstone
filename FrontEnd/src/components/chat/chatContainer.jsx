@@ -109,7 +109,7 @@ const ChatContainer = () => {
         const diff = expiry - now;
         
         if (diff <= 0) {
-          setTimeLeft("Hết hạn");
+          setTimeLeft("Expired");
           return;
         }
         
@@ -131,9 +131,9 @@ const ChatContainer = () => {
   const [hasShownExpirationNotification, setHasShownExpirationNotification] = useState(false);
   
   useEffect(() => {
-    if (timeLeft === "Hết hạn" && messages && messages.length > 0 && !hasShownExpirationNotification) {
+    if (timeLeft === "Expired" && messages && messages.length > 0 && !hasShownExpirationNotification) {
       // Show notification when chat session expires (only once)
-      toast.error("Phiên chat đã kết thúc.", {
+      toast.error("Chat session has ended.", {
         duration: 4000,
         position: "top-center"
       });
@@ -147,7 +147,7 @@ const ChatContainer = () => {
         updatedMessages[0] = { ...updatedMessages[0], expired: true };
         setMessages(updatedMessages);
       }
-    } else if (timeLeft !== "Hết hạn" && hasShownExpirationNotification) {
+    } else if (timeLeft !== "Expired" && hasShownExpirationNotification) {
       // Reset the flag if chat session becomes valid again
       setHasShownExpirationNotification(false);
     }
@@ -188,12 +188,12 @@ const ChatContainer = () => {
           // This might be a chat request object
           receiverId = selectedUser.requestId;
         } else {
-          throw new Error("Không thể xác định người nhận tin nhắn");
+          throw new Error("Cannot identify message recipient");
         }
       }
       
       if (!receiverId) {
-        throw new Error("ID người nhận không hợp lệ");
+        throw new Error("Invalid recipient ID");
       }
       
       const response = await sendMessage(content, user.id, receiverId);
@@ -219,14 +219,14 @@ const ChatContainer = () => {
       const errorMessage = err.message || "";
       
       // If payment is required, mark the chat as expired
-      if (errorMessage.includes("Vui lòng thanh toán") || 
+      if (errorMessage.includes("Please make payment") || 
           errorMessage.includes("Payment required") ||
-          errorMessage.includes("hết hạn")) {
+          errorMessage.includes("expired")) {
           
         // Check if we just came from a payment flow
         const locationState = window.history.state?.usr?.state;
         if (locationState?.fromPayment) {
-          toast.info("Đang xác minh trạng thái thanh toán...");
+          toast.info("Verifying payment status...");
           
           // Capture receiverId in closure to ensure it's available in setTimeout
           const capturedReceiverId = receiverId;
@@ -254,7 +254,7 @@ const ChatContainer = () => {
                 
                 // Add the message to the conversation
                 setMessages(prev => [...prev, retryMessage]);
-                toast.success("Tin nhắn đã được gửi thành công!");
+                toast.success("Message sent successfully!");
                 
                 // Force scroll to bottom
                 setTimeout(() => scrollToBottom(true), 100);
@@ -284,7 +284,7 @@ const ChatContainer = () => {
         }
       } else {
         // For other types of errors
-        toast.error(errorMessage || "Không thể gửi tin nhắn. Vui lòng thử lại sau.");
+        toast.error(errorMessage || "Unable to send message. Please try again later.");
       }
     } finally {
       // Only set sending to false if we're not in a retry situation
@@ -305,20 +305,20 @@ const ChatContainer = () => {
     // Validate file before attempting upload
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      alert("Chỉ hỗ trợ file hình ảnh JPEG, PNG, GIF và WebP");
+      alert("Only JPEG, PNG, GIF and WebP image files are supported");
       e.target.value = '';
       return;
     }
     
     // Check file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      alert("Kích thước hình ảnh phải nhỏ hơn 5MB");
+      alert("Image size must be less than 5MB");
       e.target.value = '';
       return;
     }
     
     if (!selectedUser || !user?.id) {
-      alert("Không thể xác định người nhận");
+      alert("Cannot identify recipient");
       e.target.value = '';
       return;
     }
@@ -345,12 +345,12 @@ const ChatContainer = () => {
           // This might be a chat request object
           receiverId = selectedUser.requestId;
         } else {
-          throw new Error("Không thể xác định người nhận tin nhắn");
+          throw new Error("Cannot identify message recipient");
         }
       }
       
       if (!receiverId) {
-        throw new Error("ID người nhận không hợp lệ");
+        throw new Error("Invalid recipient ID");
       }
       
       console.log("Original image:", file.name, "Size:", (file.size / 1024).toFixed(2) + "KB", "Type:", file.type);
@@ -395,15 +395,15 @@ const ChatContainer = () => {
       console.error("Image message send error:", err);
       
       // Show a more specific error message
-      let errorMessage = "Không thể gửi ảnh. Vui lòng thử lại sau.";
+      let errorMessage = "Unable to send image. Please try again later.";
       
       if (err.message) {
         if (err.message.includes("size")) {
-          errorMessage = "Kích thước ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn.";
+          errorMessage = "Image size too large. Please select a smaller image.";
         } else if (err.message.includes("format") || err.message.includes("supported")) {
-          errorMessage = "Định dạng ảnh không được hỗ trợ. Vui lòng sử dụng ảnh JPEG, PNG, GIF hoặc WebP.";
+          errorMessage = "Image format not supported. Please use JPEG, PNG, GIF or WebP images.";
         } else if (err.message.includes("server error") || err.message.includes("500")) {
-          errorMessage = "Lỗi máy chủ khi xử lý ảnh. Vui lòng thử lại với ảnh khác hoặc báo cho quản trị viên.";
+          errorMessage = "Server error processing image. Please try again with a different image or contact administrator.";
         } else {
           errorMessage = err.message;
         }
@@ -489,11 +489,11 @@ const ChatContainer = () => {
     yesterday.setDate(yesterday.getDate() - 1);
     
     if (date.toDateString() === today.toDateString()) {
-      return "Hôm nay";
+      return "Today";
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Hôm qua";
+      return "Yesterday";
     } else {
-      return date.toLocaleDateString('vi-VN', { 
+      return date.toLocaleDateString('en-US', { 
         day: '2-digit', 
         month: '2-digit', 
         year: 'numeric' 
@@ -532,7 +532,7 @@ const ChatContainer = () => {
   if (!selectedUser) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500">
-        <p className="text-lg">Chọn một người dùng để bắt đầu trò chuyện</p>
+        <p className="text-lg">Select a user to start chatting</p>
       </div>
     );
   }
@@ -573,7 +573,7 @@ const ChatContainer = () => {
               
               <div className="flex-1">
                 <h3 className="font-bold text-gray-900 text-lg">
-                  {selectedUser.doctorName || selectedUser.patientName || selectedUser.name || "Người dùng"}
+                  {selectedUser.doctorName || selectedUser.patientName || selectedUser.name || "User"}
                 </h3>
                 <div className="flex items-center space-x-2">
                   <div className={`flex items-center space-x-1 text-sm ${
@@ -583,7 +583,7 @@ const ChatContainer = () => {
                       selectedUser.isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
                     }`}></div>
                     <span className="font-medium">
-                      {selectedUser.isOnline ? "Đang hoạt động" : "Không hoạt động"}
+                      {selectedUser.isOnline ? "Active" : "Inactive"}
                     </span>
                   </div>
                   {selectedUser.doctorSpecialty && (
@@ -617,20 +617,20 @@ const ChatContainer = () => {
       {/* Enhanced Time Left Display */}
       {timeLeft && (
         <div className={`relative z-10 px-6 py-3 text-sm font-semibold flex items-center justify-center gap-3 backdrop-blur-sm ${
-          timeLeft === "Hết hạn" 
+          timeLeft === "Expired" 
             ? "bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border-b border-red-200/50" 
             : "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-b border-blue-200/50"
         }`}>
           <div className={`p-2 rounded-xl ${
-            timeLeft === "Hết hạn" ? "bg-red-100" : "bg-blue-100"
+            timeLeft === "Expired" ? "bg-red-100" : "bg-blue-100"
           }`}>
             <FiClock className="text-base" />
           </div>
-          <span>Thời gian còn lại: {timeLeft}</span>
-          {timeLeft !== "Hết hạn" && (
+          <span>Time remaining: {timeLeft}</span>
+          {timeLeft !== "Expired" && (
             <div className="ml-2 flex items-center space-x-1">
               <FiShield className="text-green-500" size={14} />
-              <span className="text-xs text-green-600 font-medium">Được bảo vệ</span>
+              <span className="text-xs text-green-600 font-medium">Protected</span>
             </div>
           )}
         </div>
@@ -674,7 +674,7 @@ const ChatContainer = () => {
                       <div className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-white shadow-md bg-gradient-to-br from-gray-100 to-gray-200">
                         <img 
                           src={selectedUser.doctorAvatar || selectedUser.patientAvatar || selectedUser.avatar || "https://via.placeholder.com/40"} 
-                          alt={(selectedUser.doctorName || selectedUser.patientName || selectedUser.name || "Người dùng") + " avatar"} 
+                          alt={(selectedUser.doctorName || selectedUser.patientName || selectedUser.name || "User") + " avatar"} 
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -767,7 +767,7 @@ const ChatContainer = () => {
           <button 
             onClick={() => scrollToBottom(true)}
             className="group relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-2xl p-4 shadow-2xl flex items-center justify-center hover:shadow-3xl transform hover:scale-110 transition-all duration-300 animate-bounce"
-            aria-label="Cuộn xuống tin nhắn mới nhất"
+            aria-label="Scroll to latest message"
           >
             {/* Button glow effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-2xl blur opacity-40 group-hover:opacity-60 transition-all duration-300"></div>
@@ -800,10 +800,10 @@ const ChatContainer = () => {
                   <div className="p-3 rounded-2xl bg-red-100/80 backdrop-blur-sm">
                     <FiInfo className="text-xl" />
                   </div>
-                  <p className="text-lg">Phiên chat đã hết hạn</p>
+                  <p className="text-lg">Chat session expired</p>
                 </div>
                 <p className="text-gray-700 text-sm text-center mb-4 leading-relaxed">
-                  Để tiếp tục trò chuyện với bác sĩ, vui lòng thực hiện thanh toán
+                  To continue chatting with the doctor, please make a payment
                 </p>
                 <button
                   onClick={() => {
@@ -811,7 +811,7 @@ const ChatContainer = () => {
                     if (doctorId) {
                       navigate(`/contact-doctor/${doctorId}`, { state: { expired: true } });
                     } else {
-                      alert("Không thể xác định bác sĩ. Vui lòng thử lại sau.");
+                      alert("Cannot identify doctor. Please try again later.");
                     }
                   }}
                   className="group relative flex items-center gap-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 font-semibold"
@@ -819,7 +819,7 @@ const ChatContainer = () => {
                   {/* Button glow effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 rounded-2xl blur opacity-40 group-hover:opacity-60 transition-all duration-300"></div>
                   
-                  <span className="relative z-10">Thanh toán ngay</span>
+                  <span className="relative z-10">Pay now</span>
                   <FiArrowRight className="relative z-10 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </button>
               </div>
@@ -854,7 +854,7 @@ const ChatContainer = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                    placeholder="Nhập tin nhắn của bạn..."
+                    placeholder="Type your message..."
                     className="w-full bg-white/80 backdrop-blur-sm py-3 px-5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:bg-white shadow-sm border border-gray-200/50 text-gray-800 placeholder-gray-500 transition-all duration-300"
                     disabled={sending}
                   />

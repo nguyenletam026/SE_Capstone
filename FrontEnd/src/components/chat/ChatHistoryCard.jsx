@@ -15,18 +15,16 @@ const ChatHistoryCard = ({ chatItem, onClick }) => {
       return date.toLocaleTimeString("vi-VN", { 
         hour: "2-digit", 
         minute: "2-digit" 
-      });
-    } else if (diffDays === 1) {
-      return "Hôm qua";
+      });    } else if (diffDays === 1) {
+      return "Yesterday";
     } else if (diffDays < 7) {
-      return `${diffDays} ngày trước`;
+      return `${diffDays} days ago`;
     } else {
-      return date.toLocaleDateString("vi-VN");
+      return date.toLocaleDateString("en-US");
     }
   };
 
-  const truncateMessage = (message, maxLength = 60) => {
-    if (!message) return "Chưa có tin nhắn";
+  const truncateMessage = (message, maxLength = 60) => {    if (!message) return "No messages";
     if (message.length <= maxLength) return message;
     return message.substring(0, maxLength) + "...";
   };
@@ -74,7 +72,7 @@ const ChatHistoryCard = ({ chatItem, onClick }) => {
                 ? 'bg-green-100 text-green-800' 
                 : 'bg-gray-100 text-gray-600'
             }`}>
-              {chatItem.isActive ? 'Đang hoạt động' : 'Đã hết hạn'}
+              {chatItem.isActive ? 'Active' : 'Expired'}
             </span>
             {chatItem.unreadCount > 0 && (
               <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
@@ -103,12 +101,12 @@ const ChatHistoryCard = ({ chatItem, onClick }) => {
             </div>
             <div className="flex items-center space-x-1">
               <FiMessageCircle className="w-3 h-3" />
-              <span>{chatItem.totalMessages} tin nhắn</span>
+              <span>{chatItem.totalMessages} messages</span>
             </div>
           </div>
           
           <div className="flex items-center text-blue-600 text-sm font-medium">
-            <span className="mr-1">Xem chi tiết</span>
+            <span className="mr-1">View details</span>
             <FiChevronRight className="w-4 h-4" />
           </div>
         </div>

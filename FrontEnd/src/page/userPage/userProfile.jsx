@@ -32,7 +32,7 @@ const UserProfile = () => {
         });
       } catch (error) {
         console.error("Failed to load user info:", error);
-        toast.error("Không thể tải thông tin người dùng");
+        toast.error("Unable to load user information");
       }
     };
 
@@ -59,7 +59,7 @@ const UserProfile = () => {
       // Simulate upload delay
       setTimeout(() => {
         setUploadingAvatar(false);
-        toast.info("Tính năng cập nhật ảnh đại diện đang được phát triển", {
+        toast.info("Avatar update feature is under development", {
           icon: <HiOutlinePhotograph className="text-blue-500 text-xl" />
         });
       }, 1500);
@@ -80,12 +80,12 @@ const UserProfile = () => {
       });
       
       setIsEditing(false);
-      toast.success("Cập nhật thông tin thành công!", {
+      toast.success("Information updated successfully!", {
         icon: <HiOutlineCheck className="text-green-500 text-xl" />
       });
     } catch (error) {
       console.error("Failed to update profile:", error);
-      toast.error("Không thể cập nhật thông tin. Vui lòng thử lại sau.", {
+      toast.error("Unable to update information. Please try again later.", {
         icon: <HiOutlineX className="text-red-500 text-xl" />
       });
     } finally {
@@ -101,12 +101,12 @@ const UserProfile = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-50">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
-        <p className="mt-4 text-indigo-800 font-medium">Đang tải thông tin...</p>
+        <p className="mt-4 text-indigo-800 font-medium">Loading information...</p>
       </div>
     );
   }
 
-  const fullName = `${userInfo.firstName || ""} ${userInfo.lastName || ""}`.trim() || "Chưa cập nhật";
+  const fullName = `${userInfo.firstName || ""} ${userInfo.lastName || ""}`.trim() || "Not updated";
   const birthday = userInfo.birthdayDate ? new Date(userInfo.birthdayDate) : null;
   const age = birthday ? new Date().getFullYear() - birthday.getFullYear() : "N/A";
   
@@ -114,21 +114,18 @@ const UserProfile = () => {
   const getUserRoleBadge = () => {
     const role = userInfo.role?.name || "USER";
     switch(role) {
-      case "ADMIN":
-        return {
-          name: "Quản trị viên",
+      case "ADMIN":        return {
+          name: "Administrator",
           color: "bg-red-100 text-red-700 border-red-200",
           icon: <HiBadgeCheck className="text-red-500" />
         };
-      case "DOCTOR":
-        return {
-          name: "Bác sĩ",
+      case "DOCTOR":        return {
+          name: "Doctor",
           color: "bg-purple-100 text-purple-700 border-purple-200",
           icon: <HiBadgeCheck className="text-purple-500" />
         };
-      default:
-        return {
-          name: "Người dùng",
+      default:        return {
+          name: "User",
           color: "bg-blue-100 text-blue-700 border-blue-200",
           icon: <HiBadgeCheck className="text-blue-500" />
         };
@@ -141,12 +138,11 @@ const UserProfile = () => {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 sm:mb-8">
-          <div className="mb-4 lg:mb-0">
-            <h1 className="text-2xl sm:text-3xl font-bold text-indigo-900 bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-blue-700">
-              Hồ sơ của bạn
+          <div className="mb-4 lg:mb-0">            <h1 className="text-2xl sm:text-3xl font-bold text-indigo-900 bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-blue-700">
+              Your Profile
             </h1>
             <p className="text-gray-500 mt-1 text-sm sm:text-base">
-              Xem và quản lý thông tin cá nhân của bạn
+              View and manage your personal information
             </p>
           </div>
           
@@ -155,15 +151,14 @@ const UserProfile = () => {
               <button
                 onClick={() => setIsEditing(true)}
                 className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium w-full lg:w-auto"
-              >
-                <FaEdit /> Chỉnh sửa
+              >                <FaEdit /> Edit
               </button>
             ) : (
               <button
                 onClick={() => setIsEditing(false)}
                 className="flex items-center justify-center gap-2 bg-gray-100 text-gray-600 px-5 py-2.5 rounded-xl hover:bg-gray-200 transition-all font-medium w-full lg:w-auto"
               >
-                <HiOutlineX /> Hủy
+                <HiOutlineX /> Cancel
               </button>
             )}
           </div>
@@ -223,9 +218,8 @@ const UserProfile = () => {
                 <button
                   onClick={handleChangePassword}
                   className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 px-4 rounded-xl w-full transition text-sm"
-                >
-                  <FaLock className="text-indigo-500" />
-                  Đổi mật khẩu
+                >                  <FaLock className="text-indigo-500" />
+                  Change Password
                 </button>
               </div>
             </div>
@@ -234,16 +228,14 @@ const UserProfile = () => {
           {/* Right Column - Profile Form */}
           <div className="lg:col-span-3 order-2 lg:order-2">
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-4 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-indigo-900 mb-4 sm:mb-6 flex items-center gap-2">
-                <FaUserCircle className="text-indigo-500" />
-                Thông tin cá nhân
+              <h2 className="text-xl sm:text-2xl font-bold text-indigo-900 mb-4 sm:mb-6 flex items-center gap-2">                <FaUserCircle className="text-indigo-500" />
+                Personal Information
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">                {/* First Name */}
-                <div>
-                  <label className="flex items-center gap-1.5 text-gray-700 text-sm font-medium mb-1.5">
+                <div>                  <label className="flex items-center gap-1.5 text-gray-700 text-sm font-medium mb-1.5">
                     <FaUser className="text-indigo-400" />
-                    Họ
+                    Last name
                   </label>
                   <input
                     type="text"
@@ -251,7 +243,7 @@ const UserProfile = () => {
                     value={isEditing ? formData.lastName : userInfo.lastName || ""}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    placeholder="Nhập họ của bạn"
+                    placeholder="Enter your last name"
                     className={`w-full px-4 py-2.5 rounded-xl ${
                       isEditing 
                         ? "border-2 border-indigo-200 focus:border-indigo-500 bg-white" 
@@ -264,7 +256,7 @@ const UserProfile = () => {
                 <div>
                   <label className="flex items-center gap-1.5 text-gray-700 text-sm font-medium mb-1.5">
                     <FaUser className="text-indigo-400" />
-                    Tên
+                    First name
                   </label>
                   <input
                     type="text"
@@ -272,7 +264,7 @@ const UserProfile = () => {
                     value={isEditing ? formData.firstName : userInfo.firstName || ""}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    placeholder="Nhập tên của bạn"
+                    placeholder="Enter your first name"
                     className={`w-full px-4 py-2.5 rounded-xl ${
                       isEditing 
                         ? "border-2 border-indigo-200 focus:border-indigo-500 bg-white" 
@@ -292,15 +284,14 @@ const UserProfile = () => {
                     value={userInfo.username}
                     disabled
                     className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100 text-gray-500"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">Email của bạn không thể thay đổi</p>
+                  />                  <p className="mt-1 text-xs text-gray-500">Your email cannot be changed</p>
                 </div>
 
                 {/* Birthday */}
                 <div>
                   <label className="flex items-center gap-1.5 text-gray-700 text-sm font-medium mb-1.5">
                     <FaCalendarAlt className="text-indigo-400" />
-                    Ngày sinh
+                    Birthday
                   </label>
                   <input
                     type="date"
@@ -317,10 +308,9 @@ const UserProfile = () => {
                 </div>
 
                 {/* Account Type - Full width on mobile */}
-                <div className="sm:col-span-2">
-                  <label className="flex items-center gap-1.5 text-gray-700 text-sm font-medium mb-1.5">
+                <div className="sm:col-span-2">                  <label className="flex items-center gap-1.5 text-gray-700 text-sm font-medium mb-1.5">
                     <FaIdCard className="text-indigo-400" />
-                    Loại tài khoản
+                    Account type
                   </label>
                   <input
                     type="text"
@@ -347,11 +337,11 @@ const UserProfile = () => {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Đang lưu...
+                        Saving...
                       </>
                     ) : (
                       <>
-                        <FaSave /> Lưu thay đổi
+                        <FaSave /> Save Changes
                       </>
                     )}
                   </button>
@@ -361,38 +351,34 @@ const UserProfile = () => {
 
             {/* Security Section */}
             <div className="bg-white rounded-2xl shadow-md p-4 sm:p-8 mt-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-indigo-900 mb-4 sm:mb-6 flex items-center gap-2">
-                <FaShieldAlt className="text-indigo-500" />
-                Bảo mật
+              <h2 className="text-xl sm:text-2xl font-bold text-indigo-900 mb-4 sm:mb-6 flex items-center gap-2">                <FaShieldAlt className="text-indigo-500" />
+                Security
               </h2>
 
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-800">Mật khẩu và bảo mật</h3>
+                <div>                  <h3 className="text-base sm:text-lg font-semibold text-gray-800">Password and Security</h3>
                   <p className="text-gray-500 text-sm mt-1">
-                    Cập nhật mật khẩu của bạn thường xuyên để bảo vệ tài khoản
+                    Update your password regularly to protect your account
                   </p>
                 </div>
                 <button
                   onClick={handleChangePassword}
                   className="flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-xl transition font-medium w-full lg:w-auto"
-                >
-                  <FaLock />
-                  Đổi mật khẩu
+                >                  <FaLock />
+                  Change Password
                 </button>
               </div>
               
               <hr className="my-6" />
               
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Bảo vệ tài khoản</h3>
+              <div>                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Account Protection</h3>
                 <div className="mt-4 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center">
                   <div className="p-2 bg-green-100 rounded-full mr-4 flex-shrink-0">
                     <HiOutlineCheck className="text-green-600 text-xl" />
                   </div>
                   <div>
-                    <p className="text-green-800 font-medium text-sm sm:text-base">Tài khoản của bạn đang được bảo mật</p>
-                    <p className="text-green-600 text-xs sm:text-sm">Không có vấn đề bảo mật nào được phát hiện</p>
+                    <p className="text-green-800 font-medium text-sm sm:text-base">Your account is secure</p>
+                    <p className="text-green-600 text-xs sm:text-sm">No security issues detected</p>
                   </div>
                 </div>
               </div>

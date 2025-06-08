@@ -6,14 +6,14 @@ const mockMessages = [
     id: 1,
     from: "user",
     avatar: "/user1.jpg",
-    content: "Em cảm thấy rất căng thẳng gần đây...",
+    content: "I've been feeling very stressed lately...",
     time: "2h",
   },
   {
     id: 2,
     from: "doctor",
     avatar: "/doctor1.jpg",
-    content: "Hãy thử mô tả cụ thể tình huống khiến em căng thẳng nhé.",
+    content: "Please try to describe specifically the situations that make you feel stressed.",
     time: "1h",
   },
 ];

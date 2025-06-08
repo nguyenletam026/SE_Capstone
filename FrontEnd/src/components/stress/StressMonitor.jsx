@@ -5,7 +5,7 @@ import Webcam from "react-webcam";
 // Constants
 const HIGH_STRESS_THRESHOLD = 50;
 const CHECK_INTERVAL = 3000; // 3 seconds
-const CONSECUTIVE_HIGH_COUNT = 5; // Số lần liên tiếp cao để hiển thị cảnh báo
+const CONSECUTIVE_HIGH_COUNT = 5; // Number of consecutive high readings to show warning
 
 export default function StressMonitor() {
   const webcamRef = useRef(null);
@@ -14,12 +14,43 @@ export default function StressMonitor() {
   const [recentStressLevels, setRecentStressLevels] = useState([]);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [highStressCount, setHighStressCount] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
   
-  // Function to show browser notification
+  // Function to play notification sound
+  const playNotificationSound = useCallback(() => {
+    try {
+      // Create audio context for beep sound
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800; // High pitch beep
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (error) {
+      console.log('Could not play notification sound:', error);
+    }
+  }, []);
+
+  // Function to show browser notification and popup
   const showNotification = useCallback((message) => {
+    // Show popup notification
+    setShowPopup(true);
+    
+    // Play notification sound
+    playNotificationSound();
+    
     // Check if we have notification permission
     if (Notification.permission === 'granted') {
-      new Notification('Cảnh báo căng thẳng', {
+      new Notification('Stress Alert', {
         body: message,
         icon: '/logo.png'
       });
@@ -27,14 +58,14 @@ export default function StressMonitor() {
       // Request permission
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          new Notification('Cảnh báo căng thẳng', {
+          new Notification('Stress Alert', {
             body: message,
             icon: '/logo.png'
           });
         }
       });
     }
-  }, []);
+  }, [playNotificationSound]);
   
   // Capture image and analyze stress
   const captureAndAnalyze = useCallback(async () => {
@@ -47,7 +78,7 @@ export default function StressMonitor() {
       // Capture image from webcam
       const imageSrc = webcamRef.current.getScreenshot();
       if (!imageSrc) {
-        setError('Không thể chụp ảnh từ webcam');
+        setError('Unable to capture image from webcam');
         return;
       }
       
@@ -60,46 +91,46 @@ export default function StressMonitor() {
       const result = await analyzeImage(formData);
       
       if (result?.code === 200) {
-        // Kết quả trả về từ API là một string (stressLevel)
+        // API returns a string (stressLevel)
         const stressLevel = result.result || 'UNKNOWN';
         
         // Map stress level to score range (0-100%)
         let stressScore = 0;
         let displayLevel = '';
         
-        // Phân tích dựa trên kết quả thực tế từ API
+        // Analysis based on actual API results
         switch (stressLevel) {
           case 'Extreme Stress': 
             stressScore = 95; 
-            displayLevel = 'Cực kỳ căng thẳng';
+            displayLevel = 'Extremely Stressed';
             break;
           case 'High Stress': 
             stressScore = 80; 
-            displayLevel = 'Căng thẳng cao';
+            displayLevel = 'High Stress';
             break;
           case 'Moderate Stress': 
             stressScore = 65; 
-            displayLevel = 'Căng thẳng trung bình';
+            displayLevel = 'Moderate Stress';
             break;
           case 'Mild Stress': 
             stressScore = 40; 
-            displayLevel = 'Căng thẳng nhẹ';
+            displayLevel = 'Mild Stress';
             break;
           case 'Normal': 
             stressScore = 20; 
-            displayLevel = 'Bình thường';
+            displayLevel = 'Normal';
             break;
           case 'Relaxed': 
             stressScore = 5; 
-            displayLevel = 'Thư giãn';
+            displayLevel = 'Relaxed';
             break;
           case 'No face detected!':
             stressScore = 0;
-            displayLevel = 'Không phát hiện khuôn mặt';
+            displayLevel = 'No face detected';
             break;
           default: 
             stressScore = 0;
-            displayLevel = `Không xác định (${stressLevel})`;
+            displayLevel = `Unknown (${stressLevel})`;
         }
         
         // Create analysis object
@@ -111,10 +142,10 @@ export default function StressMonitor() {
           createdAt: new Date()
         };
         
-        // Thêm vào console để kiểm tra
-        console.log('Phân tích stress:', { stressLevel, stressScore, displayLevel, result });
+        // Add to console for debugging
+        console.log('Stress analysis:', { stressLevel, stressScore, displayLevel, result });
         
-        // Chỉ lưu kết quả nếu phát hiện được khuôn mặt
+        // Only save results if face is detected
         if (stressLevel !== 'No face detected!') {
           // Update recent stress levels list
           setRecentStressLevels(prev => {
@@ -128,7 +159,7 @@ export default function StressMonitor() {
             
             // Show notification if we have 5 consecutive high stress readings
             if (highStressCount + 1 >= CONSECUTIVE_HIGH_COUNT) {
-              showNotification('Mức độ căng thẳng của bạn đang ở mức cao liên tục! Hãy nghỉ ngơi và thư giãn!');
+              showNotification('Your stress level has been consistently high! Please take a break and relax!');
               setHighStressCount(0); // Reset counter after notification
             }
           } else {
@@ -136,17 +167,17 @@ export default function StressMonitor() {
             setHighStressCount(0);
           }
         } else {
-          // Hiển thị cảnh báo nhẹ khi không phát hiện khuôn mặt
-          setError('Không phát hiện được khuôn mặt, vui lòng điều chỉnh vị trí webcam');
+          // Show light warning when no face is detected
+          setError('No face detected, please adjust your webcam position');
         }
       } else {
-        console.error('Lỗi phân tích ảnh:', result);
-        setError('Không thể phân tích ảnh. Vui lòng thử lại sau.');
+        console.error('Image analysis error:', result);
+        setError('Unable to analyze image. Please try again later.');
         setHighStressCount(0); // Reset counter on error
       }
     } catch (err) {
       console.error('Error analyzing stress level:', err);
-      setError('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+      setError('Unable to connect to server. Please try again later.');
       setHighStressCount(0); // Reset counter on error
     } finally {
       setLoading(false);
@@ -180,11 +211,22 @@ export default function StressMonitor() {
       }
     };
   }, [isMonitoring, captureAndAnalyze]);
+
+  // Auto-close popup after 10 seconds
+  useEffect(() => {
+    if (showPopup) {
+      const timer = setTimeout(() => {
+        setShowPopup(false);
+      }, 10000); // 10 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [showPopup]);
   
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Theo dõi mức độ căng thẳng liên tục</h2>
+        <h2 className="text-xl font-semibold text-gray-800">Continuous Stress Level Monitoring</h2>
         <button
           onClick={() => setIsMonitoring(!isMonitoring)}
           disabled={loading}
@@ -200,21 +242,21 @@ export default function StressMonitor() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Đang xử lý...
+              Processing...
             </span>
-          ) : isMonitoring ? 'Dừng theo dõi' : 'Bắt đầu theo dõi'}
+          ) : isMonitoring ? 'Stop Monitoring' : 'Start Monitoring'}
         </button>
       </div>
       
       {!isMonitoring && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded mb-4">
-          <h3 className="font-medium text-blue-700 mb-1">Hướng dẫn sử dụng:</h3>
+          <h3 className="font-medium text-blue-700 mb-1">Usage Instructions:</h3>
           <ul className="list-disc pl-5 text-sm text-blue-800">
-            <li>Nhấn "Bắt đầu theo dõi" để kích hoạt camera và bắt đầu phân tích mức độ căng thẳng</li>
-            <li>Đảm bảo khuôn mặt bạn được nhìn thấy rõ ràng trên camera</li>
-            <li>Hệ thống sẽ phân tích mức độ căng thẳng mỗi 3 giây</li>
-            <li>Nếu phát hiện {CONSECUTIVE_HIGH_COUNT} lần liên tiếp có mức độ căng thẳng {'>'} {HIGH_STRESS_THRESHOLD}%, bạn sẽ nhận được thông báo</li>
-            <li>Khi hoàn thành, nhấn "Dừng theo dõi" để tắt camera</li>
+            <li>Click "Start Monitoring" to activate camera and begin stress level analysis</li>
+            <li>Ensure your face is clearly visible on camera</li>
+            <li>System will analyze stress level every 3 seconds</li>
+            <li>If {CONSECUTIVE_HIGH_COUNT} consecutive readings show stress level {'>'} {HIGH_STRESS_THRESHOLD}%, you will receive a notification</li>
+            <li>When finished, click "Stop Monitoring" to turn off camera</li>
           </ul>
         </div>
       )}
@@ -231,7 +273,7 @@ export default function StressMonitor() {
           mirrored
         />
         <p className="text-xs text-gray-500 text-center mt-1">
-          Đang chụp và phân tích mỗi 3 giây...
+          Capturing and analyzing every 3 seconds...
         </p>
       </div>
       
@@ -245,21 +287,21 @@ export default function StressMonitor() {
         <div>
           <div className="mb-3">
             <p className="text-sm text-gray-600">
-              Hệ thống đang chụp và phân tích mức độ căng thẳng của bạn. Bạn sẽ nhận được cảnh báo khi mức độ căng thẳng vượt quá {HIGH_STRESS_THRESHOLD}% trong {CONSECUTIVE_HIGH_COUNT} lần liên tiếp.
+              System is capturing and analyzing your stress level. You will receive alerts when stress level exceeds {HIGH_STRESS_THRESHOLD}% for {CONSECUTIVE_HIGH_COUNT} consecutive times.
             </p>
             {highStressCount > 0 && (
               <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
                 <p className="text-sm font-medium text-yellow-800">
-                  ⚠️ Cảnh báo: Đã phát hiện {highStressCount}/{CONSECUTIVE_HIGH_COUNT} lần căng thẳng cao liên tiếp
+                  ⚠️ Warning: Detected {highStressCount}/{CONSECUTIVE_HIGH_COUNT} consecutive high stress readings
                 </p>
               </div>
             )}
           </div>
           
-          <h3 className="text-lg font-medium text-gray-700 mb-2">Các chỉ số gần đây:</h3>
+          <h3 className="text-lg font-medium text-gray-700 mb-2">Recent Readings:</h3>
           
           {recentStressLevels.length === 0 ? (
-            <p className="text-gray-500 italic">Chưa có dữ liệu căng thẳng nào. Đang chờ phân tích...</p>
+            <p className="text-gray-500 italic">No stress data yet. Waiting for analysis...</p>
           ) : (
             <div className="space-y-2">
               {recentStressLevels.map((reading, index) => (
@@ -282,9 +324,9 @@ export default function StressMonitor() {
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
-                    Mức độ: {reading.displayLevel || reading.stressLevel}
+                    Level: {reading.displayLevel || reading.stressLevel}
                     {reading.stressScore > HIGH_STRESS_THRESHOLD && (
-                      <span className="ml-2 text-red-500 font-medium">⚠️ Cao</span>
+                      <span className="ml-2 text-red-500 font-medium">⚠️ High</span>
                     )}
                   </div>
                 </div>
@@ -297,7 +339,7 @@ export default function StressMonitor() {
       {/* Recent Readings */}
       {isMonitoring && recentStressLevels.length > 0 ? (
         <div className="mt-4">
-          <h3 className="text-lg font-semibold mb-2">Kết quả gần đây</h3>
+          <h3 className="text-lg font-semibold mb-2">Recent Results</h3>
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 max-h-48 overflow-y-auto">
             {recentStressLevels.map((analysis) => (
               <div
@@ -329,13 +371,57 @@ export default function StressMonitor() {
         </div>
       ) : isMonitoring && recentStressLevels.length === 0 ? (
         <div className="mt-4">
-          <h3 className="text-lg font-semibold mb-2">Kết quả gần đây</h3>
+          <h3 className="text-lg font-semibold mb-2">Recent Results</h3>
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 text-center">
             <p className="text-lg font-medium text-gray-500">No Data</p>
-            <p className="text-sm text-gray-400 mt-1">Chưa có kết quả phân tích nào</p>
+            <p className="text-sm text-gray-400 mt-1">No analysis results yet</p>
           </div>
         </div>
       ) : null}
+
+      {/* Stress Alert Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-2xl transform transition-all duration-300 animate-bounce">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4 animate-pulse">
+                <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-red-600 mb-3">⚠️ High Stress Alert!</h3>
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                Your stress level has been consistently high for <strong>5 consecutive readings</strong>. 
+                <br />
+                Please take a break and practice some relaxation techniques!
+              </p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
+                <p className="text-xs text-yellow-800">
+                  💡 <strong>Tip:</strong> Try deep breathing exercises or take a short walk
+                </p>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    setShowPopup(false);
+                    setIsMonitoring(false); // Stop monitoring to encourage break
+                  }}
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                >
+                  Take a Break
+                </button>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                >
+                  Continue
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mt-2">This popup will auto-close in 10 seconds</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

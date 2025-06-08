@@ -83,9 +83,8 @@ export default function ProductList() {
       try {
         setLoadingProducts(true);
         const response = await getAllProducts();
-        setProducts(response.result || []);
-      } catch (error) {
-        toast.error("Tải sản phẩm thất bại");
+        setProducts(response.result || []);      } catch (error) {
+        toast.error("Failed to load products");
       } finally {
         setLoadingProducts(false);
       }
@@ -103,20 +102,18 @@ export default function ProductList() {
     try {
       setLoadingProducts(true);
       const response = await searchProducts(searchTerm);
-      setProducts(response.result || []);
-      if (!response.result || response.result.length === 0) {
-        toast.info(`Không tìm thấy sản phẩm nào cho "${searchTerm}"`);
+      setProducts(response.result || []);      if (!response.result || response.result.length === 0) {
+        toast.info(`No products found for "${searchTerm}"`);
       }
     } catch (error) {
-      toast.error("Tìm kiếm sản phẩm thất bại");
+      toast.error("Product search failed");
     } finally {
       setLoadingProducts(false);
     }
   };
-
   const handleAddToCart = (product) => {
     if (product.stock < 1) {
-      toast.warn("Sản phẩm này đã hết hàng.");
+      toast.warn("This product is out of stock.");
       return;
     }
     addItem(product.id, 1);
@@ -160,21 +157,19 @@ export default function ProductList() {
                   className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3"
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
+                  transition={{ delay: 0.2 }}                >
                   <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Khám Phá
+                    Discover
                   </span>
                   <br />
-                  <span className="text-slate-800">Sản Phẩm Tuyệt Vời</span>
+                  <span className="text-slate-800">Amazing Products</span>
                 </motion.h1>
                 <motion.p 
                   className="text-slate-600 text-sm sm:text-base lg:text-lg"
                   initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
+                  animate={{ opacity: 1, x: 0 }}                  transition={{ delay: 0.4 }}
                 >
-                  Tìm kiếm những sản phẩm chất lượng cao với giá tốt nhất
+                  Find high-quality products at the best prices
                 </motion.p>
               </div>
 
@@ -201,9 +196,8 @@ export default function ProductList() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <FiSliders size={16} className="sm:w-[18px] sm:h-[18px]" />
-                  <span className="hidden sm:inline text-sm sm:text-base">Bộ lọc</span>
-                  <span className="sm:hidden text-sm">Lọc</span>
+                  <FiSliders size={16} className="sm:w-[18px] sm:h-[18px]" />                  <span className="hidden sm:inline text-sm sm:text-base">Filters</span>
+                  <span className="sm:hidden text-sm">Filter</span>
                 </motion.button>
 
                 {/* Cart Button */}
@@ -254,7 +248,7 @@ export default function ProductList() {
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onFocus={() => setSearchFocused(true)}
                       onBlur={() => setSearchFocused(false)}
-                      placeholder="Tìm kiếm sản phẩm hoàn hảo cho bạn..."
+                      placeholder="Search for the perfect product for you..."
                       className="w-full pl-12 sm:pl-16 pr-4 sm:pr-6 py-4 sm:py-6 text-base sm:text-lg text-slate-700 placeholder-gray-400 bg-transparent focus:outline-none"
                       onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                     />
@@ -282,12 +276,12 @@ export default function ProductList() {
                     {loadingProducts ? (
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span className="text-sm sm:text-base">Đang tìm...</span>
+                        <span className="text-sm sm:text-base">Searching...</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
                         <FiSearch className="sm:w-5 sm:h-5" size={16} />
-                        <span className="text-sm sm:text-base">Tìm kiếm</span>
+                        <span className="text-sm sm:text-base">Search</span>
                       </div>
                     )}
                   </motion.button>
@@ -308,32 +302,30 @@ export default function ProductList() {
                 className="mb-8 sm:mb-12 overflow-hidden"
               >
                 <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-4 sm:p-8 shadow-xl border border-gray-200/50">
-                  <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
-                      <h3 className="text-base sm:text-lg font-semibold text-slate-800">Bộ lọc:</h3>
+                  <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+                      <h3 className="text-base sm:text-lg font-semibold text-slate-800">Filters:</h3>
                       <select
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
                         className="w-full sm:w-auto px-4 py-2 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl focus:border-indigo-300 focus:outline-none transition-all duration-300"
                       >
-                        <option value="all">Tất cả danh mục</option>
-                        <option value="electronics">Điện tử</option>
-                        <option value="fashion">Thời trang</option>
-                        <option value="home">Gia dụng</option>
+                        <option value="all">All categories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="fashion">Fashion</option>
+                        <option value="home">Home & Garden</option>
                       </select>
                     </div>
-                    
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
-                      <span className="text-slate-600">Sắp xếp:</span>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+                      <span className="text-slate-600">Sort by:</span>
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                         className="w-full sm:w-auto px-4 py-2 bg-white/70 backdrop-blur-sm border border-gray-200 rounded-xl focus:border-indigo-300 focus:outline-none transition-all duration-300"
                       >
-                        <option value="name">Tên A-Z</option>
-                        <option value="price-low">Giá thấp đến cao</option>
-                        <option value="price-high">Giá cao đến thấp</option>
-                        <option value="rating">Đánh giá cao nhất</option>
+                        <option value="name">Name A-Z</option>
+                        <option value="price-low">Price Low to High</option>
+                        <option value="price-high">Price High to Low</option>
+                        <option value="rating">Highest Rating</option>
                       </select>
                     </div>
 
@@ -354,12 +346,11 @@ export default function ProductList() {
             transition={{ delay: 0.4 }}
             className="mb-8 sm:mb-12"
           >
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {[
-                { icon: FiPackage, label: 'Sản phẩm', value: products.length, color: 'from-blue-500 to-cyan-500' },
-                { icon: FiTruck, label: 'Miễn phí ship', value: '2-5 ngày', color: 'from-green-500 to-emerald-500' },
-                { icon: FiShield, label: 'Bảo hành', value: '12 tháng', color: 'from-purple-500 to-pink-500' },
-                { icon: FiGift, label: 'Ưu đãi', value: 'Hấp dẫn', color: 'from-orange-500 to-red-500' }
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">              {[
+                { icon: FiPackage, label: 'Products', value: products.length, color: 'from-blue-500 to-cyan-500' },
+                { icon: FiTruck, label: 'Free shipping', value: '2-5 days', color: 'from-green-500 to-emerald-500' },
+                { icon: FiShield, label: 'Warranty', value: '12 months', color: 'from-purple-500 to-pink-500' },
+                { icon: FiGift, label: 'Offers', value: 'Attractive', color: 'from-orange-500 to-red-500' }
               ].map((stat, index) => (
                 <motion.div
                   key={stat.label}
@@ -394,10 +385,9 @@ export default function ProductList() {
                   <div className="absolute top-0 left-0 w-24 h-24 border-4 border-transparent border-t-indigo-600 rounded-full animate-spin"></div>
                   <div className="absolute top-2 left-2 w-20 h-20 border-4 border-transparent border-t-purple-500 rounded-full animate-spin" style={{animationDelay: '0.1s'}}></div>
                   <div className="absolute top-4 left-4 w-16 h-16 border-4 border-transparent border-t-pink-500 rounded-full animate-spin" style={{animationDelay: '0.2s'}}></div>
-                </div>
-                <div className="mt-8 text-center">
-                  <h3 className="text-2xl font-bold text-slate-800 mb-2">Đang tải sản phẩm...</h3>
-                  <p className="text-slate-600">Vui lòng chờ trong giây lát</p>
+                </div>                <div className="mt-8 text-center">
+                  <h3 className="text-2xl font-bold text-slate-800 mb-2">Loading products...</h3>
+                  <p className="text-slate-600">Please wait a moment</p>
                 </div>
               </motion.div>
             ) : products.length === 0 ? (
@@ -412,10 +402,9 @@ export default function ProductList() {
                 <div className="mb-8">
                   <div className="w-32 h-32 mx-auto bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mb-6">
                     <FiPackage size={48} className="text-gray-500" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-slate-800 mb-4">Không tìm thấy sản phẩm</h3>
+                  </div>                  <h3 className="text-3xl font-bold text-slate-800 mb-4">No products found</h3>
                   <p className="text-xl text-slate-600 mb-8">
-                    Hãy thử tìm kiếm với từ khóa khác hoặc kiểm tra lại sau nhé.
+                    Try searching with different keywords or check back later.
                   </p>
                   <motion.button
                     onClick={() => {
@@ -425,9 +414,8 @@ export default function ProductList() {
                     className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                  >
-                    <FiRefreshCw className="inline mr-2" />
-                    Tải lại tất cả sản phẩm
+                  >                    <FiRefreshCw className="inline mr-2" />
+                    Reload all products
                   </motion.button>
                 </div>
               </motion.div>
@@ -479,8 +467,7 @@ export default function ProductList() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1 }}
-                  >
-                    Không tìm thấy sản phẩm ưng ý?
+                  >                    Didn't find what you're looking for?
                   </motion.h2>
                   <motion.p 
                     className="text-xl mb-8 opacity-90"
@@ -488,7 +475,7 @@ export default function ProductList() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.1 }}
                   >
-                    Liên hệ với chúng tôi để được tư vấn và hỗ trợ tốt nhất
+                    Contact us for the best consultation and support
                   </motion.p>
                   <motion.button
                     className="px-8 py-4 bg-white text-indigo-600 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300"
@@ -497,8 +484,7 @@ export default function ProductList() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.2 }}
-                  >
-                    Liên hệ ngay
+                  >                    Contact us now
                     <FiArrowRight className="inline ml-2" />
                   </motion.button>
                 </div>

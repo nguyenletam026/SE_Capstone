@@ -50,14 +50,14 @@ export default function Home() {
 
       {/* Section 4 - Tips*/}
       <div className="mt-12 sm:mt-16 px-4 sm:px-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-10 text-green-800">🌿 Các Biện Pháp Giảm Stress</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-10 text-green-800">🌿 Stress Reduction Techniques</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
-            { title: "Lịch Sinh Hoạt Cho Một Ngày Vui Vẻ", img: Daily },
-            { title: "Nghe Âm Thanh Mưa Thư Giãn", img: Rain },
-            { title: "Âm Nhạc Giúp Cân Bằng Cảm Xúc", img: Music },
-            { title: "Tập Yoga Giảm Căng Thẳng", img: Yoga },
+            { title: "Daily Schedule for a Happy Day", img: Daily },
+            { title: "Listen to Relaxing Rain Sounds", img: Rain },
+            { title: "Music to Balance Emotions", img: Music },
+            { title: "Yoga to Reduce Stress", img: Yoga },
           ].map((item, index) => (
             <div
               key={index}
@@ -80,7 +80,7 @@ export default function Home() {
             className="bg-green-600 hover:bg-green-700 text-white text-base sm:text-lg py-3 px-6 sm:px-8 rounded-full shadow-lg transition duration-300 w-full sm:w-auto" 
             onClick={() => navigate("/chatroom")}
           >
-            Liên Hệ Với Bác Sĩ Tư Vấn →
+            Contact Medical Advisor →
           </button>
         </div>
       </div>
@@ -96,13 +96,13 @@ export default function Home() {
             />
           </div>
           <div className="w-full lg:w-1/2 text-center lg:text-left">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">Bạn là chuyên gia tâm lý?</h3>
-            <p className="text-gray-700 mb-5 text-sm sm:text-base">Hãy tham gia hệ thống để hỗ trợ học sinh vượt qua căng thẳng và áp lực học tập.</p>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">Are you a psychology expert?</h3>
+            <p className="text-gray-700 mb-5 text-sm sm:text-base">Join our system to help students overcome stress and academic pressure.</p>
             <Link
               to="/apply-doctor"
               className="inline-block bg-green-600 hover:bg-green-700 text-white px-4 sm:px-5 py-3 rounded-full text-sm font-medium w-full sm:w-auto text-center"
             >
-              Gửi Yêu Cầu Trở Thành Bác Sĩ Tư Vấn
+              Apply to Become a Medical Advisor
             </Link>
           </div>
         </div>

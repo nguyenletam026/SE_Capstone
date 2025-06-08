@@ -12,11 +12,13 @@ export default function UserContactDoctor() {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [doctor, setDoctor] = useState(null);
-  const [loadingDoctor, setLoadingDoctor] = useState(true);  const [hours, setHours] = useState(1);
+  const [loadingDoctor, setLoadingDoctor] = useState(true);
+  const [hours, setHours] = useState(1);
   const [minutes, setMinutes] = useState(5);
   const [pricingMode, setPricingMode] = useState('hours'); // 'hours' or 'minutes'
   const [userBalance, setUserBalance] = useState(0);
-  const [loadingBalance, setLoadingBalance] = useState(true);  const [paymentMode, setPaymentMode] = useState(false);
+  const [loadingBalance, setLoadingBalance] = useState(true);
+  const [paymentMode, setPaymentMode] = useState(false);
   const [costPerHour, setCostPerHour] = useState(100000); // Default value
   const [costPerMinute, setCostPerMinute] = useState(2000); // Default value
   const [loadingCost, setLoadingCost] = useState(true);
@@ -56,17 +58,18 @@ export default function UserContactDoctor() {
           // Fallback for possible alternative format
           setUserBalance(data.result.balance);
         } else {
-          console.warn("Định dạng dữ liệu balance không đúng:", data);
-          setUserBalance(0); // Giá trị mặc định
+          console.warn("Invalid balance data format:", data);
+          setUserBalance(0); // Default value
         }
       } catch (err) {
         console.error("Error fetching balance:", err);
-        setUserBalance(0); // Đặt giá trị mặc định nếu có lỗi
+        setUserBalance(0); // Set default value if error occurs
       } finally {
         setLoadingBalance(false);
       }
     };
-      const fetchChatCost = async () => {
+
+    const fetchChatCost = async () => {
       try {
         const [hourCost, minuteCost] = await Promise.all([
           getChatCostPerHour(),
@@ -93,12 +96,12 @@ export default function UserContactDoctor() {
     setLoading(true);
     try {
       await requestChatWithDoctor(id);
-      toast.success("Yêu cầu đã được gửi! Bạn có thể bắt đầu trò chuyện ngay.");
+      toast.success("Request sent successfully! You can start chatting now.");
       
       // Format doctor for chat and navigate to chat page
       const doctorToChat = {
         doctorId: id,
-        doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Bác sĩ",
+        doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Doctor",
         doctorAvatar: doctor?.avtUrl
       };
       
@@ -115,11 +118,11 @@ export default function UserContactDoctor() {
       // Handle specific error cases
       if (err.message && err.message.includes("already been processed")) {
         // If the request already exists, just navigate to the chat
-        toast.info("Bạn đã có thể trò chuyện với bác sĩ này.");
+        toast.info("You can already chat with this doctor.");
         
         const doctorToChat = {
           doctorId: id,
-          doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Bác sĩ",
+          doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Doctor",
           doctorAvatar: doctor?.avtUrl
         };
         
@@ -130,13 +133,14 @@ export default function UserContactDoctor() {
           } 
         });
       } else {
-        toast.error(err.message || "Không thể gửi yêu cầu trò chuyện");
+        toast.error(err.message || "Unable to send chat request");
       }
     } finally {
       setLoading(false);
     }
   };
-    const handlePayment = async () => {
+
+  const handlePayment = async () => {
     setLoading(true);
     try {
       const response = await createChatPayment(
@@ -146,15 +150,15 @@ export default function UserContactDoctor() {
       );
       
       const durationText = pricingMode === 'hours' 
-        ? `${hours} giờ` 
-        : `${minutes} phút`;
+        ? `${hours} hours` 
+        : `${minutes} minutes`;
       
-      toast.success(`Thanh toán thành công! Bạn có thể trò chuyện với bác sĩ trong ${durationText}.`);
+      toast.success(`Payment successful! You can chat with the doctor for ${durationText}.`);
       
       // Format doctor for chat and navigate to chat page
       const doctorToChat = {
         doctorId: id,
-        doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Bác sĩ",
+        doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : "Doctor",
         doctorAvatar: doctor?.avtUrl
       };
       
@@ -164,14 +168,15 @@ export default function UserContactDoctor() {
           doctorToChat,
           fromPayment: true  // Add flag to indicate we just came from a payment
         } 
-      });    } catch (err) {
+      });
+    } catch (err) {
       console.error("Error making payment:", err);
       
-      if (err.message && err.message.includes("Số dư không đủ")) {
+      if (err.message && err.message.includes("Insufficient balance") || err.message && err.message.includes("Số dư không đủ")) {
         // Show inline deposit modal instead of redirecting
         setShowDepositModal(true);
       } else {
-        toast.error(err.message || "Không thể thanh toán. Vui lòng thử lại sau.");
+        toast.error(err.message || "Unable to process payment. Please try again later.");
       }
     } finally {
       setLoading(false);
@@ -191,7 +196,7 @@ export default function UserContactDoctor() {
     }
 
     setShowDepositModal(false);
-    toast.success(`Nạp tiền thành công! Số dư mới: ${depositedAmount.toLocaleString('vi-VN')} VND`);
+    toast.success(`Deposit successful! New balance: ${depositedAmount.toLocaleString('vi-VN')} VND`);
     
     // Automatically retry payment after successful deposit
     setTimeout(() => {
@@ -215,7 +220,7 @@ export default function UserContactDoctor() {
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-8 text-center">
         <h2 className="text-2xl font-bold text-blue-800 mb-4">
-          {paymentMode ? "Thanh toán phí tư vấn" : "Kết nối với bác sĩ"}
+          {paymentMode ? "Pay Consultation Fee" : "Connect with Doctor"}
         </h2>
         
         {doctor && (
@@ -232,26 +237,27 @@ export default function UserContactDoctor() {
         {paymentMode ? (
           <div className="mb-6">
             <p className="text-gray-600 mb-4">
-              Phiên chat đã hết hạn. Vui lòng thanh toán để tiếp tục trò chuyện với bác sĩ.
+              Chat session has expired. Please make a payment to continue chatting with the doctor.
             </p>
-              <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600">Số dư hiện tại:</span>
+                <span className="text-gray-600">Current Balance:</span>
                 <span className="font-medium">{(userBalance || 0).toLocaleString()} VND</span>
               </div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600">Giá mỗi giờ:</span>
+                <span className="text-gray-600">Price per Hour:</span>
                 <span className="font-medium">{(costPerHour || 0).toLocaleString()} VND</span>
               </div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600">Giá mỗi phút:</span>
+                <span className="text-gray-600">Price per Minute:</span>
                 <span className="font-medium">{(costPerMinute || 0).toLocaleString()} VND</span>
               </div>
             </div>
 
             {/* Pricing Mode Selection */}
             <div className="mb-6">
-              <label className="block text-gray-700 mb-3 font-medium">Chọn phương thức tính phí:</label>
+              <label className="block text-gray-700 mb-3 font-medium">Select Pricing Method:</label>
               <div className="flex gap-4 mb-4">
                 <button
                   onClick={() => setPricingMode('hours')}
@@ -262,8 +268,8 @@ export default function UserContactDoctor() {
                   }`}
                 >
                   <div className="text-center">
-                    <div className="font-semibold">Theo giờ</div>
-                    <div className="text-sm opacity-75">{costPerHour.toLocaleString()} VND/giờ</div>
+                    <div className="font-semibold">By Hour</div>
+                    <div className="text-sm opacity-75">{costPerHour.toLocaleString()} VND/hour</div>
                   </div>
                 </button>
                 <button
@@ -275,8 +281,8 @@ export default function UserContactDoctor() {
                   }`}
                 >
                   <div className="text-center">
-                    <div className="font-semibold">Theo phút</div>
-                    <div className="text-sm opacity-75">{costPerMinute.toLocaleString()} VND/phút</div>
+                    <div className="font-semibold">By Minute</div>
+                    <div className="text-sm opacity-75">{costPerMinute.toLocaleString()} VND/minute</div>
                   </div>
                 </button>
               </div>
@@ -285,7 +291,7 @@ export default function UserContactDoctor() {
             {/* Duration Selection */}
             {pricingMode === 'hours' ? (
               <div className="mb-6">
-                <label className="block text-gray-700 mb-2">Số giờ tư vấn:</label>
+                <label className="block text-gray-700 mb-2">Consultation Hours:</label>
                 <div className="flex items-center justify-center">
                   <button 
                     onClick={() => hours > 1 && setHours(hours - 1)}
@@ -306,7 +312,8 @@ export default function UserContactDoctor() {
               </div>
             ) : (
               <div className="mb-6">
-                <label className="block text-gray-700 mb-2">Số phút tư vấn:</label>                <div className="flex items-center justify-center">
+                <label className="block text-gray-700 mb-2">Consultation Minutes:</label>
+                <div className="flex items-center justify-center">
                   <button 
                     onClick={() => minutes > 5 && setMinutes(minutes - 5)}
                     className="px-4 py-3 sm:px-3 sm:py-1 bg-gray-200 rounded-l-lg hover:bg-gray-300 active:bg-gray-400 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center text-lg sm:text-base"
@@ -324,28 +331,30 @@ export default function UserContactDoctor() {
                   </button>
                 </div>
                 <div className="text-center text-sm text-gray-500 mt-2">
-                  Tăng/giảm theo bước 5 phút
+                  Increase/decrease in 5-minute increments
                 </div>
               </div>
             )}
             
             <div className="bg-blue-50 p-4 rounded-lg mb-6">
               <div className="flex justify-between items-center">
-                <span className="font-bold text-gray-800">Tổng thanh toán:</span>
+                <span className="font-bold text-gray-800">Total Payment:</span>
                 <span className="font-bold text-blue-600">{(totalCost || 0).toLocaleString()} VND</span>
               </div>
               
               {userBalance !== null && userBalance < totalCost && (
                 <div className="mt-2 text-red-500 text-sm">
-                  Số dư không đủ. Vui lòng nạp thêm tiền vào tài khoản.
+                  Insufficient balance. Please add more money to your account.
                 </div>
               )}
-            </div>              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => setShowDepositModal(true)}
                 className="px-6 py-3 border-2 border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 active:bg-blue-100 transition-colors font-medium min-h-[48px] text-base"
               >
-                Nạp tiền
+                Add Money
               </button>
               <button
                 onClick={handlePayment}
@@ -354,25 +363,28 @@ export default function UserContactDoctor() {
                   loading || userBalance === null || userBalance < totalCost ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
                 } transition-colors`}
               >
-                {loading ? "Đang xử lý..." : "Thanh toán"}
+                {loading ? "Processing..." : "Pay Now"}
               </button>
             </div>
           </div>
         ) : (
           <>
             <p className="text-gray-600 mb-6">
-              Bạn đang yêu cầu trò chuyện với bác sĩ. Sau khi gửi yêu cầu, bạn có thể bắt đầu trò chuyện ngay lập tức.
-            </p>            <button
+              You are requesting to chat with the doctor. After sending the request, you can start chatting immediately.
+            </p>
+            
+            <button
               onClick={handleStartChat}
               disabled={loading}
               className={`w-full px-8 py-4 rounded-full text-white font-medium text-lg min-h-[52px] ${
                 loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
               } transition-colors shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]`}
             >
-              {loading ? "Đang xử lý..." : "Bắt đầu trò chuyện"}
+              {loading ? "Processing..." : "Start Chat"}
             </button>
           </>
-        )}      </div>
+        )}
+      </div>
       
       {/* Inline Deposit Modal */}
       <InlineDepositModal

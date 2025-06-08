@@ -82,7 +82,7 @@ export default function UserHealthAssessment() {
     );
   }
 
-  if (questions.length === 0) return <p className="text-center p-8">Không có câu hỏi nào.</p>;
+  if (questions.length === 0) return <p className="text-center p-8">No questions available.</p>;
 
   const current = questions[currentIndex];
   const alreadyAnswered = answeredMap[current.id];
@@ -136,16 +136,15 @@ export default function UserHealthAssessment() {
           })}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <span className="text-sm sm:text-base text-black font-medium">
-            Câu hỏi {currentIndex + 1} / {questions.length}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">          <span className="text-sm sm:text-base text-black font-medium">
+            Question {currentIndex + 1} / {questions.length}
           </span>
           <button
             onClick={handleSubmit}
             className="w-full sm:w-auto bg-brown-700 hover:bg-brown-800 active:bg-brown-900 text-white py-3 sm:py-2 px-8 sm:px-6 rounded-full shadow-md transition-all transform hover:scale-105 active:scale-95 font-semibold min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={selectedOption === null}
           >
-            {currentIndex + 1 === questions.length ? "Hoàn tất" : "Tiếp tục →"}
+            {currentIndex + 1 === questions.length ? "Complete" : "Continue →"}
           </button>
         </div>
       </div>

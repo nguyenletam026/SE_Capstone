@@ -46,7 +46,7 @@ export default function ChatHistory() {
       setChatHistory(history || []);
     } catch (error) {
       console.error("Error fetching chat history:", error);
-      toast.error("Không thể tải lịch sử chat");
+      toast.error("Unable to load chat history");
       setChatHistory([]);
     } finally {
       setLoading(false);
@@ -69,9 +69,8 @@ export default function ChatHistory() {
       }
     });
   };
-
   const formatLastMessageTime = (timestamp) => {
-    if (!timestamp) return "Chưa có tin nhắn";
+    if (!timestamp) return "No messages yet";
     
     const messageDate = new Date(timestamp);
     const now = new Date();
@@ -79,14 +78,14 @@ export default function ChatHistory() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays === 1) {
-      return "Hôm qua";
+      return "Yesterday";
     } else if (diffDays < 7) {
-      return `${diffDays} ngày trước`;
+      return `${diffDays} days ago`;
     } else if (diffDays < 30) {
       const weeks = Math.floor(diffDays / 7);
-      return `${weeks} tuần trước`;
+      return `${weeks} weeks ago`;
     } else {
-      return messageDate.toLocaleDateString("vi-VN");
+      return messageDate.toLocaleDateString("en-US");
     }
   };
 
@@ -126,9 +125,8 @@ export default function ChatHistory() {
               <div className="p-3 sm:p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-xl">
                 <FiMessageCircle className="text-2xl sm:text-4xl text-white" />
               </div>
-            </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">Lịch sử Chat</h1>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600">Đang tải dữ liệu...</p>
+            </div>            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">Chat History</h1>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600">Loading data...</p>
           </motion.div>
           <ChatHistoryLoading />
         </div>
@@ -155,9 +153,8 @@ export default function ChatHistory() {
             <div className="p-3 sm:p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-xl">
               <FiMessageCircle className="text-2xl sm:text-4xl text-white" />
             </div>
-          </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">Lịch sử Chat</h1>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600">Xem lại các cuộc trò chuyện với bác sĩ</p>
+          </div>          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2">Chat History</h1>
+          <p className="text-sm sm:text-base lg:text-lg text-gray-600">Review your conversations with doctors</p>
         </motion.div>
 
         {/* Search and Filter Controls */}
@@ -173,7 +170,7 @@ export default function ChatHistory() {
               <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Tìm kiếm theo tên bác sĩ hoặc tin nhắn..."
+                placeholder="Search by doctor name or message..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-12 py-3 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent placeholder-gray-500 text-sm sm:text-base"
@@ -197,24 +194,22 @@ export default function ChatHistory() {
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="px-3 sm:px-4 py-2 bg-white/80 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base min-w-0 flex-1 sm:flex-none"
-                >
-                  <option value="all">Tất cả</option>
-                  <option value="active">Đang hoạt động</option>
-                  <option value="expired">Đã hết hạn</option>
+                >                  <option value="all">All</option>
+                  <option value="active">Active</option>
+                  <option value="expired">Expired</option>
                 </select>
               </div>
 
               {/* Sort */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">Sắp xếp:</span>
+              <div className="flex items-center gap-2">                <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">Sort by:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="px-3 sm:px-4 py-2 bg-white/80 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base min-w-0 flex-1 sm:flex-none"
                 >
-                  <option value="lastMessage">Tin nhắn mới nhất</option>
-                  <option value="doctorName">Tên bác sĩ</option>
-                  <option value="date">Ngày tạo</option>
+                  <option value="lastMessage">Latest message</option>
+                  <option value="doctorName">Doctor name</option>
+                  <option value="date">Creation date</option>
                 </select>
               </div>
 
@@ -222,7 +217,7 @@ export default function ChatHistory() {
               <button
                 onClick={fetchChatHistory}
                 className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                title="Làm mới"
+                title="Refresh"
               >
                 <FiRefreshCw size={16} />
               </button>
@@ -267,20 +262,19 @@ export default function ChatHistory() {
           >
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-center">
               <div>
-                <div className="text-xl sm:text-2xl font-bold text-indigo-600">{chatHistory.length}</div>
-                <div className="text-xs sm:text-sm text-gray-600">Tổng số cuộc chat</div>
+                <div className="text-xl sm:text-2xl font-bold text-indigo-600">{chatHistory.length}</div>                <div className="text-xs sm:text-sm text-gray-600">Total chats</div>
               </div>
               <div>
                 <div className="text-xl sm:text-2xl font-bold text-green-600">
                   {chatHistory.filter(chat => chat.isActive).length}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600">Đang hoạt động</div>
+                <div className="text-xs sm:text-sm text-gray-600">Active</div>
               </div>
               <div>
                 <div className="text-xl sm:text-2xl font-bold text-purple-600">
                   {chatHistory.reduce((total, chat) => total + (chat.totalMessages || 0), 0)}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600">Tổng tin nhắn</div>
+                <div className="text-xs sm:text-sm text-gray-600">Total messages</div>
               </div>
             </div>
           </motion.div>

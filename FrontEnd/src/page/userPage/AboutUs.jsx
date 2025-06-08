@@ -17,19 +17,18 @@ const AboutUs = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        Về Chúng Tôi
+        About Us
       </motion.h1>      <motion.section
         className="mb-12 sm:mb-16 px-2 sm:px-6 lg:px-12"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-      >
-        <p className="text-base sm:text-lg leading-relaxed text-justify">
-          Student Stress Helper là nền tảng hướng đến việc chăm sóc sức khỏe tinh thần cho học sinh, sinh viên tại Việt Nam.
-          Chúng tôi hiểu rằng áp lực học tập, các mối quan hệ và định hướng tương lai có thể gây ra nhiều căng thẳng, lo âu cho giới trẻ.
-          Vì vậy, Student Stress Helper ra đời với mục tiêu cung cấp công cụ hỗ trợ, tư vấn và kết nối với các chuyên gia tâm lý hàng đầu
-          để đồng hành cùng bạn trên hành trình tìm lại sự cân bằng trong cuộc sống.
+      >        <p className="text-base sm:text-lg leading-relaxed text-justify">
+          Student Stress Helper is a platform focused on mental health care for students in Vietnam.
+          We understand that academic pressure, relationships and future direction can cause a lot of stress and anxiety for young people.
+          Therefore, Student Stress Helper was born with the goal of providing support tools, counseling and connecting with leading psychology experts
+          to accompany you on your journey to regain balance in life.
         </p>
       </motion.section>      <motion.section
         className="grid md:grid-cols-2 gap-6 sm:gap-10 mb-12 sm:mb-16 items-center"
@@ -39,16 +38,15 @@ const AboutUs = () => {
         transition={{ duration: 0.7 }}
       >
         <img src={missionImage} alt="Mission" className="rounded-lg shadow-lg w-full" />
-        <div>
-          <SectionTitle>Sứ Mệnh Của Chúng Tôi</SectionTitle>
+        <div>          <SectionTitle>Our Mission</SectionTitle>
           <p className="text-sm sm:text-md leading-relaxed">
-            Chúng tôi cam kết tạo ra một môi trường trực tuyến lành mạnh, nơi các bạn trẻ có thể:
+            We are committed to creating a healthy online environment where young people can:
           </p>
           <ul className="list-disc pl-6 mt-2 space-y-1 text-sm sm:text-base">
-            <li>Trò chuyện với chuyên gia tâm lý uy tín.</li>
-            <li>Thực hiện đánh giá sức khỏe tinh thần định kỳ.</li>
-            <li>Nhận lời khuyên, mẹo giảm stress được cá nhân hóa.</li>
-            <li>Tiếp cận thông tin khoa học về tâm lý học lâm sàng.</li>
+            <li>Chat with reputable psychology experts.</li>
+            <li>Conduct regular mental health assessments.</li>
+            <li>Receive personalized advice and stress reduction tips.</li>
+            <li>Access scientific information about clinical psychology.</li>
           </ul>
         </div>
       </motion.section>      <motion.section
@@ -58,13 +56,12 @@ const AboutUs = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
       >
-        <div className="order-2 md:order-1">
-          <SectionTitle>Giá Trị Cốt Lõi</SectionTitle>
+        <div className="order-2 md:order-1">          <SectionTitle>Core Values</SectionTitle>
           <ul className="list-decimal pl-6 text-sm sm:text-md space-y-2">
-            <li>Sự lắng nghe không phán xét.</li>
-            <li>Tôn trọng quyền riêng tư và bảo mật thông tin người dùng.</li>
-            <li>Chuyên môn vững vàng từ đội ngũ tư vấn viên.</li>
-            <li>Cam kết cải tiến công nghệ để tối ưu trải nghiệm.</li>
+            <li>Non-judgmental listening.</li>
+            <li>Respecting privacy and user information security.</li>
+            <li>Strong expertise from our counseling team.</li>
+            <li>Commitment to improving technology for optimal experience.</li>
           </ul>
         </div>
         <img src={valuesImage} alt="Values" className="rounded-lg shadow-lg w-full order-1 md:order-2" />
@@ -77,16 +74,15 @@ const AboutUs = () => {
       >
         <img src={teamImage} alt="Team" className="rounded-lg shadow-lg w-full max-w-2xl mx-auto" />
 
-        <div>
-          <SectionTitle>Đội Ngũ Của Chúng Tôi</SectionTitle>
+        <div>          <SectionTitle>Our Team</SectionTitle>
           <p className="mb-4 text-sm sm:text-md">
-            Student Stress Helper được xây dựng bởi những con người đam mê trong lĩnh vực sức khỏe tinh thần, công nghệ và giáo dục. Chúng tôi kết nối:
+            Student Stress Helper is built by passionate people in the fields of mental health, technology and education. We connect:
           </p>
           <ul className="list-disc pl-6 text-sm sm:text-md space-y-1">
-            <li>Các nhà tâm lý học lâm sàng.</li>
-            <li>Kỹ sư phần mềm, chuyên gia AI.</li>
-            <li>Chuyên gia giáo dục và giảng viên đại học.</li>
-            <li>Sinh viên với nhiệt huyết lan toả sự tích cực.</li>
+            <li>Clinical psychologists.</li>
+            <li>Software engineers and AI experts.</li>
+            <li>Educational experts and university lecturers.</li>
+            <li>Students with passion to spread positivity.</li>
           </ul>
         </div>
       </motion.section>      <motion.section
@@ -95,11 +91,10 @@ const AboutUs = () => {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-      >
-        <SectionTitle>Cam Kết Của Chúng Tôi</SectionTitle>
+      >        <SectionTitle>Our Commitment</SectionTitle>
         <p className="text-base sm:text-lg leading-relaxed text-justify">
-          Student Stress Helper luôn đặt người dùng làm trung tâm. Chúng tôi không chỉ cung cấp dịch vụ - chúng tôi đồng hành.
-          Mỗi tính năng đều được thiết kế nhằm thúc đẩy sự phát triển cá nhân, cải thiện đời sống tinh thần và giúp bạn học cách yêu thương bản thân đúng cách.
+          Student Stress Helper always puts users at the center. We don't just provide services - we accompany you.
+          Every feature is designed to promote personal development, improve mental well-being and help you learn to love yourself properly.
         </p>
       </motion.section>
 
@@ -109,14 +104,13 @@ const AboutUs = () => {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-      >
-        <h2 className="text-xl sm:text-2xl font-bold text-[#2b3a29] mb-4">Bạn không cô đơn trên hành trình này</h2>
-        <p className="text-sm sm:text-md mb-6">Hãy để Student Stress Helper là người bạn đồng hành đáng tin cậy của bạn.</p>
+      >        <h2 className="text-xl sm:text-2xl font-bold text-[#2b3a29] mb-4">You are not alone on this journey</h2>
+        <p className="text-sm sm:text-md mb-6">Let Student Stress Helper be your trusted companion.</p>
         <Link
           to="/home"
           className="inline-block bg-[#2b3a29] hover:bg-[#1e291e] text-white font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-full text-sm transition w-full sm:w-auto max-w-xs"
         >
-          Bắt đầu hành trình ngay
+          Start your journey now
         </Link>
       </motion.section>
     </div>

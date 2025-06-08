@@ -30,7 +30,7 @@ export default function StressChartsCombined({ refreshSignal }) {
         <div className="flex flex-col items-center justify-center h-48 bg-gray-50 rounded-lg border border-gray-200">
           <FaExclamationCircle className="text-gray-400 text-4xl mb-3" />
           <p className="text-gray-500 text-lg font-medium">No Data</p>
-          <p className="text-gray-400 text-sm mt-1">Chưa có dữ liệu cho biểu đồ này</p>
+          <p className="text-gray-400 text-sm mt-1">No data available for this chart</p>
         </div>
       );
     }

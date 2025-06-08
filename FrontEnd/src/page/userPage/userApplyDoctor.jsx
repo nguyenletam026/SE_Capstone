@@ -88,12 +88,11 @@ export default function ApplyDoctor() {
     };
     checkExistingRequest();
   }, [navigate]);
-
   // Validate file
   const validateFile = (file) => {
-    if (file.size > 5 * 1024 * 1024) return "Kích thước file quá lớn (tối đa 5MB)";
+    if (file.size > 5 * 1024 * 1024) return "File size too large (maximum 5MB)";
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!validTypes.includes(file.type)) return "Định dạng file không hợp lệ (chỉ chấp nhận JPG/PNG)";
+    if (!validTypes.includes(file.type)) return "Invalid file format (only JPG/PNG accepted)";
     return null;
   };
 
@@ -118,19 +117,18 @@ export default function ApplyDoctor() {
       setFormData({ ...formData, [name]: value });
     }
   };
-
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.specialization) newErrors.specialization = "Vui lòng nhập chuyên môn";
-    if (!formData.experienceYears) newErrors.experienceYears = "Vui lòng nhập số năm kinh nghiệm";
-    if (!formData.description) newErrors.description = "Vui lòng nhập mô tả";
-    if (!formData.phoneNumber) newErrors.phoneNumber = "Vui lòng nhập số điện thoại";
-    if (!formData.hospital) newErrors.hospital = "Vui lòng nhập bệnh viện";
+    if (!formData.specialization) newErrors.specialization = "Please enter your specialization";
+    if (!formData.experienceYears) newErrors.experienceYears = "Please enter years of experience";
+    if (!formData.description) newErrors.description = "Please enter a description";
+    if (!formData.phoneNumber) newErrors.phoneNumber = "Please enter phone number";
+    if (!formData.hospital) newErrors.hospital = "Please enter hospital";
     if (formData.phoneNumber && !/^[0-9]{10}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = "Số điện thoại không hợp lệ (cần 10 chữ số)";
+      newErrors.phoneNumber = "Invalid phone number (requires 10 digits)";
     }
-    if (!formData.certificateImage) newErrors.certificateImage = "Vui lòng tải lên ảnh bằng cấp";
-    if (!formData.cccdImage) newErrors.cccdImage = "Vui lòng tải lên ảnh CCCD";
+    if (!formData.certificateImage) newErrors.certificateImage = "Please upload certificate image";
+    if (!formData.cccdImage) newErrors.cccdImage = "Please upload ID card image";
     if (formData.certificateImage) {
       const certError = validateFile(formData.certificateImage);
       if (certError) newErrors.certificateImage = certError;
@@ -144,9 +142,8 @@ export default function ApplyDoctor() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      toast.error("Vui lòng điền đầy đủ thông tin và sửa các lỗi");
+    e.preventDefault();    if (!validateForm()) {
+      toast.error("Please fill in all information and correct any errors");
       return;
     }
     setLoading(true);
@@ -171,29 +168,26 @@ export default function ApplyDoctor() {
             'Content-Type': 'multipart/form-data'
           }
         }
-      );
-
-      toast.success("Yêu cầu gửi thành công! Vui lòng chờ phản hồi.");
+      );      toast.success("Request sent successfully! Please wait for response.");
       setTimeout(() => navigate("/home"), 1500);
 
-    } catch (error) {
-      if (error.response) {
+    } catch (error) {      if (error.response) {
         const errorCode = error.response.data?.code;
-        const errorMessage = error.response.data?.message || "Lỗi không xác định";
+        const errorMessage = error.response.data?.message || "Unknown error";
         switch (errorCode) {
           case 1013:
-            toast.error("Ảnh bằng cấp không hợp lệ.");
-            setErrors({ ...errors, certificateImage: "Ảnh bằng cấp không hợp lệ" });
+            toast.error("Invalid certificate image.");
+            setErrors({ ...errors, certificateImage: "Invalid certificate image" });
             break;
           case 1025:
-            toast.error("Tên trong CCCD không khớp với tên tài khoản.");
-            setErrors({ ...errors, cccdImage: "Tên trong CCCD không khớp" });
+            toast.error("Name on ID card does not match account name.");
+            setErrors({ ...errors, cccdImage: "Name mismatch on ID card" });
             break;
           case 1015:
-            toast.error("File ảnh trống hoặc bị lỗi.");
+            toast.error("Empty or corrupted image file.");
             break;
           case 1010:
-            toast.error("Tài khoản của bạn đã là bác sĩ.");
+            toast.error("Your account is already a doctor.");
             navigate("/home");
             break;
           case 1037:
@@ -201,24 +195,24 @@ export default function ApplyDoctor() {
             setTimeout(() => navigate("/home"), 2000);
             break;
           case 401:
-            toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+            toast.error("Session expired. Please log in again.");
             navigate("/login");
             break;
           case 9999:
             if (errorMessage.includes("Query did not return a unique result")) {
-              toast.error("Yêu cầu đã gửi. Vui lòng chờ phản hồi.");
+              toast.error("Request already sent. Please wait for response.");
               setTimeout(() => navigate("/home"), 2000);
             } else {
-              toast.error(`Gửi yêu cầu thất bại: ${errorMessage}`);
+              toast.error(`Request failed: ${errorMessage}`);
             }
             break;
           default:
-            toast.error(`Gửi yêu cầu thất bại: ${errorMessage}`);
+            toast.error(`Request failed: ${errorMessage}`);
         }
       } else if (error.request) {
-        toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối.");
+        toast.error("Cannot connect to server. Please check your connection.");
       } else {
-        toast.error("Gửi yêu cầu thất bại. Vui lòng thử lại.");
+        toast.error("Request failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -258,7 +252,7 @@ export default function ApplyDoctor() {
         </div>
         <p className="mt-4 sm:mt-6 text-center text-blue-600 font-bold text-base sm:text-lg flex flex-col sm:flex-row items-center justify-center gap-2">
           <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7" strokeWidth={2} strokeLinecap="round"/></svg>
-          <span className="text-center sm:text-left">Đáng tin cậy - An toàn - Hỗ trợ 24/7</span>
+          <span className="text-center sm:text-left">Trusted - Safe - 24/7 Support</span>
         </p>
       </div>
 
@@ -266,14 +260,14 @@ export default function ApplyDoctor() {
       <div className="w-full lg:w-1/2 bg-white shadow-2xl rounded-2xl sm:rounded-3xl p-6 sm:p-10 max-w-xl border-[1.5px] border-blue-100">
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-center text-blue-700 mb-6 sm:mb-8 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
           <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M20 7V6a2 2 0 00-2-2h-1.5a1.5 1.5 0 010-3h-9a1.5 1.5 0 010 3H6a2 2 0 00-2 2v1" strokeWidth={2}/><circle cx="12" cy="13" r="7" strokeWidth={2}/></svg>
-          <span>Đăng ký bác sĩ tư vấn</span>
+          <span>Apply to Become Medical Advisor</span>
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <Field icon={icons.specialization} error={errors.specialization}>
             <input
               type="text"
               name="specialization"
-              placeholder="Chuyên môn (VD: General Psychology)"
+              placeholder="Specialization (e.g., General Psychology)"
               className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base"
               onChange={handleChange}
               value={formData.specialization}
@@ -283,7 +277,7 @@ export default function ApplyDoctor() {
             <input
               type="number"
               name="experienceYears"
-              placeholder="Số năm kinh nghiệm"
+              placeholder="Years of experience"
               className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base"
               onChange={handleChange}
               value={formData.experienceYears}
@@ -292,7 +286,7 @@ export default function ApplyDoctor() {
           <Field icon={icons.description} error={errors.description}>
             <textarea
               name="description"
-              placeholder="Mô tả về bản thân và kỹ năng"
+              placeholder="Describe yourself and your skills"
               className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base resize-none"
               rows="3"
               onChange={handleChange}
@@ -303,7 +297,7 @@ export default function ApplyDoctor() {
             <input
               type="text"
               name="phoneNumber"
-              placeholder="Số điện thoại"
+              placeholder="Phone number"
               className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base"
               onChange={handleChange}
               value={formData.phoneNumber}
@@ -313,7 +307,7 @@ export default function ApplyDoctor() {
             <input
               type="text"
               name="hospital"
-              placeholder="Bệnh viện đang công tác"
+              placeholder="Current workplace hospital"
               className="w-full bg-transparent border-none focus:ring-0 outline-none text-sm sm:text-base"
               onChange={handleChange}
               value={formData.hospital}
@@ -321,11 +315,10 @@ export default function ApplyDoctor() {
           </Field>
           <div>
             <label className="block text-xs sm:text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
-              {icons.cert} Ảnh bằng cấp
-            </label>
-            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-blue-200 w-fit min-h-[44px] transition-colors active:scale-95">
+              {icons.cert} Certificate Image
+            </label>            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-blue-200 w-fit min-h-[44px] transition-colors active:scale-95">
               {icons.upload}
-              <span className="text-xs sm:text-sm font-medium text-blue-500">Chọn file</span>
+              <span className="text-xs sm:text-sm font-medium text-blue-500">Choose file</span>
               <input
                 type="file"
                 name="certificateImage"
@@ -336,15 +329,14 @@ export default function ApplyDoctor() {
             </label>
             {errors.certificateImage && <p className="text-red-500 text-xs mt-1">{errors.certificateImage}</p>}
             {previewCert && <img src={previewCert} alt="Preview Certificate" className="w-24 sm:w-32 rounded-lg mt-2 border border-blue-100 shadow" />}
-            <p className="text-xs text-gray-400 mt-2">Chỉ chấp nhận JPG/PNG, tối đa 5MB</p>
+            <p className="text-xs text-gray-400 mt-2">Only JPG/PNG accepted, maximum 5MB</p>
           </div>
           <div>
             <label className="block text-xs sm:text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
-              {icons.cccd} Ảnh CCCD
-            </label>
-            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-blue-200 w-fit min-h-[44px] transition-colors active:scale-95">
+              {icons.cccd} ID Card Image
+            </label>            <label className="flex items-center cursor-pointer bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-blue-200 w-fit min-h-[44px] transition-colors active:scale-95">
               {icons.upload}
-              <span className="text-xs sm:text-sm font-medium text-blue-500">Chọn file</span>
+              <span className="text-xs sm:text-sm font-medium text-blue-500">Choose file</span>
               <input
                 type="file"
                 name="cccdImage"
@@ -355,21 +347,20 @@ export default function ApplyDoctor() {
             </label>
             {errors.cccdImage && <p className="text-red-500 text-xs mt-1">{errors.cccdImage}</p>}
             {previewCccd && <img src={previewCccd} alt="Preview CCCD" className="w-24 sm:w-32 rounded-lg mt-2 border border-blue-100 shadow" />}
-            <p className="text-xs text-gray-400 mt-2">Chỉ chấp nhận JPG/PNG, tối đa 5MB</p>
-            <p className="text-xs text-gray-500 font-medium">Tên trong CCCD phải khớp với tên tài khoản của bạn</p>
+            <p className="text-xs text-gray-400 mt-2">Only JPG/PNG accepted, maximum 5MB</p>
+            <p className="text-xs text-gray-500 font-medium">Name on ID card must match your account name</p>
           </div>
           
           <button
             type="submit"
             className={`w-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-bold py-3 sm:py-4 rounded-xl shadow-xl flex items-center justify-center gap-2 text-base sm:text-lg transition-all duration-150 min-h-[44px] active:scale-95 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             disabled={loading}
-          >
-            {loading ? <>
+          >            {loading ? <>
               {icons.loading}
-              <span>Đang xử lý...</span>
+              <span>Processing...</span>
             </> : <>
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7" strokeWidth={2} strokeLinecap="round"/></svg>
-              <span>Gửi Yêu Cầu</span>
+              <span>Send Request</span>
             </>}
           </button>
         </form>

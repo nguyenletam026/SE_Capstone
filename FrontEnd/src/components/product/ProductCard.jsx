@@ -133,7 +133,7 @@ export default function ProductCard({ product, addToCart, viewMode = "grid" }) {
             <div className="flex justify-between items-start mb-3">
               <div>
                 <p className="text-xs text-indigo-600 font-semibold uppercase tracking-wide mb-1">
-                  {product.category || "Sức khỏe"}
+                  {product.category || "Health"}
                 </p>
                 <Link to={`/products/${product.id}`}>
                   <h3 className="font-bold text-xl text-slate-900 hover:text-indigo-600 transition-colors line-clamp-2">

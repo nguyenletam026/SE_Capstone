@@ -63,11 +63,10 @@ export default function Header({ cartItemsCount = 0 }) {
   
   const handleLogout = async () => {
     console.log('Logout clicked');
-    try {
-      setMenuOpen(false);
+    try {      setMenuOpen(false);
       setSearchOpen(false);
       await logout();
-      toast.success("Đăng xuất thành công!");
+      toast.success("Successfully logged out!");
       
       // Force navigation
       setTimeout(() => {
@@ -75,7 +74,7 @@ export default function Header({ cartItemsCount = 0 }) {
       }, 500);
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error("Có lỗi khi đăng xuất!");
+      toast.error("Error occurred during logout!");
     }
   };
 
@@ -86,9 +85,8 @@ export default function Header({ cartItemsCount = 0 }) {
     // Close menu
     setMenuOpen(false);
     setSearchOpen(false);
-    
-    // Show loading toast
-    toast.info(`Đang chuyển đến ${path}...`);
+      // Show loading toast
+    toast.info(`Navigating to ${path}...`);
     
     // Use window.location.href for reliable mobile navigation
     setTimeout(() => {
@@ -139,16 +137,14 @@ export default function Header({ cartItemsCount = 0 }) {
       </a>
     );
   };
-
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-    toast.info(darkMode ? "Đã chuyển sang chế độ sáng" : "Đã chuyển sang chế độ tối");
+    toast.info(darkMode ? "Switched to light mode" : "Switched to dark mode");
   };
-
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      toast.info(`Đang tìm kiếm: ${searchQuery}`);
+      toast.info(`Searching: ${searchQuery}`);
       setSearchOpen(false);
     }
   };
@@ -188,29 +184,27 @@ export default function Header({ cartItemsCount = 0 }) {
         return `${firstName} ${lastName}`.trim();
       }
     }
-    return user?.email?.split('@')[0] || "Người dùng";
+    return user?.email?.split('@')[0] || "User";
   };
 
   const getUserEmail = () => {
     return userProfile?.username || user?.email || "";
   };
-
   const navItems = [
-    { path: "/about", label: "Về chúng tôi", icon: <FaInfoCircle /> },
-    { path: "/daily", label: "Đánh giá hằng ngày", icon: <FaClipboardCheck /> },
-    { path: "/products", label: "Sản phẩm sức khỏe", icon: <FaHeartbeat /> },
-    { path: "/chatroom", label: "Tư vấn bác sĩ", icon: <FaUserMd /> },
-    { path: "/chat-history", label: "Lịch sử chat", icon: <FaHistory /> },
-    { path: "/deposit", label: "Nạp tiền", icon: <FaWallet /> },
-    { path: "/refund-history", label: "Lịch sử hoàn tiền", icon: <FaUndo /> },
+    { path: "/about", label: "About Us", icon: <FaInfoCircle /> },
+    { path: "/daily", label: "Daily Assessment", icon: <FaClipboardCheck /> },
+    { path: "/products", label: "Health Products", icon: <FaHeartbeat /> },
+    { path: "/chatroom", label: "Doctor Consultation", icon: <FaUserMd /> },
+    { path: "/chat-history", label: "Chat History", icon: <FaHistory /> },
+    { path: "/deposit", label: "Deposit", icon: <FaWallet /> },
+    { path: "/refund-history", label: "Refund History", icon: <FaUndo /> },
   ];
-
   const accountItems = [
-    { path: '/user-profile', label: 'Tài khoản của tôi', icon: <FaUser className="text-blue-500 text-base" /> },
-    { path: '/refund-history', label: 'Lịch sử hoàn tiền', icon: <FaUndo className="text-orange-500 text-base" /> },
-    { path: '/orders', label: 'Lịch sử đơn hàng', icon: <FaHistory className="text-green-500 text-base" /> },
-    { path: '/settings', label: 'Cài đặt', icon: <FaCog className="text-gray-500 text-base" /> },
-    { path: '/help', label: 'Trợ giúp & Phản hồi', icon: <FaQuestionCircle className="text-purple-500 text-base" /> }
+    { path: '/user-profile', label: 'My Account', icon: <FaUser className="text-blue-500 text-base" /> },
+    { path: '/refund-history', label: 'Refund History', icon: <FaUndo className="text-orange-500 text-base" /> },
+    { path: '/orders', label: 'Order History', icon: <FaHistory className="text-green-500 text-base" /> },
+    { path: '/settings', label: 'Settings', icon: <FaCog className="text-gray-500 text-base" /> },
+    { path: '/help', label: 'Help & Feedback', icon: <FaQuestionCircle className="text-purple-500 text-base" /> }
   ];
 
   return (
@@ -234,12 +228,11 @@ export default function Header({ cartItemsCount = 0 }) {
           </span>
         </Link>
 
-        {/* Search Bar - Desktop */}
-        <div className="hidden lg:flex relative mx-4 flex-1 max-w-md">
+        {/* Search Bar - Desktop */}        <div className="hidden lg:flex relative mx-4 flex-1 max-w-md">
           <form onSubmit={handleSearch} className="w-full">
             <input
               type="text"
-              placeholder="Tìm kiếm..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={`w-full py-2 pl-10 pr-4 rounded-full border ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-100 border-gray-300 text-gray-800'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -274,9 +267,8 @@ export default function Header({ cartItemsCount = 0 }) {
           <Link
             to="/apply-doctor"
             className="hidden md:flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium px-4 py-2 rounded-full text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-          >
-            <FaUserMd className="text-white" />
-            <span>Trở thành bác sĩ</span>
+          >            <FaUserMd className="text-white" />
+            <span>Become a Doctor</span>
           </Link>
 
           {/* Search Button - Mobile */}
@@ -287,7 +279,7 @@ export default function Header({ cartItemsCount = 0 }) {
                 ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
-            title="Tìm kiếm"
+            title="Search"
           >
             <FaSearch />
           </button>
@@ -300,7 +292,7 @@ export default function Header({ cartItemsCount = 0 }) {
                 ? 'bg-gray-700 hover:bg-gray-600 text-yellow-300' 
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
-            title={darkMode ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
+            title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
             {darkMode ? <FaSun /> : <FaMoon />}
           </button>
@@ -313,7 +305,7 @@ export default function Header({ cartItemsCount = 0 }) {
                 ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
-            title="Giỏ hàng"
+            title="Shopping Cart"
           >
             <FaShoppingCart />
             {cartItemsCount > 0 && (
@@ -330,7 +322,7 @@ export default function Header({ cartItemsCount = 0 }) {
                 ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
-            title="Thông báo"
+            title="Notifications"
           >
             <FaBell />
             <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full border-2 border-white"></span>
@@ -354,7 +346,7 @@ export default function Header({ cartItemsCount = 0 }) {
             <button 
               onClick={handleMenuToggle} 
               className="flex items-center focus:outline-none transition-all duration-200 active:scale-95"
-              title="Tài khoản của tôi"
+              title="My Account"
             >
               <div className="relative">
                 <img
@@ -401,7 +393,7 @@ export default function Header({ cartItemsCount = 0 }) {
                     className={`flex items-center w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${darkMode ? 'text-red-400 hover:bg-gray-700 active:bg-gray-600' : 'text-red-600 hover:bg-gray-100 active:bg-gray-200'}`}
                   >
                     <FaSignOutAlt className="mr-3" />
-                    Đăng xuất
+                    Logout
                   </button>
                 </div>
               </div>
@@ -418,11 +410,10 @@ export default function Header({ cartItemsCount = 0 }) {
             onClick={() => setSearchOpen(false)}
           />
           
-          <div className={`fixed top-16 left-0 w-full ${darkMode ? 'bg-gray-900' : 'bg-white'} shadow-md z-[151] p-4 md:hidden transition-colors duration-300`} ref={searchRef}>
-            <form onSubmit={handleSearch} className="relative">
+          <div className={`fixed top-16 left-0 w-full ${darkMode ? 'bg-gray-900' : 'bg-white'} shadow-md z-[151] p-4 md:hidden transition-colors duration-300`} ref={searchRef}>            <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
-                placeholder="Tìm kiếm..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={`w-full py-3 pl-12 pr-4 rounded-lg border ${
@@ -437,7 +428,7 @@ export default function Header({ cartItemsCount = 0 }) {
                 type="submit"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200"
               >
-                Tìm
+                Search
               </button>
             </form>
           </div>
@@ -474,7 +465,7 @@ export default function Header({ cartItemsCount = 0 }) {
 
             {/* Main Navigation - Using MobileNavItem */}
             <div className="px-4 py-2">
-              <p className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider mb-3`}>Menu chính</p>
+              <p className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider mb-3`}>Main Menu</p>
               
               {navItems.map((item) => (
                 <MobileNavItem
@@ -497,13 +488,13 @@ export default function Header({ cartItemsCount = 0 }) {
                 className="gap-3 px-4 py-4 rounded-lg mb-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white"
               >
                 <FaUserMd className="text-base mr-3" />
-                <span className="font-medium">Trở thành bác sĩ</span>
+                <span className="font-medium">Become a Doctor</span>
               </MobileNavItem>
             </div>
 
             {/* Account Section */}
             <div className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} px-4 py-2 mt-3`}>
-              <p className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider mb-3`}>Tài khoản</p>
+              <p className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider mb-3`}>Account</p>
               
               {accountItems.map((item) => (
                 <MobileNavItem
@@ -539,7 +530,7 @@ export default function Header({ cartItemsCount = 0 }) {
                 }}
               >
                 <FaSignOutAlt className="text-base" />
-                <span className="font-medium">Đăng xuất</span>
+                <span className="font-medium">Logout</span>
               </a>
             </div>
           </div>
